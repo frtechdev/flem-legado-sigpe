@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+
+    <h:head>
+        <f:facet name="first">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        </f:facet>
+        <title>Primeiro Emprego</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <h:outputStylesheet name="css/style.css" />
+        <h:outputStylesheet name="css/componente-flem.css" />
+        <h:outputScript library="js" name="primefaces.custom.js" />
+        <style type="text/css">
+            .notificacao_urgente{
+                background-color: #FF6969;
+            }
+            #fieldsetNotificacoes{
+                border:1px solid red !important;
+            }
+            #fieldsetNotificacoes, #fieldsetNotificacoes .ui-fieldset-legend{
+                border:1px solid red !important;
+            }
+            
+        </style>
+<!--        <script>
+            $.noConflict()
+        </script>-->
+    </h:head>
+
+    <h:body>
+        <div align="center">
+            <p:growl id="growl" showDetail="true" sticky="true" />  
+            <p:layout fullPage="true"  >
+                <p:layoutUnit position="west" size="210" style="overflow: hidden">
+                    <ui:include src="/template/menu.xhtml" />
+                    <div class="container" style="z-index: 0;">
+                        <h:graphicImage url="/resources/img/LogoMarcaFlemFooter.jpg"/> 
+                    </div>
+                </p:layoutUnit>
+                <p:layoutUnit position="center">
+                    <p:outputPanel rendered="#{facesContext.externalContext.request.serverName ne 'localhost' and facesContext.externalContext.request.serverName ne 'primeiroemprego.flem.org.br'}" style="background-color:red;color:white;font-size: 18px; padding: 10px">
+                        Você está acessando o ambiente de testes, não o utilize para lançar dados reais.
+                    </p:outputPanel>
+                    <p:outputPanel id="panelNotificacoes">
+                        <p:fieldset id="fieldsetNotificacoes" legend="#{notificacaoMB.notificacoes.size()} Notificaç#{notificacaoMB.notificacoes.size() == 1 ?  'ão' : 'ões'}" toggleable="true" collapsed="#{notificacaoMB.fieldsetFechado}" widgetVar="notificacoesVar" rendered="#{notificacaoMB.notificacoes.size() gt 0}">
+                            <p:ajax event="toggle" listener="#{notificacaoMB.setFieldsetFechado(!notificacaoMB.fieldsetFechado)}" global="false"/>
+                            <p:dataTable id="dataTableNotificacoes" value="#{notificacaoMB.notificacoes}" var="notificacao" emptyMessage="" rowStyleClass="#{notificacao.urgente ? 'notificacao_urgente' : ''}" >
+                                <p:column headerText="Data para conclusão" width="100">
+                                    <h:outputText value="#{notificacao.dataLimite}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                    </h:outputText>
+                                </p:column>
+                                <p:column headerText="Mensagem">
+                                    <h:outputText value="#{notificacao.mensagem}"/>
+                                </p:column>
+                                <p:column headerText="Dias ativa" width="65">
+                                    <h:outputText value="#{notificacao.qtdDiasAtiva()}"/>
+                                </p:column>
+                                <p:column headerText="Remetente">
+                                    <h:outputText value="#{usuarioLogadoMB.nomeUsuarioPorLogin(notificacao.usuarioCriacao)}"/>
+                                </p:column>
+                                <p:column headerText="Data de envio" width="100">
+                                    <h:outputText value="#{notificacao.dataCriacao}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                    </h:outputText>
+                                </p:column>
+                                <p:column>
+                                    <p:commandButton value="Concluir" actionListener="#{notificacaoMB.registrarConclusao(notificacao.id)}" update=":panelNotificacoes :mensagens">
+                                        <p:confirm message="Confirma a conclusão da notificação?" icon="ui-icon-alert"/>
+                                    </p:commandButton>
+                                </p:column>
+                            </p:dataTable>
+                        </p:fieldset>
+                    </p:outputPanel>
+                    <script type="text/javascript">
+                        $(document).ready(function() {
+                            $('#fieldsetNotificacoes').mouseenter(function(){if(PF('notificacoesVar').stateHolder.attr('value')==='true'){PF('notificacoesVar').toggle();}});
+                        });
+                    </script>
+                    <p:messages id="mensagens" showDetail="true" closable="true" globalOnly="true"/>
+                    <ui:insert name="centro" />
+                </p:layoutUnit>
+            </p:layout>
+        </div>
+        <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+            <p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+            <p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+        </p:confirmDialog>
+
+        <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+            <p:graphicImage url="/resources/img/ajax-loader.gif"/>
+        </p:dialog>
+        
+        <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+    </h:body>
+</html>

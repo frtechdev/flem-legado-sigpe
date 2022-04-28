@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:cc="http://java.sun.com/jsf/composite">
+    <h:head>
+        <title>flem:selectOneMenu</title>
+    </h:head>
+    <h:body>
+        <cc:interface name="selectOneMenu" displayName="Cria um selectOneMenu customizado">        
+        	
+            <cc:attribute name="label" />
+            <cc:attribute name="escape" default="true" />
+            <cc:attribute name="readonly" default="false" />
+            <cc:attribute name="title" />
+            <cc:attribute name="required" default="false" />
+            <cc:attribute name="value" default="" />
+            <cc:attribute name="style" />
+            <cc:attribute name="styleClass" />		
+            <cc:attribute name="immediate" default="false" />	
+            <cc:attribute name="onchange" />			
+            <cc:attribute name="noSelectionOption" default="true" />			
+            <cc:attribute name="noSelectionLabel" default="Selecione" />						
+            <cc:attribute name="items"  />			
+            <cc:attribute name="itemLabel"  /> 			
+            <cc:attribute name="itemValue"  />
+
+            <cc:editableValueHolder name="inputId"  />      
+
+            <cc:clientBehavior name="change" event="change" targets="inputId" />
+                    
+            <cc:clientBehavior name="blur" event="blur" targets="inputId" />
+
+            <cc:clientBehavior name="click" event="click" targets="inputId" />
+
+            <cc:clientBehavior name="focus" event="focus" targets="inputId" />
+                    
+        </cc:interface>
+        
+        <cc:implementation>
+            <div style="margin-left: 5px; margin-bottom: 15px;">
+                <p:outputLabel for="inputId" id="#{cc.clientId}_label" value="#{cc.attrs.label}" style="display: block; margin-bottom: 5px;" />
+                <h:selectOneMenu id="inputId" value="#{cc.attrs.value}"
+                                styleClass="ui-inputfield ui-inputtext ui-widget ui-state-default ui-corner-all #{cc.attrs.styleClass}"
+                                required="#{cc.attrs.required}"	 
+                                style="#{cc.attrs.style}"
+                                disabled="#{cc.attrs.readonly}"
+                                immediate="#{cc.attrs.immediate}"		
+                                onchange="#{cc.attrs.onchange}"
+                                label="#{cc.attrs.label}">
+
+                    <c:if test="#{not empty cc.attrs.items}">
+                        <f:converter converterId="uidConverter" />
+                        <f:selectItems var="item" itemLabel="#{item.nome}" value="#{cc.attrs.items}" itemValue="#{item}" />
+                    </c:if>
+                    
+                    <cc:insertChildren />  
+                    
+                </h:selectOneMenu>
+                <p:message for="#{cc.clientId}:inputId"/>
+            </div>
+        </cc:implementation>
+
+    </h:body>
+</html>

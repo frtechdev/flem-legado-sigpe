@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:cc="http://java.sun.com/jsf/composite">
+    <h:head>
+        <title>flem:inputMask</title>
+    </h:head>
+    <h:body>
+        <cc:interface name="inputMask" displayName="Cria inputMask padronizados">
+            <cc:attribute name="readonly" default="false" />
+            <cc:attribute name="required" default="false" />
+            <cc:attribute name="value" />
+            <cc:attribute name="maxlength" default="100" />
+            <cc:attribute name="style" />
+            <cc:attribute name="styleClass" />
+            <cc:attribute name="autocomplete" default="off" />
+            <cc:attribute name="immediate" default="false" />
+            <cc:attribute name="onkeypress" />
+            <cc:attribute name="autoClear" default="false" />
+            <cc:attribute name="onkeyup" />
+            <cc:attribute name="onkeydown" />
+            <cc:attribute name="onblur" />			
+            <cc:attribute name="onchange" />
+            <cc:attribute name="onfocus" />
+            <cc:attribute name="size" default="25" />
+            <cc:attribute name="mask" default="(99)9999-9999" />
+            <cc:attribute name="converter" default="telefoneConverter" />
+
+            <cc:clientBehavior name="change" event="change"
+               targets="#{cc.clientId}:inputId" />
+
+            <cc:clientBehavior name="blur" event="blur"
+               targets="#{cc.clientId}:inputId" />
+
+            <cc:clientBehavior name="click" event="click"
+               targets="#{cc.clientId}:inputId" />			
+
+            <cc:editableValueHolder name="inputId"  />
+        </cc:interface>
+
+        <cc:implementation>
+                <p:inputMask id="inputId" value="#{cc.attrs.value}"
+                                    required="#{cc.attrs.required}"			
+                                    maxlength="#{cc.attrs.maxlength}" 
+                                    style="#{cc.attrs.style}"
+                                    styleClass="#{cc.attrs.styleClass}"
+                                    readonly="#{cc.attrs.readonly}"
+                                    disabled="#{cc.attrs.readonly}"
+                                    autocomplete="#{cc.attrs.autocomplete}"
+                                    immediate="#{cc.attrs.immediate}"
+                                    onkeypress="#{cc.attrs.onkeypress}"
+                                    onkeyup="#{cc.attrs.onkeyup}"
+                                    onkeydown="#{cc.attrs.onkeydown}"
+                                    onblur="#{cc.attrs.onblur}"				
+                                    onchange="#{cc.attrs.onchange}"
+                                    onfocus="#{cc.attrs.onfocus}"
+                                    size="#{cc.attrs.size}"
+                                    mask="#{cc.attrs.mask}"
+                                    autoClear="#{cc.attrs.autoClear}"> 
+                                <cc:insertChildren />  
+                            <f:converter converterId="#{cc.attrs.converter}" />
+                </p:inputMask>
+                <p:message for="#{cc.clientId}:inputId"/>
+        </cc:implementation>
+        
+    </h:body>
+</html>

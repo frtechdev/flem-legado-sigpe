@@ -1,0 +1,56 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+    
+    <h:graphicImage url="/resources/img/PrimeiroEmprego.jpg"/> 
+    <h:form style="position:relative; z-index:1">
+        <p:menu style="width: auto" toggleable="true" >
+            <p:submenu label="Cadastros">
+                
+                <p:menuitem value="Beneficiário" url="/egresso/listaBusca.xhtml" rendered="#{usuarioLogadoMB.temPermissao('primEmp.egresso')}" />
+                <p:menuitem value="Categoria da Situação" url="/categoriaDaSituacao/lista.xhtml" rendered="#{usuarioLogadoMB.temPermissao('primEmp.categoriaSituacao')}"/>
+                <p:menuitem value="Colaborador" url="/colaborador/lista.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.colab')}"/>
+                <p:menuitem value="Conta de Email" url="/contaDeEmail/lista.xhtml" rendered="#{usuarioLogadoMB.temPermissao('primEmp.contaDeEmail')}"/>
+                <p:menuitem value="Coordenador Focal" url="/coordenadorFocal/lista.xhtml" rendered="#{usuarioLogadoMB.temPermissao('primEmp.coordenadorFocal')}"/>
+                <p:menuitem value="Deficiência" url="/deficiencia/lista.xhtml" rendered="#{usuarioLogadoMB.temPermissao('primEmp.deficiencia')}"/>
+                <p:menuitem value="Demandante" url="/demandante/lista.xhtml"/>
+                <p:menuitem value="Eixo de Formação" url="/eixoDeFormacao/lista.xhtml" rendered="#{usuarioLogadoMB.temPermissao('primEmp.eixoDeFormacao')}"/>
+                <p:menuitem value="Escritório Regional" url="/escritorioregional/lista.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.cadEscri')}"/>
+                <p:menuitem value="Evento" url="/evento/lista.xhtml" rendered="#{usuarioLogadoMB.temPermissao('primEmp.evento')}"/>
+                <p:menuitem value="Formação" url="/formacao/lista.xhtml" rendered="#{usuarioLogadoMB.temPermissao('primEmp.formacao')}"/>
+                <p:menuitem value="Lista" url="/lista/lista.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.lista')}"/>
+                <p:menuitem value="Local do Evento" url="/localDoEvento/lista.xhtml" rendered="#{usuarioLogadoMB.temPermissao('primEmp.localDoEvento')}"/>
+                <p:menuitem value="Material" url="/material/lista.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.abaMat')}"/>
+                <p:menuitem value="Modelo de Ofício" url="/modeloDeOficio/lista.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.modeloDeOficio')}"/>
+                <p:menuitem value="Municipios" url="/municipio/lista.xhtml"/>
+                <p:menuitem value="Regra de Contratação" url="/regra/lista.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.tipoAcao')}"/>
+                <p:menuitem value="Situação" url="/situacao/lista.xhtml" rendered="#{usuarioLogadoMB.temPermissao('primEmp.situacao')}"/>
+                <p:menuitem value="Tamanho" url="/tamanho/lista.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.cadTamanho')}"/>
+                <p:menuitem value="Tipos de Assistência" url="/tipoAssistenciaSocial/lista.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.cadTipoAssistencia')}"/>
+                <p:menuitem value="Tipos de Ação" url="/tipoDeAcao/lista.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.tipoAcao')}"/>
+                <p:menuitem value="Unidade" url="/unidade/lista.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.cadUnidade')}"/>
+                <p:menuitem value="Tipos de Modelos" url="/tipoModeloDeOficio/lista.xhtml" rendered="${usuarioLogadoMB.temPermissao('listaTiposModelos')}"/>
+            </p:submenu>
+            <p:submenu label="Gerenciamento">
+                <p:menuitem value="Campanha" url="/campanha/lista.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.campanha')}"/>
+                <p:menuitem value="CI" url="/ci/lista.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.ci')}"/>
+                <p:menuitem value="Importar" url="/carga/excel.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.excel')}"/>
+                <p:menuitem value="Listas de Beneficiários" url="/lista/egressos.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.listasEgressos')}"/>
+                <p:menuitem value="Notificação" url="/notificacao/lista.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.notificacao')}"/>
+                <p:menuitem value="Ofício" url="/oficio/lista.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.oficio')}"/>
+                <p:menuitem value="Parametros" url="/parametro/valores.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.parametro')}"/>
+                <p:menuitem value="Pendência de Cálculo de Distância" url="/egresso/pendenteDeCalculoDeDistancia.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.pendCalculoDistancia')}"/>
+                <p:menuitem value="Monitoramento" url="/monitoramento/associar.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.acessoMonitoramento')}"/>
+            </p:submenu>
+            <p:submenu label="Relatórios">
+                <p:menuitem value="Ações" url="/relatorio/acoes.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.relAcoes')}"/>
+                <p:menuitem value="Contratados / Desligados - Posição RH" url="/relatorio/contratados.xhtml" rendered="${usuarioLogadoMB.temPermissao('primEmp.relContratados')}"/>
+                <p:menuitem value="Listas de Presença" url="/relatorio/listaDeFrequencia.xhtml"/>
+                <p:menuitem value="Seminário de Acolhimento" url="/relatorio/seminarioDeAcolhimento.xhtml" />
+                <p:menuitem value="Quantitativo" url="/relatorio/quantitativo.xhtml" rendered="false"/>
+            </p:submenu>
+            <p:menuitem value="Sair" url="/logout"/>
+        </p:menu>
+    </h:form>
+</ui:composition>

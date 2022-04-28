@@ -1,0 +1,40 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <h:form id="form">
+            <h3 style="margin-top:0">Cadastro de Tipo Modelo de Ofício</h3>
+            <table>
+                <tr>
+                    <td><p:outputLabel for="codigo" value="Código" /></td>
+                    <td>
+                        <flem:inputText readonly="#{tipoModeloDeOficioCadastroMB.tipoModelo.id ne null}" value="#{tipoModeloDeOficioCadastroMB.tipoModelo.codigo}" id="codigo" style="width: 450px;"/>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><p:outputLabel for="descricao" value="Descrição" /></td>
+                    <td>
+                        <flem:inputText value="#{tipoModeloDeOficioCadastroMB.tipoModelo.descricao}" id="descricao" style="width: 450px;"/>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                        <flem:commandButton action="#{tipoModeloDeOficioCadastroMB.salvar()}" value="Salvar" profile="salvar" />
+                    </td>
+                    <td colspan="2">
+                        <flem:commandButton action="#{tipoModeloDeOficioCadastroMB.cancelar()}" value="Cancelar" profile="clear" />
+                    </td>
+                </tr>
+            </table>
+        </h:form>
+    </ui:define>
+</ui:composition>

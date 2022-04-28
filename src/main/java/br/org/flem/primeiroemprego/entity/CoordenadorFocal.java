@@ -1,0 +1,79 @@
+package br.org.flem.primeiroemprego.entity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
+/**
+ *
+ * @author emsilva
+ */
+@Entity
+public class CoordenadorFocal extends UID<Long>{
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id_coordenadorFocal")
+    private Long id;
+    
+    @ManyToOne
+    @Fetch(FetchMode.SELECT)
+    @JoinColumn(name = "id_demandante")
+    @NotNull(message = "{coordenadorFocal.demandante.notnull}")
+    private Demandante demandante;
+
+    private String nome;
+    private String telefone;
+    private String email;
+
+    @Override
+    public Long getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Demandante getDemandante() {
+        return demandante;
+    }
+
+    public void setDemandante(Demandante demandante) {
+        this.demandante = demandante;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+    
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+}

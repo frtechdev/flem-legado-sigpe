@@ -1,0 +1,40 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    template="/template/padrao.xhtml">
+
+    <ui:define name="centro" >
+        <h:form id="form" enctype="multipart/form-data" style="width: 100%">
+            <h3 style="margin-top:0">Carga de Ações</h3>
+
+                <p:fileUpload value="#{cargaMB.arquivoXLS}" mode="simple" style="margin-right: 15px;" allowTypes="/(\.|\/)xlsx$/"/>  
+                <p:commandButton value="Importar" ajax="false" actionListener="#{cargaMB.carregar()}" style="margin-left: 10px;"/>  
+                <br/>
+                
+                
+                <p:dataTable value="#{cargaMB.linhasInseridas}" var="inserida" emptyMessage="">
+                    <f:facet name="header">Importados #{cargaMB.linhasInseridas.size()}</f:facet>
+                    <p:columns value="#{cargaMB.nomeColunas}" var="coluna" columnIndexVar="colN" headerText="#{coluna}">
+                        <h:outputText value="#{inserida[colN]}" style="#{coluna.toLowerCase() eq 'cpf' and !cargaMB.cpfValido(inserida[colN]) ? 'color:red' : ''}"/>
+                    </p:columns>
+                </p:dataTable>
+
+                <p:dataTable value="#{cargaMB.linhasErro}" var="erro" emptyMessage="" scrollable="true">
+                    <f:facet name="header">Não Importados #{cargaMB.linhasErro.size()}</f:facet>
+                    <p:column headerText="Erro">
+                        <h:outputText value="#{erro[erro.size()-1]}"/>
+                    </p:column>
+                    <p:columns value="#{cargaMB.nomeColunas}" var="coluna" columnIndexVar="colN" headerText="#{coluna}">
+                        <h:outputText value="#{erro[colN]}" style="#{coluna.toLowerCase() eq 'cpf' and !cargaMB.cpfValido(erro[colN]) ? 'color:red' : ''}"/>
+                    </p:columns>
+                    
+                </p:dataTable>
+
+        </h:form>
+    </ui:define>
+</ui:composition>

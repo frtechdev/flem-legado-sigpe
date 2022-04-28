@@ -1,0 +1,51 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <flem:fieldset legend="Lista de Presença">
+            
+            <h:form id="formFrequencia">
+
+                <flem:selectOneMenu value="#{relatorioFrequenciaMB.escritorioSelecionado}">
+                    <f:selectItems value="#{relatorioFrequenciaMB.escritoriosRegionais}" var="item" itemLabel="#{item}" />
+                </flem:selectOneMenu>
+                
+                <flem:commandButton value="Pesquisar" action="#{relatorioFrequenciaMB.pesquisar()}" ajax="true" process="@this" update="frequenciaTable" />
+                
+                <flem:dataTable value="#{relatorioFrequenciaMB.listaImpressao}" id="frequenciaTable" >
+                    
+                    <p:column headerText="Demandante">
+                        <h:outputText value="#{item.demandante}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Egresso">
+                        <h:outputText value="#{item.nomeEgresso}"/>
+                    </p:column>
+                    
+                    <p:column headerText="CPF">
+                        <h:outputText value="#{item.cpf}"/>
+                    </p:column>
+                    <p:column headerText="Formação">
+                        <h:outputText value="#{item.formacao}"/>
+                    </p:column>
+                    
+                    <p:column headerText="E-mail">
+                        <h:outputText value="#{item.email}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Municipio Vaga">
+                        <h:outputText value="#{item.municipioVaga}"/>
+                    </p:column>
+                </flem:dataTable>
+                
+            </h:form>
+            
+        </flem:fieldset>
+    </ui:define>
+</ui:composition>

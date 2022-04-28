@@ -1,0 +1,128 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    template="/template/padrao.xhtml">
+
+    <ui:define name="centro" >
+        <h:form id="form" enctype="multipart/form-data" style="width: 100%">
+            <h3 style="margin-top:0">Carga de Beneficiários</h3>
+                <p:dataTable id="modeloCSV" emptyMessage="" tableStyle="width:auto;">
+                    <p:column><f:facet name="header">CPF</f:facet></p:column>
+                    <p:columns value="#{cargaMB.camposPossiveis()}" var="campo" headerText="#{campo}" rendered="#{usuarioLogadoMB.temPermissao('primEmp.excelCompleto')}"/> 
+                    <f:facet name="footer">
+                        <h:outputText value="* A primeira coluna obrigatoriamente deve ser a CPF, para identificar o beneficiário. As demais colunas são opcionais" rendered="#{usuarioLogadoMB.temPermissao('primEmp.excelCompleto')}"/>
+                        <br/>
+                        <p:commandButton value="Modelo de importação" ajax="false">
+                            <p:dataExporter type="xlsx" target="modeloCSV" fileName="modeloImportacaoEgresso"/>
+                        </p:commandButton>
+                    </f:facet>
+                </p:dataTable>
+                <br/>
+                <p:panel id="panelListas" header="Listas" toggleable="true" rendered="#{usuarioLogadoMB.temPermissao('primEmp.associarEgressoEmLista')}" collapsed="true" style="border: none; clear: both">
+                    <p:dataTable value="#{cargaMB.listas}" var="lista" selection="#{cargaMB.listasSelecionadas}" id="listas" style="width:100%" rowKey="#{lista.id}" rows="5" paginator="true"  emptyMessage="Nenhum registro">
+                        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+                        <p:column headerText="Nome">
+                            <h:outputText value="#{lista.nome}" />
+                        </p:column>
+                    </p:dataTable>
+                </p:panel>
+                <p:panel id="panelEventos" header="Eventos" toggleable="true" collapsed="true" style="border: none" rendered="#{usuarioLogadoMB.temPermissao('primEmp.excelCompleto')}" >
+                    <p:dataTable value="#{cargaMB.eventos}" var="evento" selection="#{cargaMB.eventoSelecionados}" id="eventos" style="width:100%" rowKey="#{evento.id}" rows="30" paginator="true"  emptyMessage="Nenhum registro">
+                        <p:column selectionMode="single" style="width:16px;text-align:center"/>
+                        <p:column headerText="Id" sortBy="#{evento.id}">
+                            <h:outputText value="#{evento.id}" />
+                        </p:column>
+                        
+                        <p:column headerText="Nome" filterBy="#{evento.nome}">
+                            <h:outputText value="#{evento.nome}" />
+                        </p:column>
+                        <p:column headerText="Data">
+                            <h:outputText value="#{evento.data}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                            </h:outputText>
+                        </p:column>
+                    </p:dataTable>
+                </p:panel>
+                <p:panel id="panelCampanhas" header="Campanhas Salvas" toggleable="true" collapsed="true" style="border: none" rendered="#{usuarioLogadoMB.temPermissao('primEmp.importCamp')}">
+                    <p:dataTable value="#{cargaMB.campanhasSalvas}" var="campanha" selection="#{cargaMB.campanhasSelecionadas}" id="campanhas" style="width:100%" rowKey="#{campanha.id}" rows="5" paginator="true"  emptyMessage="Nenhum registro">
+                        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+                        <p:column headerText="Nome">
+                            <h:outputText value="#{campanha.assunto}" />
+                        </p:column>
+                        <p:column headerText="Data">
+                            <h:outputText value="#{campanha.dataCriacao}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                            </h:outputText>
+                        </p:column>
+                    </p:dataTable>
+                </p:panel>
+                <p:panel id="panelModelosDeOficio" header="Modelos de Ofício" toggleable="true" collapsed="true" style="border: none" rendered="#{usuarioLogadoMB.temPermissao('primEmp.importModOf')}">
+                    <p:dataTable value="#{cargaMB.modelosNaoGerados}" var="modeloDeOficio" selection="#{cargaMB.modelosDeOficioSelecionados}" id="modelosDeOficio" style="width:100%" rowKey="#{modeloDeOficio.id}" rows="5" paginator="true" emptyMessage="Nenhum registro">
+                        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+                        <p:column headerText="Nome">
+                            <h:outputText value="#{modeloDeOficio.nome}" />
+                        </p:column>
+                        <p:column headerText="Assunto">
+                            <h:outputText value="#{modeloDeOficio.assunto}" />
+                        </p:column>
+                        <p:column headerText="Data de Criação">
+                            <h:outputText value="#{modeloDeOficio.dataCriacao}">
+                                <f:convertDateTime pattern="dd/MM/yyyy"/>
+                            </h:outputText>
+                        </p:column>
+                    </p:dataTable>
+                </p:panel>
+                <p:panel id="panelCIs" header="CIs" toggleable="true" collapsed="true" style="border: none" rendered="#{usuarioLogadoMB.temPermissao('primEmp.importCis')}">
+                    <p:dataTable value="#{cargaMB.cis}" var="ci" selection="#{cargaMB.cisSelecionadas}" id="cis" style="width:100%" rowKey="#{ci.id}" rows="5" paginator="true" emptyMessage="Nenhum registro">
+                        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+                        <p:column headerText="Numero">
+                            <h:outputText value="#{ci.identificacao} - #{ci.assunto}" />
+                        </p:column>
+                        <p:column headerText="Assunto">
+                            <h:outputText value="#{ci.assunto}" />
+                        </p:column>
+                    </p:dataTable>
+                </p:panel>
+                
+                <p:panel id="panelBeneficiario" header="Beneficiário" toggleable="true" collapsed="true" style="border: none" rendered="#{usuarioLogadoMB.temPermissao('primEmp.excelCompleto')}">
+                    <h:selectOneRadio id="acaoBeneficiario" value="#{cargaMB.acaoBeneficiario}" >
+                        <f:selectItem itemValue="0" itemLabel="Materiais" />
+                        <f:selectItem itemValue="1" itemLabel="Ação" />
+                        <f:selectItem itemValue="2" itemLabel="Curso Superior" />
+                        <f:ajax event="change" render="modeloCSV" />
+                    </h:selectOneRadio>
+                </p:panel>
+                
+                <p:fileUpload value="#{cargaMB.arquivoXLS}" mode="simple" style="margin-right: 15px;" allowTypes="/(\.|\/)xlsx$/"/> 
+                <p:commandButton value="Importar" ajax="false" actionListener="#{cargaMB.carregar()}" style="margin-left: 10px; margin-right: 20px;"/>  
+                <br/>
+                <p:dataTable value="#{cargaMB.linhasInseridas}" var="inserida" emptyMessage="">
+                    <f:facet name="header">Importados #{cargaMB.linhasInseridas.size()}</f:facet>
+                    <p:columns value="#{cargaMB.nomeColunas}" var="coluna" columnIndexVar="colN" headerText="#{coluna}">
+                        <h:outputText value="#{inserida[colN]}" style="#{coluna.toLowerCase() eq 'cpf' and !cargaMB.cpfValido(inserida[colN]) ? 'color:red' : ''}"/>
+                    </p:columns>
+                </p:dataTable>
+                <p:dataTable value="#{cargaMB.linhasAtualizadas}" var="atualizada" emptyMessage="">
+                    <f:facet name="header">Atualizados #{cargaMB.linhasAtualizadas.size()}</f:facet>
+                    <p:columns value="#{cargaMB.nomeColunas}" var="coluna" columnIndexVar="colN" headerText="#{coluna}">
+                        <h:outputText value="#{atualizada[colN]}" style="#{coluna.toLowerCase() eq 'cpf' and !cargaMB.cpfValido(atualizada[colN]) ? 'color:red' : ''}"/>
+                    </p:columns>
+                </p:dataTable>
+                <p:dataTable value="#{cargaMB.linhasErro}" var="erro" emptyMessage="" scrollable="true">
+                    <f:facet name="header">Não Importados #{cargaMB.linhasErro.size()}</f:facet>
+                    <p:column headerText="Erro">
+                        <h:outputText value="#{erro[erro.size()-1]}"/>
+                    </p:column>
+                    <p:columns value="#{cargaMB.nomeColunas}" var="coluna" columnIndexVar="colN" headerText="#{coluna}">
+                        <h:outputText value="#{erro[colN]}" style="#{coluna.toLowerCase() eq 'cpf' and !cargaMB.cpfValido(erro[colN]) ? 'color:red' : ''}"/>
+                    </p:columns>
+                    
+                </p:dataTable>
+        </h:form>
+    </ui:define>
+</ui:composition>

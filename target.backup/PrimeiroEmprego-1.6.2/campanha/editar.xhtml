@@ -1,0 +1,104 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+        <h:form id="campanhaForm" enctype="multipart/form-data">
+            <p:fieldset legend="Campanha" style="margin-top: 10px;">
+                <table>
+                    <tr>
+                        <td style="width: 20px;">
+                            <h:outputLabel value="Conta De Email" style="font-weight:bold;" />
+                        </td>
+                        <td>
+                            <p:selectOneMenu id="contaDeEmail" value="#{campanhaEditarMB.campanha.contaDeEmail}" style="width: 300px" converter="#{genericConverter}">
+                                <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true"/>
+                                <f:selectItems value="#{campanhaEditarMB.contasDeEmail}" var="contaDeEmail" itemLabel="#{contaDeEmail.nomeRemetente}&lt;#{contaDeEmail.emailRemetente}&gt;"/>
+                            </p:selectOneMenu>
+                            <p:message for="contaDeEmail"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 20px;">
+                            <h:outputLabel value="Assunto" style="font-weight:bold;" />
+                        </td>
+                        <td>
+                            <p:inputText id="assunto" value="#{campanhaEditarMB.campanha.assunto}" style="width: 300px"/>
+                            <p:message for="assunto"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h:outputLabel value="Mensagem" style="font-weight:bold"/>
+                        </td>
+                        <td>
+                            <p:editor id="mensagem" value="#{campanhaEditarMB.campanha.mensagem}" widgetVar="mensagemCampanhaWD"/>
+                            <p:message for="mensagem"/>
+                        </td>
+                        <td>
+                            <p:selectOneMenu widgetVar="wdCamposEgressosParaCampanha" filter="true">
+                                <f:selectItem itemLabel="Selecione um Campo do Egresso" />
+                                <f:selectItems value="#{campanhaEditarMB.camposPossiveis()}"/>
+                            </p:selectOneMenu>
+                            <button onclick="adicionarCampoEgressoNaCampanha(event)">Adicionar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h:outputLabel for="anexos" value="Anexos" style="font-weight:bold"/>
+                        </td>
+                        <td>
+                            <p:fileUpload id="anexos" fileUploadListener="#{campanhaEditarMB.uploadAnexos}" multiple="true" auto="true" uploadLabel="Upload" cancelLabel="Cancelar" label="Selecionar arquivo" allowTypes="/(\.|\/)(zip|rar|gif|jpe?g|png|pdf|docx?|xlsx?|pptx?)$/" update="listaAnexos"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <p:dataTable value="#{campanhaEditarMB.campanha.anexos}" var="anexo" id="listaAnexos" emptyMessage="">
+                                <p:column>
+                                    #{anexo.nome}
+                                </p:column>
+                                <p:column>
+                                    <p:panel rendered="#{anexo.imagem}">
+                                        <img src="data:image;base64,#{campanhaEditarMB.imagemBase64(anexo)}" height="50px"/>
+                                    </p:panel>
+                                </p:column>
+                                <p:column>
+                                    <p:commandButton value="Remover" actionListener="#{campanhaEditarMB.removerAnexo(anexo)}" update="listaAnexos" process="@this"/>
+                                    <p:commandButton value="Incluir na msg" rendered="#{anexo.imagem}" onclick="adicionarImagemEmbutida(event,'#{anexo.nome}')" ajax="false"/>
+                                </p:column>
+                            </p:dataTable>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p:commandButton value="Salvar" action="#{campanhaEditarMB.salvar()}" update="@form :mensagens">
+                                <p:confirm message="Confirmar o salvamento da campanha?"/>
+                            </p:commandButton>
+                        </td>
+                    </tr>
+                </table>
+                <script type="text/javascript">
+                    function adicionarCampoEgressoNaCampanha(e){
+                        e.preventDefault();
+                        if(PF('wdCamposEgressosParaCampanha').value != null){
+                            PF('mensagemCampanhaWD').editor.execCommand('inserthtml', '{'+PF('wdCamposEgressosParaCampanha').value+'}', false);
+                        }
+                        return false;
+                    }
+
+                    function adicionarImagemEmbutida(e,imagem){
+                        e.preventDefault();
+                        if(imagem != null){
+                            PF('mensagemCampanhaWD').editor.execCommand('inserthtml', 'cid:'+imagem, false);
+                        }
+                        return false;
+                    }
+                </script>
+            </p:fieldset>
+        </h:form>
+    </ui:define>
+</ui:composition>

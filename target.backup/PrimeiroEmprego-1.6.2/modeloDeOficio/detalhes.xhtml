@@ -1,0 +1,56 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    template="/template/padrao.xhtml">
+
+    <ui:define name="centro">
+        <h2><h:outputText value="Detalhes do Modelo de Ofício"/></h2>
+        <h3><h:outputText value="#{modeloDeOficioDetalhesMB.modeloDeOficio.nome}"/></h3>
+        <h4><h:outputText value="#{modeloDeOficioDetalhesMB.modeloDeOficio.assunto}"/></h4>
+        <h:form>
+            <p:fieldset legend="Egressos Pendentes" style="margin-top: 10px;">
+                <p:dataTable id="egressos" emptyMessage="Nenhum registro encontrado." var="egresso" value="#{modeloDeOficioDetalhesMB.modeloDeOficio.egressosParaGerar}" paginator="true" rows="20" paginatorPosition="bottom" rowIndexVar="item">
+                    <f:facet name="header">
+                        <h:outputText value="#{modeloDeOficioDetalhesMB.modeloDeOficio.egressosParaGerar.size()} registros"/>
+                    </f:facet>
+                    <p:column>
+                        <h:outputText value="#{item+1}" />
+                    </p:column>
+                    <p:column headerText="Beneficiário">
+                        <h:outputLink value="#{request.contextPath}/egresso/cadastro.xhtml?id=#{egresso.id}">
+                            <h:outputText value="#{egresso.nome}"/>
+                        </h:outputLink>
+                    </p:column>
+                    <p:column >
+                        <p:commandButton value="Remover" actionListener="#{modeloDeOficioDetalhesMB.removerEgresso(egresso)}" rendered="#{modeloDeOficioDetalhesMB.modeloDeOficio.status.id eq 0}" update="@form :mensagens">
+                            <p:confirm message="Confirmar a removação do egresso deste modelo de ofício?"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+            </p:fieldset>
+            <p:fieldset legend="Oficios Gerados" style="margin-top: 10px;">
+                <p:dataTable id="oficios" emptyMessage="Nenhum registro encontrado." var="oficio" value="#{modeloDeOficioDetalhesMB.modeloDeOficio.oficiosGerados}" paginator="true" rows="20" paginatorPosition="bottom" rowIndexVar="item">
+                    <f:facet name="header">
+                        <h:outputText value="#{modeloDeOficioDetalhesMB.modeloDeOficio.oficiosGerados.size()} registros"/>
+                    </f:facet>
+                    <p:column>
+                        <h:outputText value="#{item+1}" />
+                    </p:column>
+                    <p:column headerText="Beneficiário">
+                        <h:outputLink value="#{request.contextPath}/egresso/cadastro.xhtml?id=#{oficio.egresso.id}">
+                            <h:outputText value="#{oficio.egresso.nome}"/>
+                        </h:outputLink>
+                    </p:column>
+                </p:dataTable>
+                <p:commandButton styleClass="bt-action" value="Download" ajax="false" icon="ui-icon-arrowthick-1-s">
+                    <p:fileDownload value="#{modeloDeOficioDetalhesMB.downloadDocumento()}"/>
+                </p:commandButton>
+            </p:fieldset>
+        </h:form>
+    </ui:define>
+</ui:composition>

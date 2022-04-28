@@ -1,0 +1,93 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <flem:fieldset legend="Municípios">
+            <h:form>
+                <flem:commandButton value="Novo" rendered="#{usuarioLogadoMB.temPermissao('primEmp.municipio')}" action="/municipio/cadastro.xhtml" profile="add"/>
+                <flem:dataTable id="municipios" value="#{municipioListaMB.municipios}" actionEdit="/municipio/cadastro.xhtml?id=#{item.id}" renderedEdit="${usuarioLogadoMB.temPermissao('primEmp.municipio')}">
+
+                    <p:column filterBy="#{item.nome}" headerText="Nome" filterMatchMode="contains" width="150">
+                        <h:outputText value="#{item.nome}" />
+                    </p:column>
+
+                    <p:column filterBy="#{item.uf}" headerText="UF" filterMatchMode="contains" width="150">
+                        <h:outputText value="#{item.uf}" />
+                    </p:column>
+
+                    <p:column filterBy="#{item.territorio.nome}" headerText="Território" width="300">
+                        <h:outputText value="#{item.territorio.nome}" />
+                    </p:column>
+
+                    <p:column filterBy="#{item.escritorioRegional.nome}" headerText="Escritório Regional" filterMatchMode="contains" width="350">
+
+                        <h:outputText rendered="#{item.escritorioRegional ne null}" value="#{item.escritorioRegional.nome} " />
+                        <p:commandButton rendered="#{item.escritorioRegional ne null}" action="#{municipioListaMB.abrirEscritorio(item.escritorioRegional.id)}" update="idEscritorioRegionalDialog" icon="ui-icon-search" />
+                        <h:outputText rendered="#{item.escritorioRegional eq null}" value="Escritório Inexistente" />
+                    </p:column>
+
+                </flem:dataTable>
+                <flem:commandButton value="Novo" rendered="#{usuarioLogadoMB.temPermissao('primEmp.municipio')}" action="/municipio/cadastro.xhtml" style="float: left;" profile="add"/>
+            </h:form>
+
+        </flem:fieldset>
+        <p:dialog widgetVar="escritorioRegionalDialog" modal="true" appendTo="@(body)" resizable="false" id="idEscritorioRegionalDialog">
+            <p:panelGrid id="panelGridModal" style="width: 800px !important;">
+                <p:row>
+                    <p:column>
+                        <h:outputLabel value="Escritório" style="font-weight:bold"/>
+                    </p:column>
+                    <p:column>
+                        <h:outputLabel value="#{municipioListaMB.escritorioRegional.nome}"/>
+                    </p:column>
+                    <p:column rendered="#{municipioListaMB.escritorioRegional.email ne null}">
+                        <h:outputLabel value="#{municipioListaMB.escritorioRegional.email}"/>
+                    </p:column>
+                    <p:column rendered="#{municipioListaMB.escritorioRegional.telefone ne null}">
+                        <h:outputLabel value="#{municipioListaMB.escritorioRegional.telefone}">
+                            <f:converter converterId="telefoneConverter"/>
+                        </h:outputLabel>
+                    </p:column>
+                </p:row>
+                <p:row>
+                    <p:column>
+                        <h:outputLabel value="Endereço" style="font-weight:bold"/>
+                    </p:column>
+                    <p:column colspan="3">
+                        <h:outputLabel value="#{municipioListaMB.escritorioRegional.descricaoEndereco}"/>
+                    </p:column>
+                </p:row>
+
+            </p:panelGrid>
+            <div style="width: 800px !important; margin-top: 5px;">
+                <p:dataTable paginator="false" var="item" id="colaborador" rendered="#{municipioListaMB.escritorioRegional.getColaboradores() ne null}" value="#{municipioListaMB.escritorioRegional.getColaboradores()}">
+                    <f:facet name="header">Técnicos</f:facet>
+                    <p:column width="300">
+                        <h:outputLabel value="#{item.nome}"/>
+                    </p:column>
+
+                    <p:column width="150">
+                        <h:outputLabel value="#{item.telefone}" >
+                            <f:converter converterId="telefoneConverter"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="/" rendered="#{item.celular ne null and item.celular ne '' and item.telefone ne null and item.telefone ne ''}"/>
+                        <h:outputLabel value="#{item.celular}">
+                            <f:converter converterId="telefoneConverter"/>
+                        </h:outputLabel>
+                    </p:column>
+
+                </p:dataTable>
+            </div>
+        </p:dialog>
+    </ui:define>
+
+</ui:composition>
+

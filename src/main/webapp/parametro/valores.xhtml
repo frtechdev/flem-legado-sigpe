@@ -1,0 +1,25 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    template="/template/padrao.xhtml">
+
+    <ui:define name="centro">
+        <h:form >
+            <h2>Parâmetros</h2>
+            <p:dataTable id="parametros" emptyMessage="Nenhum registro encontrado." var="parametro" value="#{parametroValoresMB.parametros}" paginator="true" rows="10" paginatorPosition="bottom" tableStyle="width:auto">
+                <p:column headerText="Parâmetro">
+                    <h:outputText value="#{parametro.descricao}"/>
+                </p:column>
+                <p:column headerText="Valor">
+                    <p:inputText value="#{parametro.valor}"/>
+                </p:column>
+                <f:facet name="footer">
+                    <p:commandButton value="Salvar" action="#{parametroValoresMB.salvar()}" update="@form :mensagens"/>
+                </f:facet>
+            </p:dataTable>
+        </h:form>
+    </ui:define>
+</ui:composition>

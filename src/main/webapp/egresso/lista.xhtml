@@ -1,0 +1,1043 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+        <h:form id="egressosForm">
+            <h:outputScript library="js" name="egresso.lista.js"/>  
+            <h:outputStylesheet>
+                .ui-columntoggler-items{
+                    width:630px;
+                }
+                .ui-columntoggler-item{
+                    width:200px;
+                    float:left;
+                    white-space: normal !important;
+                }
+                .ui-columntoggler{
+                    height:450px !important;
+                }
+            </h:outputStylesheet>
+            
+            <p:fieldset legend="Lista de Beneficiários" style="margin-top: 10px;">
+                <div style="height: 25px;text-align: left; margin-bottom: 10px;">
+                    <p:commandButton id="alterView" action="/egresso/listaSintetico.xhtml" value="Sintético" icon="ui-icon-refresh" />
+                </div>
+                <p:dataTable  id="egressos" paginator="true" value="#{egressoListaMB.egressos}" draggableColumns="true" var="egresso" rows="20"
+                              rowsPerPageTemplate="20,30,50,100" rowIndexVar="item" emptyMessage="Nenhum registro encontrado"  tableStyle="width:auto"
+                              widgetVar="egressosTable" resizableColumns="true" currentPageReportTemplate="Registros:{totalRecords}" rowSelectMode="checkbox"
+                              paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                              selection="#{egressoListaMB.egressosSelecionados}"  filteredValue="#{egressoListaMB.egressosFiltrados}" rowKey="#{egresso.idEgresso}" filterEvent="enter"  > 
+                    <f:facet name="header">
+                        <div style="height: 25px;text-align: left">
+                            <p:commandButton id="toggler" type="button" value="Colunas" icon="ui-icon-calculator" />
+                            <p:commandButton value="Exibir todas Colunas" actionListener="#{egressoListaMB.estadoDasColunas.exibirTodas()}" update="egressos"/>
+                            <p:commandButton value="Esconder todas Colunas" actionListener="#{egressoListaMB.estadoDasColunas.esconderTodas()}" update="egressos"/>
+                            <p:columnToggler datasource="egressos" trigger="toggler" >
+                                <p:ajax event="toggle" listener="#{egressoListaMB.onToggle}" />
+                            </p:columnToggler>
+                        </div>
+                    </f:facet>
+                    <p:column exportable="false" toggleable="false">
+                        <h:outputLink value="#{request.contextPath}/egresso/cadastro.xhtml?id=#{egresso.idEgresso}" styleClass="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-left">
+                            <span class="ui-button-icon-left ui-icon ui-c ui-icon-pencil"></span>
+                            <span class="ui-button-text ui-c">Cadastro</span>
+                        </h:outputLink>
+                    </p:column>
+                    <p:column selectionMode="multiple" style="width:16px; text-align:center" exportable="false" toggleable="false">
+                        <f:facet name="header"><h:outputText style="font-size:10px" value="* pag. atual"/></f:facet>
+                    </p:column>
+                    <p:ajax event="rowSelectCheckbox" process="@this" update="btnEnviarCampanha btnAssociarALista brnIncluirEmOficio brnIncluirEmCI"/>
+                    <p:ajax event="rowUnselectCheckbox" process="@this" update="btnEnviarCampanha btnAssociarALista brnIncluirEmOficio brnIncluirEmCI"/>
+                    <p:ajax event="toggleSelect" process="@this" update="btnEnviarCampanha btnAssociarALista brnIncluirEmOficio brnIncluirEmCI"/>
+                    <p:column id="n" headerText="Nº" width="15" exportable="#{egressoListaMB.estadoDasColunas.n}" visible="#{egressoListaMB.estadoDasColunas.n}">
+                        <h:outputText value="#{item+1}" />
+                    </p:column>
+
+                    <p:column id="nome" filterBy="#{egresso.nome}" headerText="Nome" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.nome}" visible="#{egressoListaMB.estadoDasColunas.nome}" sortBy="#{egresso.nome}">
+                        <h:outputText value="#{egresso.nome}" />
+                    </p:column>
+
+                    <p:column filterBy="#{egresso.cpf}" headerText="CPF" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.cpf}" visible="#{egressoListaMB.estadoDasColunas.cpf}" styleClass="cpf" style="#{egresso eq null or egresso.cpfValido ? '' : 'color:red'}">
+                        <h:outputText value="#{egresso.cpf}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.cpfValido ? 'Sim' : 'Não'}" headerText="CPF Válido" exportable="#{egressoListaMB.estadoDasColunas.cpfValido}" visible="#{egressoListaMB.estadoDasColunas.cpfValido}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" itemValue="" />
+                                <f:selectItem itemLabel="Sim" itemValue="Sim" />
+                                <f:selectItem itemLabel="Não" itemValue="Não" />
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.cpfValido ? 'Sim' : 'Não'}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.rg}" headerText="RG" exportable="#{egressoListaMB.estadoDasColunas.rg}" visible="#{egressoListaMB.estadoDasColunas.rg}">
+                        <h:outputText value="#{egresso.rg}" />
+                    </p:column>
+
+                    <p:column filterBy="#{egresso.racaCor}" headerText="Raça / Cor" exportable="#{egressoListaMB.estadoDasColunas.racaCor}" visible="#{egressoListaMB.estadoDasColunas.racaCor}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{egressoListaMB.racasCor()}" var="racaCor" itemLabel="#{racaCor.descricao}" itemValue="#{deficiencia}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.racaCor.descricao}" />
+                    </p:column> 
+
+                    <p:column filterBy="#{egresso.deficiencia}" headerText="Deficiência" exportable="#{egressoListaMB.estadoDasColunas.deficiencia}" visible="#{egressoListaMB.estadoDasColunas.deficiencia}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{egressoListaMB.deficiencias}" var="deficiencia" itemLabel="#{deficiencia.nome}" itemValue="#{deficiencia.nome}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.deficiencia}" />
+                    </p:column> 
+
+                    <p:column filterBy="#{egresso.dataNascimento}" headerText="Data de Nascimento" exportable="#{egressoListaMB.estadoDasColunas.dataNascimento}" visible="#{egressoListaMB.estadoDasColunas.dataNascimento}">
+                        <h:outputText value="#{egresso.dataNascimento}" >
+                             <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
+                    
+                    <p:column sortBy="#{egresso.idade}" headerText="Idade" style="#{egresso.idade gt 0 and egresso.idade lt 18 ? 'color:red;font-size:16px' : ''}" exportable="#{egressoListaMB.estadoDasColunas.idade}" visible="#{egressoListaMB.estadoDasColunas.idade}" filterMatchMode="exact">
+                        <h:outputText value="#{egresso.idade}">
+                            <f:convertNumber pattern="#,##0.00" />
+                        </h:outputText>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.cep}" headerText="CEP Residência" exportable="#{egressoListaMB.estadoDasColunas.cep}" visible="#{egressoListaMB.estadoDasColunas.cep}">
+                        <h:outputText value="#{egresso.cep}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.bairro}" headerText="Bairro Residência" exportable="#{egressoListaMB.estadoDasColunas.bairro}" visible="#{egressoListaMB.estadoDasColunas.bairro}">
+                        <h:outputText value="#{egresso.bairro}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.endereco}" headerText="Endereço Residência" exportable="#{egressoListaMB.estadoDasColunas.endereco}" visible="#{egressoListaMB.estadoDasColunas.endereco}" filterMatchMode="contains">
+                        <h:outputText value="#{egresso.endereco}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.complemento}" headerText="Complemento Residência" exportable="#{egressoListaMB.estadoDasColunas.complemento}" visible="#{egressoListaMB.estadoDasColunas.complemento}">
+                        <h:outputText value="#{egresso.complemento}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.numero}" headerText="Número Residência" exportable="#{egressoListaMB.estadoDasColunas.numero}" visible="#{egressoListaMB.estadoDasColunas.numero}">
+                        <h:outputText value="#{egresso.numero}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.municipio}" headerText="Municipio Residência" exportable="#{egressoListaMB.estadoDasColunas.municipio}" visible="#{egressoListaMB.estadoDasColunas.municipio}">
+                        <h:outputText value="#{egresso.municipio}" />
+                    </p:column>
+
+                    <p:column filterBy="#{egresso.dddTelefone1}" headerText="DDD Telefone 1" exportable="#{egressoListaMB.estadoDasColunas.dddTelefone1}" visible="#{egressoListaMB.estadoDasColunas.dddTelefone1}">
+                        <h:outputText value="#{egresso.dddTelefone1}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.telefone1}" headerText="Telefone 1" exportable="#{egressoListaMB.estadoDasColunas.telefone1}" visible="#{egressoListaMB.estadoDasColunas.telefone1}">
+                        <h:outputText value="#{egresso.telefone1}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.dddTelefone2}" headerText="DDD Telefone 2" exportable="#{egressoListaMB.estadoDasColunas.dddTelefone2}" visible="#{egressoListaMB.estadoDasColunas.dddTelefone2}">
+                        <h:outputText value="#{egresso.dddTelefone2}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.telefone2}" headerText="Telefone 2" exportable="#{egressoListaMB.estadoDasColunas.telefone2}" visible="#{egressoListaMB.estadoDasColunas.telefone2}">
+                        <h:outputText value="#{egresso.telefone2}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.dddCelular}" headerText="DDD Celular" exportable="#{egressoListaMB.estadoDasColunas.dddCelular}" visible="#{egressoListaMB.estadoDasColunas.dddCelular}">
+                        <h:outputText value="#{egresso.dddCelular}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.celular}" headerText="Celular" exportable="#{egressoListaMB.estadoDasColunas.celular}" visible="#{egressoListaMB.estadoDasColunas.celular}">
+                        <h:outputText value="#{egresso.celular}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.dddContato}" headerText="DDD Contato" exportable="#{egressoListaMB.estadoDasColunas.dddContato}" visible="#{egressoListaMB.estadoDasColunas.dddContato}">
+                        <h:outputText value="#{egresso.dddContato}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.contato}" headerText="Contato" exportable="#{egressoListaMB.estadoDasColunas.contato}" visible="#{egressoListaMB.estadoDasColunas.contato}">
+                        <h:outputText value="#{egresso.contato}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.emailParticular}" headerText="Email particular" exportable="#{egressoListaMB.estadoDasColunas.emailParticular}" visible="#{egressoListaMB.estadoDasColunas.emailParticular}" filterMatchMode="contains">
+                        <h:outputText value="#{egresso.emailParticular}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.emailValido ? 'Sim' : 'Não'}" headerText="Email Válido" exportable="#{egressoListaMB.estadoDasColunas.emailValido}" visible="#{egressoListaMB.estadoDasColunas.emailValido}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" itemValue="" />
+                                <f:selectItem itemLabel="Sim" itemValue="Sim" />
+                                <f:selectItem itemLabel="Não" itemValue="Não" />
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.emailValido ? 'Sim' : 'Não'}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.emailSecundario}" headerText="Email secundário" exportable="#{egressoListaMB.estadoDasColunas.emailSecundario}" visible="#{egressoListaMB.estadoDasColunas.emailSecundario}" filterMatchMode="contains">
+                        <h:outputText value="#{egresso.emailSecundario}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.emailSecundarioValido ? 'Sim' : 'Não'}" headerText="Email Secundário Válido" exportable="#{egressoListaMB.estadoDasColunas.emailSecundarioValido}" visible="#{egressoListaMB.estadoDasColunas.emailSecundarioValido}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" itemValue="" />
+                                <f:selectItem itemLabel="Sim" itemValue="Sim" />
+                                <f:selectItem itemLabel="Não" itemValue="Não" />
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.emailSecundarioValido ? 'Sim' : 'Não'}" />
+                    </p:column>
+                    
+                    <p:column headerText="Listas" filterBy="#{egresso.listas}"  exportable="#{egressoListaMB.estadoDasColunas.listas}" visible="#{egressoListaMB.estadoDasColunas.listas}"   filterFunction="#{egressoListaMB.filtrarMultiplasOpcoes}" style="">
+                        <f:facet name="filter">
+                            <p:selectManyMenu onchange="PF('egressosTable').filter()" style="width: 100%;height: 80px;text-align: left;overflow-x: hidden" showCheckbox="true">
+                                <f:selectItems value="#{egressoListaMB.listas}" var="lista" itemLabel="#{lista.nome}" itemValue="#{lista.nome}"/>
+                            </p:selectManyMenu>
+                        </f:facet>
+                        <h:outputText value="#{egressoListaMB.emUmaLinha(egresso.listas)}"  escape="false"/>
+                    </p:column>
+                    <p:column headerText="Eventos" filterBy="#{egresso.eventos}" exportable="#{egressoListaMB.estadoDasColunas.eventos}" visible="#{egressoListaMB.estadoDasColunas.eventos}" filterFunction="#{egressoListaMB.filtrarMultiplasOpcoes}">
+                        <f:facet name="filter">
+                            <p:selectManyMenu onchange="PF('egressosTable').filter()" style="width: 100%;height: 80px;text-align: left;overflow-x: hidden" showCheckbox="true">
+                                <f:selectItems value="#{egressoListaMB.eventos}" var="evento" itemLabel="#{evento.nome}" itemValue="#{evento.nome}"/>
+                            </p:selectManyMenu>
+                        </f:facet>
+                        <h:outputText value="#{egressoListaMB.emUmaLinha(egresso.eventos)}" escape="false" />
+                    </p:column>
+
+                    <p:column headerText="Matricula FLEM" filterBy="#{egresso.matriculaFlem}"  filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.matriculaFLEM}" visible="#{egressoListaMB.estadoDasColunas.matriculaFLEM}">
+                        <h:outputText value="#{egresso.matriculaFlem}" />
+                    </p:column>
+
+                    <p:column headerText="Data de Admissão" filterBy="#{egresso.admissao}"  filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.admissao}" visible="#{egressoListaMB.estadoDasColunas.admissao}">
+                        <h:outputText value="#{egresso.admissao}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column headerText="Data de Rescisão" exportable="#{egressoListaMB.estadoDasColunas.rescisao}" visible="#{egressoListaMB.estadoDasColunas.rescisao}" >
+                        <h:outputText value="#{egresso.rescisao}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column headerText="Observação" exportable="#{egressoListaMB.estadoDasColunas.observacao}" visible="#{egressoListaMB.estadoDasColunas.observacao}">
+                        <h:outputText value="#{egresso.observacao}" escape="false"/>
+                    </p:column>
+
+                    <p:column filterBy="#{egresso.sexo}" headerText="Sexo" exportable="#{egressoListaMB.estadoDasColunas.sexo}" visible="#{egressoListaMB.estadoDasColunas.sexo}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{egressoCadastroMB.obterRespostas('sexo')}" var="sexo" itemValue="#{sexo}" itemLabel="#{sexo eq 'M' ? 'Masculino' : 'Feminino'}" />
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <c:if test="#{egresso.sexo ne null or egresso.sexo ne ''}">
+                            <h:outputText value="#{egresso.sexo eq 'M' ? 'Masculino' : 'Feminino'}"/>
+                        </c:if>
+                    </p:column>
+
+                    <p:column headerText="Matrícula SEC" exportable="#{egressoListaMB.estadoDasColunas.matriculaSAEB}" visible="#{egressoListaMB.estadoDasColunas.matriculaSAEB}">
+                        <h:outputText value="#{egresso.matriculaSAEB}"/>
+                    </p:column> 
+
+                    <p:column filterBy="#{egresso.demandante}" headerText="Demandante" exportable="#{egressoListaMB.estadoDasColunas.demandante}" visible="#{egressoListaMB.estadoDasColunas.demandante}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{egressoListaMB.demandantes}" var="demandante" itemLabel="#{demandante.nome}" itemValue="#{demandante.nome}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.demandante}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.demandanteSigla}" headerText="Demandante - Sigla" exportable="#{egressoListaMB.estadoDasColunas.demandanteSigla}" visible="#{egressoListaMB.estadoDasColunas.demandanteSigla}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{egressoListaMB.demandantes}" var="demandante" itemLabel="#{demandante.sigla}" itemValue="#{demandante.sigla}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.demandanteSigla}" />
+                    </p:column>
+
+                    <p:column filterBy="#{egresso.instituicao}" headerText="Instituição" exportable="#{egressoListaMB.estadoDasColunas.instituicao}" visible="#{egressoListaMB.estadoDasColunas.instituicao}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{egressoListaMB.obterRespostasDaVaga('instituicao')}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.instituicao}"/>
+                    </p:column>
+
+                    <p:column filterBy="#{egresso.unidadeDeLotacao}" headerText="Unidade de Lotação" exportable="#{egressoListaMB.estadoDasColunas.unidadeDeLotacao}" visible="#{egressoListaMB.estadoDasColunas.unidadeDeLotacao}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{egressoListaMB.obterRespostasDaVaga('unidadeDeLotacao')}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.unidadeDeLotacao}" />
+                    </p:column>
+
+                    <p:column headerText="Logradouro da Unidade de Lotação" exportable="#{egressoListaMB.estadoDasColunas.logradouroUnidadeDeLotacao}" visible="#{egressoListaMB.estadoDasColunas.logradouroUnidadeDeLotacao}">
+                        <h:outputText value="#{egresso.logradouroUnidadeDeLotacao}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Bairro da Unidade de Lotação" exportable="#{egressoListaMB.estadoDasColunas.bairroUnidadeDeLotacao}" visible="#{egressoListaMB.estadoDasColunas.bairroUnidadeDeLotacao}">
+                        <h:outputText value="#{egresso.bairroUnidadeDeLotacao}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Município da Unidade de Lotação" exportable="#{egressoListaMB.estadoDasColunas.municipioUnidadeDeLotacao}" visible="#{egressoListaMB.estadoDasColunas.municipioUnidadeDeLotacao}">
+                        <h:outputText value="#{egresso.municipioUnidadeDeLotacao}"/>
+                    </p:column>
+                    
+                    <p:column headerText="CEP da Unidade de Lotação" exportable="#{egressoListaMB.estadoDasColunas.cepUnidadeDeLotacao}" visible="#{egressoListaMB.estadoDasColunas.cepUnidadeDeLotacao}">
+                        <h:outputText value="#{egresso.cepUnidadeDeLotacao}"/>
+                    </p:column>
+
+                    <p:column filterBy="#{egresso.pontoFocalNaUnidade}" headerText="Ponto Focal na Unidade" exportable="#{egressoListaMB.estadoDasColunas.pontoFocalNaUnidade}" visible="#{egressoListaMB.estadoDasColunas.pontoFocalNaUnidade}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{egressoListaMB.obterRespostasDaVaga('pontoFocalNaUnidade')}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.pontoFocalNaUnidade}"/>
+                    </p:column> 
+
+                    <p:column headerText="Telefone 1 Ponto Focal" exportable="#{egressoListaMB.estadoDasColunas.telefone1PontoFocal}" visible="#{egressoListaMB.estadoDasColunas.telefone1PontoFocal}">
+                        <h:outputText value="#{egresso.telefone1PontoFocal}"/>
+                    </p:column> 
+
+                    <p:column headerText="Telefone 2 Ponto Focal" exportable="#{egressoListaMB.estadoDasColunas.telefone2PontoFocal}" visible="#{egressoListaMB.estadoDasColunas.telefone2PontoFocal}">
+                        <h:outputText value="#{egresso.telefone2PontoFocal}"/>
+                    </p:column> 
+
+                    <p:column headerText="Telefone 3 Ponto Focal" exportable="#{egressoListaMB.estadoDasColunas.telefone3PontoFocal}" visible="#{egressoListaMB.estadoDasColunas.telefone3PontoFocal}">
+                        <h:outputText value="#{egresso.telefone3PontoFocal}"/>
+                    </p:column> 
+
+                    <p:column headerText="Telefone 4 Ponto Focal" exportable="#{egressoListaMB.estadoDasColunas.telefone4PontoFocal}" visible="#{egressoListaMB.estadoDasColunas.telefone4PontoFocal}">
+                        <h:outputText value="#{egresso.telefone4PontoFocal}"/>
+                    </p:column> 
+
+                    <p:column headerText="Telefone 5 Ponto Focal" exportable="#{egressoListaMB.estadoDasColunas.telefone5PontoFocal}" visible="#{egressoListaMB.estadoDasColunas.telefone5PontoFocal}">
+                        <h:outputText value="#{egresso.telefone5PontoFocal}"/>
+                    </p:column> 
+
+                    <p:column headerText="Email Ponto Focal" exportable="#{egressoListaMB.estadoDasColunas.emailPontoFocal}" visible="#{egressoListaMB.estadoDasColunas.emailPontoFocal}">
+                        <h:outputText value="#{egresso.emailPontoFocal}"/>
+                    </p:column> 
+
+                    <p:column headerText="Território" exportable="#{egressoListaMB.estadoDasColunas.territorio}" visible="#{egressoListaMB.estadoDasColunas.territorio}">
+                        <h:outputText value="#{egresso.territorio}"/>
+                    </p:column>
+
+                    <p:column filterBy="#{egresso.municipioDaVaga}"  headerText="Município Vaga" exportable="#{egressoListaMB.estadoDasColunas.municipioDaVaga}" visible="#{egressoListaMB.estadoDasColunas.municipioDaVaga}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{egressoListaMB.municipios}" var="municipio" itemLabel="#{municipio.nome}" itemValue="#{municipio.nome}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.municipioDaVaga}"/>
+                    </p:column>
+                    
+
+                    <p:column filterBy="#{egresso.divergenciaMunicipio}" headerText="Divergência Município" exportable="#{egressoListaMB.estadoDasColunas.divergenciaMunicipio}" visible="#{egressoListaMB.estadoDasColunas.divergenciaMunicipio}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItem itemLabel="Sim" itemValue="#{true}" />
+                                <f:selectItem itemLabel="Não" itemValue="#{false}" />
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.divergenciaMunicipio ? 'MUNICÍPIO VAGA DIVERGENTE' : ''}"/>
+                    </p:column>
+
+                    <p:column sortBy="#{egresso.distanciaMunicipios}" headerText="Distância entre os Municípios (km)" exportable="#{egressoListaMB.estadoDasColunas.distanciaMunicipios}" visible="#{egressoListaMB.estadoDasColunas.distanciaMunicipios}" style="#{egresso ne null ? 'color:'.concat(egresso.distanciaMunicipios/1000 > parametroMB.valorEmLong('limiteDistanciaEntreMunicipios') ? 'red' : 'green') : ''}">
+                        <h:outputText value="#{egresso.distanciaMunicipios/1000}" rendered="#{egresso.distanciaMunicipios ne null}">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputText>
+                        <h:outputText value=" km" rendered="#{egresso.distanciaMunicipios ne null}"/>
+                    </p:column>
+
+                    <p:column headerText="Data Convocação SETRE/SINE" exportable="#{egressoListaMB.estadoDasColunas.dataConvocacaoSETRESINE}" visible="#{egressoListaMB.estadoDasColunas.dataConvocacaoSETRESINE}">
+                        <h:outputText value="#{egresso.dataConvocacaoSETRESINE}"/>
+                    </p:column> 
+
+                    <p:column filterBy="#{egresso.remessaSETRESINE}" headerText="Remessa SETRE/SINE" exportable="#{egressoListaMB.estadoDasColunas.remessaSETRESINE}" visible="#{egressoListaMB.estadoDasColunas.remessaSETRESINE}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{egressoListaMB.obterRespostasDaVaga('remessaSETRESINE')}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.remessaSETRESINE}"/>
+                    </p:column> 
+
+                    <p:column headerText="Data Remessa SETRE/SINE" exportable="#{egressoListaMB.estadoDasColunas.dataRemessaSETRESINE}" visible="#{egressoListaMB.estadoDasColunas.dataRemessaSETRESINE}">
+                        <h:outputText value="#{egresso.dataRemessaSETRESINE}"/>
+                    </p:column> 
+
+                    <p:column headerText="Mês Remessa SETRE/SINE" exportable="#{egressoListaMB.estadoDasColunas.mesRemessaSETRESINE}" visible="#{egressoListaMB.estadoDasColunas.mesRemessaSETRESINE}">
+                        <h:outputText value="#{egresso.mesRemessaSETRESINE}"/>
+                    </p:column> 
+
+                    <p:column headerText="Categoria" filterBy="#{egresso.categoria}" exportable="#{egressoListaMB.estadoDasColunas.categoria}" visible="#{egressoListaMB.estadoDasColunas.categoria}" style="#{egresso.corCategoria ne null ? 'color:'.concat(egresso.corCategoria).concat(';') : ''}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{egressoListaMB.categorias}" var="categoria" itemLabel="#{categoria.nome}" itemValue="#{categoria.nome}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.categoria}"/>
+                    </p:column> 
+
+                    <p:column filterBy="#{egresso.situacao}" headerText="Situação" exportable="#{egressoListaMB.estadoDasColunas.situacao}" visible="#{egressoListaMB.estadoDasColunas.situacao}" style="#{egresso.corSituacao ne null ? 'color:'.concat(egresso.corSituacao).concat(';') : ''}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{egressoListaMB.situacoes}" var="situacao" itemLabel="#{situacao.nome} - #{situacao.categoria.nome}" itemValue="#{situacao.nome}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.situacao}"/>
+                    </p:column>
+
+                    <p:column filterBy="#{egresso.anamnese}" headerText="Anamnese?" exportable="#{egressoListaMB.estadoDasColunas.anamnese}" visible="#{egressoListaMB.estadoDasColunas.anamnese}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{egressoListaMB.obterRespostas('anamnese')}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.anamnese}"/>
+                    </p:column> 
+
+                    <p:column headerText="Data Início Atividades" exportable="#{egressoListaMB.estadoDasColunas.dataInicioAtividades}" visible="#{egressoListaMB.estadoDasColunas.dataInicioAtividades}">
+                        <h:outputText value="#{egresso.dataInicioAtividades}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column headerText="Publicação D.O" exportable="#{egressoListaMB.estadoDasColunas.publicacaoDiarioOficial}" visible="#{egressoListaMB.estadoDasColunas.publicacaoDiarioOficial}">
+                        <h:outputText value="#{egresso.publicacaoDiarioOficial}"/>
+                    </p:column>
+
+                    <p:column filterBy="#{egresso.dataDeEnvioDaSituacaoParaSETRESINE}" headerText="Data de Envio da Situação para SETRE/SINE" exportable="#{egressoListaMB.estadoDasColunas.dataDeEnvioDaSituacaoParaSETRESINE}" visible="#{egressoListaMB.estadoDasColunas.dataDeEnvioDaSituacaoParaSETRESINE}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{egressoListaMB.obterRespostasDaVaga('dataDeEnvioDaSituacaoParaSETRESINE')}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.dataDeEnvioDaSituacaoParaSETRESINE}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.formacao}" headerText="Formação Beneficiário" exportable="#{egressoListaMB.estadoDasColunas.formacao}" visible="#{egressoListaMB.estadoDasColunas.formacao}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{egressoListaMB.formacoes}" var="formacao" itemLabel="#{formacao.nome}" itemValue="#{formacao.nome}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.formacao}"/>
+                    </p:column>
+
+                    <p:column filterBy="#{egresso.eixoDeFormacao}" headerText="Eixo de Formação Beneficiário" exportable="#{egressoListaMB.estadoDasColunas.eixoDeFormacao}" visible="#{egressoListaMB.estadoDasColunas.eixoDeFormacao}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{egressoListaMB.eixosDeFormacao}" var="eixoDeFormacao" itemLabel="#{eixoDeFormacao.nome}" itemValue="#{eixoDeFormacao.nome}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.eixoDeFormacao}"/>
+                    </p:column> 
+                    
+                    <p:column filterBy="#{egresso.municipioEscola}" headerText="Município Escola" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.municipioEscola}" visible="#{egressoListaMB.estadoDasColunas.municipioEscola}">
+                        <h:outputText value="#{egresso.municipioEscola}"/>
+                    </p:column>
+
+                    <p:column headerText="Vale Alimentação" exportable="#{egressoListaMB.estadoDasColunas.valeAlimentacao}" visible="#{egressoListaMB.estadoDasColunas.valeAlimentacao}">
+                        <h:outputText value="#{egresso.valeAlimentacao}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Vale Transporte" exportable="#{egressoListaMB.estadoDasColunas.valeTransporte}" visible="#{egressoListaMB.estadoDasColunas.valeTransporte}">
+                        <h:outputText value="#{egresso.valeTransporte}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.aso}" headerText="ASO" exportable="#{egressoListaMB.estadoDasColunas.aso}" visible="#{egressoListaMB.estadoDasColunas.aso}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Sim" itemValue="#{true}"/>
+                                <f:selectItem itemLabel="Não" itemValue="#{false}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.aso eq null ? '' : (egresso.aso ? 'Sim' : 'Não')}"/>
+                    </p:column>
+
+                    <p:column headerText="Tamanho Fardamento" filterBy="#{egresso.tamanhoDeCamisa}" exportable="#{egressoListaMB.estadoDasColunas.tamanhoDeCamisa}" visible="#{egressoListaMB.estadoDasColunas.tamanhoDeCamisa}" filterMatchMode="equals">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="P" itemValue="P"/>
+                                <f:selectItem itemLabel="M" itemValue="M"/>
+                                <f:selectItem itemLabel="G" itemValue="G"/>
+                                <f:selectItem itemLabel="GG" itemValue="GG"/>
+                                <f:selectItem itemLabel="XG" itemValue="XG"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.tamanhoDeCamisa}"/>
+                    </p:column>
+
+                    <p:column headerText="Data Recebimento Fardamento" exportable="#{egressoListaMB.estadoDasColunas.dataRecebimentoFardamento}" visible="#{egressoListaMB.estadoDasColunas.dataRecebimentoFardamento}">
+                        <h:outputText value="#{egresso.dataRecebimentoFardamento}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column filterBy="#{egresso.escolaconclusao}"  headerText="Escola Conclusão" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.escolaconlusao}" visible="#{egressoListaMB.estadoDasColunas.escolaconlusao}">
+                        <h:outputText value="#{egresso.escolaconclusao }"/>
+                    </p:column>   
+                    
+                    <p:column filterBy="#{egresso.fichaAdmissao}"  headerText="Ficha de Admissão Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.fichaAdmissao}" visible="#{egressoListaMB.estadoDasColunas.fichaAdmissao}">
+                         <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.fichaAdmissao  eq null ? '' : (egresso.fichaAdmissao ? 'Pendente' : '')}"/>
+                    </p:column>
+
+                    
+                    <p:column filterBy="#{egresso.ctpsPendente}"  headerText="CTPS Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.ctpsPendente}" visible="#{egressoListaMB.estadoDasColunas.ctpsPendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.ctpsPendente  eq null ? '' : (egresso.ctpsPendente ? 'Pendente' : '')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.cpfPendente}" headerText="CPF Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.cpfPendente}" visible="#{egressoListaMB.estadoDasColunas.cpfPendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.cpfPendente  eq null ? '' : (egresso.cpfPendente ? 'Pendente' : '')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.comprovanteresidenciaPendente}"  headerText="Comprovante de Residencia Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.comprovanteresidenciaPendente}" visible="#{egressoListaMB.estadoDasColunas.comprovanteresidenciaPendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.comprovanteresidenciaPendente  eq null ? '' : (egresso.comprovanteresidenciaPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.rgPendente}"  headerText="RG Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.rgPendente}" visible="#{egressoListaMB.estadoDasColunas.rgPendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.rgPendente  eq null ? '' : (egresso.rgPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    <p:column filterBy="#{egresso.cartaCidadaoPendente}"  headerText="Carta Cidadão Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.cartaCidadaoPendente}" visible="#{egressoListaMB.estadoDasColunas.cartaCidadaoPendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.cartaCidadaoPendente  eq null ? '' : (egresso.cartaCidadaoPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.tituloEleitorPendente}"  headerText="Titulo de eleitor Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.tituloEleitorPendente}" visible="#{egressoListaMB.estadoDasColunas.tituloEleitorPendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.tituloEleitorPendente  eq null ? '' : (egresso.tituloEleitorPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    <p:column filterBy="#{egresso.comprovanteVotacaoPendente}"  headerText="Comprovante de Votação Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.comprovanteVotacaoPendente}" visible="#{egressoListaMB.estadoDasColunas.comprovanteVotacaoPendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.comprovanteVotacaoPendente  eq null ? '' : (egresso.comprovanteVotacaoPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    <p:column filterBy="#{egresso.diplomaPendente}"  headerText="Diploma Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.diplomaPendente}" visible="#{egressoListaMB.estadoDasColunas.diplomaPendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.diplomaPendente  eq null ? '' : (egresso.diplomaPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    <p:column filterBy="#{egresso.curriculoPendente}"  headerText="Currículo Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.curriculoPendente}" visible="#{egressoListaMB.estadoDasColunas.curriculoPendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.curriculoPendente  eq null ? '' : (egresso.curriculoPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    <p:column filterBy="#{egresso.foto3x4Pendente}"  headerText="Foto 3x4 Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.foto3x4Pendente}" visible="#{egressoListaMB.estadoDasColunas.foto3x4Pendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.foto3x4Pendente  eq null ? '' : (egresso.foto3x4Pendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.asoPendente}"  headerText="ASO Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.asoPendente}" visible="#{egressoListaMB.estadoDasColunas.asoPendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.asoPendente  eq null ? '' : (egresso.asoPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.certidaoCasamentoPendente}"  headerText="certidão de Casamento Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.certidaoCasamentoPendente}" visible="#{egressoListaMB.estadoDasColunas.certidaoCasamentoPendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.certidaoCasamentoPendente  eq null ? '' : (egresso.certidaoCasamentoPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.certidaoNascimentoPendente}"  headerText="Certidão de Nascimento Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.certidaoNascimentoPendente}" visible="#{egressoListaMB.estadoDasColunas.certidaoNascimentoPendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.certidaoNascimentoPendente  eq null ? '' : (egresso.certidaoNascimentoPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.comprovanteEscolaridadePendente }"  headerText="Comprovante de Escolaridade Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.comprovanteEscolaridadePendente}" visible="#{egressoListaMB.estadoDasColunas.comprovanteEscolaridadePendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.certidaoNascimentoPendente  eq null ? '' : (egresso.certidaoNascimentoPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.reservistaPendente}"  headerText="reservista Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.reservistaPendente}" visible="#{egressoListaMB.estadoDasColunas.reservistaPendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.reservistaPendente  eq null ? '' : (egresso.reservistaPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.cartaoVacinaPendente}"  headerText="Cartão de vacinação Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.cartaoVacinaPendente}" visible="#{egressoListaMB.estadoDasColunas.cartaoVacinaPendente}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.cartaoVacinaPendente  eq null ? '' : (egresso.cartaoVacinaPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.contratoTrabalhoFlem}"  headerText="Contrato de Trabalho Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.contratoTrabalhoFlem}" visible="#{egressoListaMB.estadoDasColunas.contratoTrabalhoFlem}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.contratoTrabalhoFlem  eq null ? '' : (egresso.contratoTrabalhoFlem ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.vale_Transporte}"  headerText="Vale Transporte Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.vale_Transporte}" visible="#{egressoListaMB.estadoDasColunas.vale_Transporte}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.vale_Transporte  eq null ? '' : (egresso.vale_Transporte ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.vale_Alimentacao}"  headerText="Vale Alimentação Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.vale_Alimentacao}" visible="#{egressoListaMB.estadoDasColunas.vale_Alimentacao}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.vale_Alimentacao  eq null ? '' : (egresso.vale_Alimentacao ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.plano_Saude}"  headerText="Plano de Saúde Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.plano_Saude}" visible="#{egressoListaMB.estadoDasColunas.plano_Saude}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.plano_Saude  eq null ? '' : (egresso.plano_Saude ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.cracha}"  headerText="Crachá Pendente" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.cracha}" visible="#{egressoListaMB.estadoDasColunas.cracha}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Pendente" itemValue="#{true}"/>
+                                
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.cracha  eq null ? '' : (egresso.cracha ? 'Pendente' :'')}"/>
+                    </p:column>
+                    <p:column filterBy="#{egresso.carteiraAssinada}"  headerText="Carteira Assinada" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.carteiraAssinada}" visible="#{egressoListaMB.estadoDasColunas.carteiraAssinada}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Sim" itemValue="#{true}"/>
+                                <f:selectItem itemLabel="Não" itemValue="#{false}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.carteiraAssinada eq null ? '' : (egresso.carteiraAssinada ? 'Sim' : 'Não')}"/>
+                    </p:column>
+                    <p:column filterBy="#{egresso.estagioConcluido}" headerText="Estágio Concluído" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.estagioConcluido}" visible="#{egressoListaMB.estadoDasColunas.estagioConcluido}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('egressosTable').filter()">
+                                <f:selectItem itemLabel="Todos" noSelectionOption=""/>
+                                <f:selectItem itemLabel="Sim" itemValue="#{true}"/>
+                                <f:selectItem itemLabel="Não" itemValue="#{false}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{egresso.estagioConcluido eq null ? '' : (egresso.estagioConcluido ? 'S' :'')}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.tempoContratacao}" headerText="Tempo de Contratação (Em meses)" filterMatchMode="exact" 
+                              exportable="#{egressoListaMB.estadoDasColunas.tempoContratacao}" visible="#{egressoListaMB.estadoDasColunas.tempoContratacao}">
+                        <h:outputText value="#{egresso.tempoContratacao}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Mês/Ano Admissão" filterMatchMode="contains" 
+                              exportable="#{egressoListaMB.estadoDasColunas.mesAnoAdmissao}" visible="#{egressoListaMB.estadoDasColunas.mesAnoAdmissao}">
+                        <h:outputText value="#{egresso.mesAnoAdmissao}"/>
+                    </p:column>
+                    
+                    <p:column  headerText="Mês/Ano Desligamento" filterMatchMode="contains" 
+                              exportable="#{egressoListaMB.estadoDasColunas.mesAnoDesligamento}" visible="#{egressoListaMB.estadoDasColunas.mesAnoDesligamento}">
+                        <h:outputText value="#{egresso.mesAnoDesligamento}"/>
+                    </p:column>
+
+                    <p:column filterBy="#{egresso.ctps}"  headerText="CTPS" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.ctps}" visible="#{egressoListaMB.estadoDasColunas.ctps}">
+                        <h:outputText value="#{egresso.ctps}"/>
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.pis}"  headerText="PIS" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.pis}" visible="#{egressoListaMB.estadoDasColunas.pis}">
+                        <h:outputText value="#{egresso.pis}"/>
+                    </p:column>
+                    <p:column headerText="Escritório Regional" filterBy="#{egresso.escRegional}" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.escRegional}" visible="#{egressoListaMB.estadoDasColunas.escRegional}">
+                        <h:outputText value="#{egresso.escRegional}"/>
+                    </p:column>
+                    <p:column headerText="Curso Superior Concluído" filterBy="#{egresso.cursoSuperiorConcluido}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.cursoSuperiorConcluido}" visible="#{egressoListaSinteticaMB.estadoDasColunas.cursoSuperiorConcluido}">
+                        <h:outputText value="#{egresso.cursoSuperiorConcluido}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Curso Superior Andamento" filterBy="#{egresso.cursoSuperiorAndamento}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.cursoSuperior}" visible="#{egressoListaSinteticaMB.estadoDasColunas.cursoSuperior}">
+                        <h:outputText value="#{egresso.cursoSuperiorAndamento}"/>
+                    </p:column>
+                    <p:column headerText="Tipo de Instituição" filterBy="#{egresso.tipoInstituicaoSuperior.descricao}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.tipoInstituicaoSuperior}" visible="#{egressoListaSinteticaMB.estadoDasColunas.tipoInstituicaoSuperior}">
+                        <h:outputText value="#{egresso.tipoInstituicaoSuperior.descricao}"/>
+                    </p:column>
+                    <p:column headerText="Instituição de ensino superior" filterBy="#{egresso.nomeInstituicaoSuperior}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.nomeInstituicaoSuperior}" visible="#{egressoListaSinteticaMB.estadoDasColunas.nomeInstituicaoSuperior}">
+                        <h:outputText value="#{egresso.nomeInstituicaoSuperior}"/>
+                    </p:column>
+                    <p:column headerText="Curso da Graduação" filterBy="#{egresso.nomeCursoGraduacao}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.nomeCursoGraduacao}" visible="#{egressoListaSinteticaMB.estadoDasColunas.nomeCursoGraduacao}">
+                        <h:outputText value="#{egresso.nomeCursoGraduacao}"/>
+                    </p:column>
+                    <p:column headerText="Modalidade da Graduação" filterBy="#{egresso.modalidadeGraduacao}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.modalidadeGraduacao}" visible="#{egressoListaSinteticaMB.estadoDasColunas.modalidadeGraduacao}">
+                        <h:outputText value="#{egresso.modalidadeGraduacao}"/>
+                    </p:column>
+                    <p:column headerText="Ano da Matricula" filterBy="#{egresso.anoMatricula}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.anoMatricula}" visible="#{egressoListaSinteticaMB.estadoDasColunas.anoMatricula}">
+                        <h:outputText value="#{egresso.anoMatricula}"/>
+                    </p:column>
+                    <p:column headerText="Semestre" filterBy="#{egresso.semestre}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.semestre}" visible="#{egressoListaSinteticaMB.estadoDasColunas.semestre}">
+                        <h:outputText value="#{egresso.semestre}"/>
+                    </p:column>
+                    <p:column headerText="Renda do PPE Ajuda" filterBy="#{egresso.rendaPPEAjuda}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.rendaPPEAjuda}" visible="#{egressoListaSinteticaMB.estadoDasColunas.rendaPPEAjuda}">
+                        <h:outputText value="#{egresso.rendaPPEAjuda eq null ? '' : (egresso.rendaPPEAjuda ? 'SIM' : 'NAO')}"/>
+                    </p:column>
+                    <p:column headerText="Data Informação do Semestre" exportable="#{egressoListaSinteticaMB.estadoDasColunas.dataRespostaSemestre}" visible="#{egressoListaSinteticaMB.estadoDasColunas.dataRespostaSemestre}">
+                        <h:outputText value="#{egresso.dataRespostaSemestre}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Pretende Fazer Curso Superior" filterBy="#{egresso.pretendeFazerCursoSuperior}" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.pretendeFazerCursoSuperior}" visible="#{egressoListaMB.estadoDasColunas.pretendeFazerCursoSuperior}">
+                        <h:outputText value="#{egresso.pretendeFazerCursoSuperior}"/>
+                    </p:column>
+                    <p:column headerText="Curso Técnico" filterBy="#{egresso.cursoTecnicoProfissionalizante}" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.cursoTecnicoProfissionalizante}" visible="#{egressoListaMB.estadoDasColunas.cursoTecnicoProfissionalizante}">
+                        <h:outputText value="#{egresso.cursoTecnicoProfissionalizante}"/>
+                    </p:column>
+                    <p:column headerText="Tipo Instituição do Curso Técnico" filterBy="#{egresso.tipoInstituicaoTecnica}" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.tipoInstituicaoTecnica}" visible="#{egressoListaMB.estadoDasColunas.tipoInstituicaoTecnica}">
+                        <h:outputText value="#{egresso.tipoInstituicaoTecnica}"/>
+                    </p:column>
+                    <p:column headerText="Nome Instituição do Curso Técnico" filterBy="#{egresso.nomeInstituicaoTecnico}" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.nomeInstituicaoTecnico}" visible="#{egressoListaMB.estadoDasColunas.nomeInstituicaoTecnico}">
+                        <h:outputText value="#{egresso.nomeInstituicaoTecnico}"/>
+                    </p:column>
+                    <p:column headerText="Nome do Curso Técnico" filterBy="#{egresso.nomeCursoTecnico}" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.nomeCursoTecnico}" visible="#{egressoListaMB.estadoDasColunas.nomeCursoTecnico}">
+                        <h:outputText value="#{egresso.nomeCursoTecnico}"/>
+                    </p:column>
+
+                    <f:facet name="footer">
+                        <div style="height: 25px;">
+                            
+                            <p:commandButton value="XLS" ajax="false" style="float: left">
+                                <p:dataExporter type="xlsx" target="egressos" fileName="Egressos.PrimeiroEmprego"/>
+                            </p:commandButton>
+                            <p:commandButton value="Selecionar de Todas as páginas" actionListener="#{egressoListaMB.alternarSelecaoDeTodasAsPaginas()}" update="egressos" style="float: left"/>
+
+                            <p:commandButton id="btnAssociarALista" value="Associar a Lista" process="@this" oncomplete="PF('egressoListaDialog').show()" update="idEgressoListaDialog" rendered="#{usuarioLogadoMB.temPermissao('primEmp.associarEgressoEmLista')}" disabled="#{egressoListaMB.egressosSelecionados.size() eq 0}"/>
+                            <p:commandButton id="btnEnviarCampanha" value="Gerar Campanha de Email" process="@this" actionListener="#{campanhaMB.novaCampanha()}" oncomplete="PF('campanhaDialog').show()" update="idCampanhaDialog" rendered="#{usuarioLogadoMB.temPermissao('primEmp.associarEgressoEmLista')}" disabled="#{egressoListaMB.egressosSelecionados.size() eq 0}"/>
+                            <p:commandButton id="brnIncluirEmOficio" value="Incluir em Modelo do Ofício" process="@this" oncomplete="PF('oficioDialog').show()" update="idOficioDialog" rendered="#{usuarioLogadoMB.temPermissao('primEmp.incluirEgressoEmOficio')}" disabled="#{egressoListaMB.egressosSelecionados.size() eq 0}"/>
+                            <p:commandButton id="brnIncluirEmCI" value="Incluir em CI" process="@this" oncomplete="PF('ciDialog').show()" update="idCIDialog" rendered="#{usuarioLogadoMB.temPermissao('primEmp.incluirEgressoEmOficio')}" disabled="#{egressoListaMB.egressosSelecionados.size() eq 0}"/>
+                        </div>
+                    </f:facet>
+                </p:dataTable>
+                <script type="text/javascript">
+                    $(document).ready(function() {
+                        $('.cpf .ui-column-filter').mask('999.999.999-99');
+                    });
+
+                    function adicionarCampoEgressoNaCampanha(e){
+                        e.preventDefault();
+                        if(PF('wdCamposEgressosParaCampanha').value != null){
+                            PF('mensagemCampanhaWD').editor.execCommand('inserthtml', '{'+PF('wdCamposEgressosParaCampanha').value+'}', false);
+                        }
+                        return false;
+                    }
+
+                    function adicionarImagemEmbutida(e,imagem){
+                        e.preventDefault();
+                        if(imagem != null){
+                            PF('mensagemCampanhaWD').editor.execCommand('inserthtml', 'cid:'+imagem, false);
+                        }
+                        return false;
+                    }
+                </script>
+            </p:fieldset>
+        </h:form>
+
+        <p:dialog widgetVar="egressoListaDialog" modal="true" resizable="false" appendTo="@(body)" id="idEgressoListaDialog" >
+            <h:form id="egressoListaForm">
+                <p:panelGrid>
+                    <p:row>
+                        <p:column>
+                            <p:selectOneMenu value="#{egressoListaMB.lista}" id="listas" converter="#{genericConverter}" required="true" requiredMessage="Favor selecionar uma Lista">
+                                <f:selectItem itemLabel="Selecione uma Lista" itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{egressoListaMB.listas}" var="lista" itemLabel="#{lista.nome}" />
+                            </p:selectOneMenu>
+                            <p:message for="listas"/>
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
+                            <p:commandButton value="Salvar" update="egressosForm:egressos :mensagens"  actionListener="#{egressoListaMB.incluirEgressosNaLista()}" oncomplete="if(args &amp;&amp; !args.validationFailed){PF('egressoListaDialog').hide()}"/>
+                        </p:column>
+                    </p:row>
+                </p:panelGrid>
+            </h:form>
+        </p:dialog>
+
+        <p:dialog widgetVar="campanhaDialog" modal="true" resizable="false" appendTo="@(body)" id="idCampanhaDialog"  width="80%">
+            <h:form id="campanhaForm" enctype="multipart/form-data">
+                <table>
+                    <tr>
+                        <td style="width: 20px;">
+                            <h:outputLabel value="Conta De Email" style="font-weight:bold;" />
+                        </td>
+                        <td>
+                            <p:selectOneMenu id="contaDeEmail" value="#{campanhaMB.campanha.contaDeEmail}" style="width: 300px" converter="#{genericConverter}">
+                                <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true"/>
+                                <f:selectItems value="#{campanhaMB.contasDeEmail}" var="contaDeEmail" itemLabel="#{contaDeEmail.nomeRemetente}&lt;#{contaDeEmail.emailRemetente}&gt;"/>
+                            </p:selectOneMenu>
+                            <p:message for="contaDeEmail"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 20px;">
+                            <h:outputLabel value="Assunto" style="font-weight:bold;" />
+                        </td>
+                        <td>
+                            <p:inputText id="assunto" value="#{campanhaMB.campanha.assunto}" style="width: 300px"/>
+                            <p:message for="assunto"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h:outputLabel value="Mensagem" style="font-weight:bold"/>
+                        </td>
+                        <td>
+                            <p:editor id="mensagem" value="#{campanhaMB.campanha.mensagem}" widgetVar="mensagemCampanhaWD"/>
+                            <p:message for="mensagem"/>
+                        </td>
+                        <td>
+                            <p:selectOneMenu widgetVar="wdCamposEgressosParaCampanha" filter="true">
+                                <f:selectItem itemLabel="Selecione um Campo do Beneficiário" />
+                                <f:selectItems value="#{campanhaMB.camposPossiveis()}"/>
+                            </p:selectOneMenu>
+                            <button onclick="adicionarCampoEgressoNaCampanha(event)">Adicionar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h:outputLabel for="anexos" value="Anexos" style="font-weight:bold"/>
+                        </td>
+                        <td>
+                            <p:fileUpload id="anexos" fileUploadListener="#{campanhaMB.uploadAnexos}" multiple="true" auto="true" uploadLabel="Upload" cancelLabel="Cancelar" label="Selecionar arquivo" allowTypes="/(\.|\/)(zip|rar|gif|jpe?g|png|pdf|docx?|xlsx?|pptx?)$/" update="listaAnexos"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <p:dataTable value="#{campanhaMB.campanha.anexos}" var="anexo" id="listaAnexos" emptyMessage="">
+                                <p:column>
+                                    #{anexo.nome}
+                                </p:column>
+                                <p:column>
+                                    <p:panel rendered="#{anexo.imagem}">
+                                        <img src="data:image;base64,#{campanhaMB.imagemBase64(anexo)}" height="50px"/>
+                                    </p:panel>
+                                </p:column>
+                                <p:column>
+                                    <p:commandButton value="Remover" actionListener="#{campanhaMB.campanha.anexos.remove(anexo)}" update="listaAnexos" process="@this"/>
+                                    <p:commandButton value="Incluir na msg" rendered="#{anexo.imagem}" onclick="adicionarImagemEmbutida(event,'#{anexo.nome}')" ajax="false"/>
+                                </p:column>
+                            </p:dataTable>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h:outputLabel for="emailParaTeste" value="Email para Teste" style="font-weight:bold"/>
+                        </td>
+                        <td>
+                            <p:inputText value="#{campanhaMB.emailParaTeste}" id="emailParaTeste"/>
+                            <p:commandButton value="Enviar Teste" action="#{campanhaMB.enviarTeste()}" update="@form :mensagens"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p:commandButton value="Salvar" actionListener="#{campanhaMB.salvar(egressoListaMB.egressosSelecionados)}" oncomplete="if(args &amp;&amp; !args.validationFailed){PF('campanhaDialog').hide()}" update="@form :mensagens">
+                                <p:confirm message="Confirmar salvar para enviar depois?"/>
+                            </p:commandButton>
+                        </td>
+                        <td>
+                            <p:commandButton value="Enviar" actionListener="#{campanhaMB.enviar(egressoListaMB.egressosSelecionados)}" oncomplete="if(args &amp;&amp; !args.validationFailed){PF('campanhaDialog').hide()}" update="@form :mensagens">
+                                <p:confirm message="Confirmar envio do email para os Beneficiários?"/>
+                            </p:commandButton>
+                        </td>
+                    </tr>
+                </table>
+            </h:form>
+        </p:dialog>
+
+        <p:dialog widgetVar="oficioDialog" modal="true" resizable="false" appendTo="@(body)" id="idOficioDialog">
+            <h:form id="oficioForm">
+                <p:panelGrid>
+                    <p:row>
+                        <p:column>
+                            <p:selectOneMenu value="#{egressoListaMB.modeloDeOficio}" id="modelosDoOficio" converter="#{genericConverter}" required="true" requiredMessage="Favor selecionar um ofício">
+                                <f:selectItem itemLabel="Selecione o Modelo do Oficio" itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{egressoListaMB.modeloDeOficiosNaoGerados}" var="modeloDeOficio" itemLabel="#{modeloDeOficio.nome} - #{modeloDeOficio.assunto}" />
+                            </p:selectOneMenu>
+                            <p:message for="modelosDoOficio"/>
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
+                            <p:commandButton value="Incluir" update="egressosForm:egressos oficioForm :mensagens"  actionListener="#{egressoListaMB.incluirEgressosNoOficio()}" oncomplete="if(args &amp;&amp; !args.validationFailed){PF('oficioDialog').hide()}"/>
+                        </p:column>
+                    </p:row>
+                </p:panelGrid>
+            </h:form>
+        </p:dialog>
+
+        <p:dialog widgetVar="ciDialog" modal="true" resizable="false" appendTo="@(body)" id="idCIDialog">
+            <h:form id="ciForm">
+                <p:panelGrid>
+                    <p:row>
+                        <p:column>
+                            <p:selectOneMenu value="#{egressoListaMB.ci}" id="cis" converter="#{genericConverter}" required="true" requiredMessage="Favor selecionar uma CI">
+                                <f:selectItem itemLabel="Selecione uma CI" itemValue="" noSelectionOption="true" />
+                                <f:selectItems value="#{egressoListaMB.cis}" var="ci" itemLabel="#{ci.identificacao} - #{ci.assunto}" />
+                            </p:selectOneMenu>
+                            <p:message for="cis"/>
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
+                            <p:commandButton value="Associar" update="egressosForm:egressos ciForm :mensagens"  actionListener="#{egressoListaMB.incluirEgressosNaCI()}" oncomplete="if(args &amp;&amp; !args.validationFailed){PF('ciDialog').hide()}"/>
+                        </p:column>
+                    </p:row>
+                </p:panelGrid>
+            </h:form>
+        </p:dialog>
+    </ui:define>
+</ui:composition>

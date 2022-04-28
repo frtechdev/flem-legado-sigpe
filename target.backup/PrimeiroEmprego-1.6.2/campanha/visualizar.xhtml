@@ -1,0 +1,54 @@
+<ui:composition
+   xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+
+    <ui:define name="centro">
+        <style type="text/css">
+            .ui-editor{
+                width: 100% !important;
+            }
+        </style>
+        <h:form >
+            <h2>#{campanhaVisualizarMB.campanha.assunto}</h2>
+            <h3>#{campanhaVisualizarMB.campanha.status.descricao} (#{campanhaVisualizarMB.campanha.envios.size()})</h3>
+            <h3>#{campanhaVisualizarMB.campanha.contaDeEmail.nomeRemetente} &lt;#{campanhaVisualizarMB.campanha.contaDeEmail.emailRemetente}&gt;</h3>
+            <p:outputPanel rendered="#{campanhaVisualizarMB.campanha.modeloDeOficio ne null}">
+                <h2>Campanha do Modelo de Ofício <h:outputText value="#{campanhaVisualizarMB.campanha.modeloDeOficio.nome}"/></h2>
+            </p:outputPanel>
+            <p:fieldset legend="Beneficiários da Campanha" style="margin-top: 10px;">
+                <flem:dataTable paginator="true" widgetVar="campanhaTable" value="#{campanhaVisualizarMB.campanha.envios}" >
+                    <p:column filterBy="#{item.egresso.nome}" filterMatchMode="contains" width="350">
+                        <h:outputText value="#{item.egresso.nome}" style="width: auto" />
+                    </p:column>
+                    <p:column headerText="E-mail Primário">
+                        <h:outputText value="#{item.email}"/>
+                    </p:column>
+                    <p:column headerText="E-mail Secundário">
+                        <h:outputText value="#{item.emailSecundario}"/>
+                    </p:column>
+                    <p:column style="width:32px;text-align: center"  >
+                        <p:button style="width:30px; height:27px;" value=""  href="/egresso/cadastro.xhtml?id=#{item.egresso.id}"  icon="ui-icon-search"/>
+                    </p:column> 
+                </flem:dataTable>
+            </p:fieldset>
+            <p:editor controls="" value="#{campanhaVisualizarMB.campanha.mensagem}" />
+            <flem:dataTable paginator="false" value="#{campanhaVisualizarMB.campanha.anexos}" id="listaAnexos" emptyMessage="" >
+                <f:facet name="header">Anexos</f:facet>
+                <p:column>
+                    #{item.nome}
+                </p:column>
+                <p:column>
+                    <p:panel rendered="#{campanhaMB.tipoDeAnexoImagem(item)}">
+                        <img src="data:image;base64,#{campanhaMB.imagemBase64(item)}" width="200"/>
+                    </p:panel>
+                </p:column>
+            </flem:dataTable>
+
+        </h:form>
+    </ui:define>
+</ui:composition>

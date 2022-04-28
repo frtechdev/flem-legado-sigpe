@@ -1,0 +1,204 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <p:fieldset legend="Relatorio de Contratados / Desligados" style="margin-top: 10px;">
+            <h:form>
+                <h2 style="text-align: left"><h:outputText value="Ativos"/></h2>
+                <p:dataTable id="contratados" value="#{relatorioContratadosMB.contratados}" var="funcionario" widgetVar="wvContratados" emptyMessage="Nenhum funcionário encontrado" 
+                             rows="10" tableStyle="width:auto" paginator="true" currentPageReportTemplate="Registros:{totalRecords}"
+                             paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" >
+                    <p:column headerText="CPF">
+                        <h:outputText value="#{funcionario.cpf}">
+                            <f:converter converterId="converter.CPFConverter"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column filterBy="#{funcionario.nome}"  headerText="Nome" sortBy="#{funcionario.nome}" >
+                        <h:outputText value="#{funcionario.nome}"/>
+                    </p:column>
+                    <p:column  filterBy="#{funcionario.mesAno}" headerText="Mês/Ano admissão" sortBy="#{funcionario.admissao}">
+                        <f:facet name="filter">
+                            <p:inputMask id="mesAno" size="10" value="#{relatorioContratadosMB.mesAno}" mask="99/9999" onchange="PF('wvContratados').filter()" />
+                        </f:facet>
+                        <h:outputText value="#{funcionario.admissao}">
+                            <f:convertDateTime pattern="MMM/yyyy"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Admissão" sortBy="#{funcionario.admissao}">
+                        <h:outputText value="#{funcionario.admissao}">
+                            <f:convertDateTime pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Municipio" sortBy="#{funcionario.endereco.cidade}">
+                        <h:outputText value="#{funcionario.endereco.cidade}"/>
+                    </p:column>
+                    <p:column headerText="Matricula">
+                        <h:outputText value="#{funcionario.matricula}"/>
+                    </p:column>
+                    <p:column headerText="Sexo" sortBy="#{funcionario.sexo}">
+                        <h:outputText value="#{funcionario.sexo}"/>
+                    </p:column>
+                    <p:column headerText="Nascimento" sortBy="#{funcionario.nascimento}">
+                        <h:outputText value="#{funcionario.nascimento}">
+                            <f:convertDateTime pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="e-mail">
+                        <h:outputText value="#{funcionario.email.toLowerCase()}"/>
+                    </p:column>
+                    <p:column headerText="e-mail alternativo">
+                        <h:outputText value="#{funcionario.emailalternativo.toLowerCase()}"/>
+                    </p:column>
+                    <p:column headerText="telefone">
+                        <h:outputText value="(#{funcionario.dddTelefone}) " rendered="#{funcionario.dddTelefone ne null and funcionario.dddTelefone.trim() ne ''}"/>
+                        <h:outputText value="#{funcionario.telefone}"/>
+                    </p:column>
+                    <p:column headerText="telefone 2">
+                        <h:outputText value="(#{funcionario.dddTelefone2}) " rendered="#{funcionario.dddTelefone2 ne null and funcionario.dddTelefone2.trim() ne ''}"/>
+                        <h:outputText value="#{funcionario.telefone2}"/>
+                    </p:column>
+                    <p:column headerText="celular">
+                        <h:outputText value="(#{funcionario.dddCelular}) " rendered="#{funcionario.dddCelular ne null and funcionario.dddCelular.trim() ne ''}"/>
+                        <h:outputText value="#{funcionario.celular}"/>
+                    </p:column>
+                    <p:column headerText="contato">
+                        <h:outputText value="(#{funcionario.dddContato}) " rendered="#{funcionario.dddContato ne null and funcionario.dddContato.trim() ne ''}"/>
+                        <h:outputText value="#{funcionario.contato}"/>
+                    </p:column>
+                    <p:column headerText="endereco">
+                        <h:outputText value="#{funcionario.endereco.descricao}"/>
+                    </p:column>
+                    <p:column headerText="Bairro">
+                        <h:outputText value="#{funcionario.endereco.bairro}"/>
+                    </p:column>
+                    <p:column headerText="numero">
+                        <h:outputText value="#{funcionario.endereco.numero}"/>
+                    </p:column>
+                    <p:column headerText="cidade">
+                        <h:outputText value="#{funcionario.endereco.cidade}"/>
+                    </p:column>
+                    <p:column headerText="uf">
+                        <h:outputText value="#{funcionario.endereco.uf}"/>
+                    </p:column>
+                    <p:column headerText="cep">
+                        <h:outputText value="#{funcionario.endereco.cep}"/>
+                    </p:column>
+                    <p:column headerText="cidade">
+                        <h:outputText value="#{funcionario.endereco.cidade}"/>
+                    </p:column>
+                    <f:facet name="footer">
+                        <p:commandButton value="Excel" ajax="false">
+                            <p:dataExporter type="xlsx" target="contratados" fileName="Contratadados.PrimeiroEmprego"/>
+                        </p:commandButton>
+                    </f:facet>
+                </p:dataTable>
+
+                <h2 style="text-align: left"><h:outputText value="Desligados"/></h2>
+
+                <p:dataTable id="desligados" value="#{relatorioContratadosMB.contratadosDesligados}" widgetVar="wvDesligados" var="funcionario" emptyMessage="Nenhum funcionário desligado encontrado"
+                             rows="10" tableStyle="width:auto" paginator="true" currentPageReportTemplate="Registros:{totalRecords}"
+                             paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" >
+                    <p:column headerText="CPF">
+                        <h:outputText value="#{funcionario.cpf}">
+                            <f:converter converterId="converter.CPFConverter"/>
+                        </h:outputText>
+                    </p:column>         
+                    <p:column filterBy="#{funcionario.nome}" headerText="Nome" sortBy="#{funcionario.nome}">
+                        <h:outputText value="#{funcionario.nome}"/>
+                    </p:column>
+                    <p:column  filterBy="#{funcionario.mesAno}" headerText="Mês/Ano admissão" sortBy="#{funcionario.admissao}">   
+                        <f:facet name="filter">
+                            <p:inputMask id="mesAno" size="10" value="#{relatorioContratadosMB.mesAno}" mask="99/9999" onchange="PF('wvDesligados').filter()" />
+                        </f:facet>
+                        <h:outputText value="#{funcionario.admissao}">
+                            <f:convertDateTime pattern="MMM/yyyy"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Admissão" sortBy="#{funcionario.admissao}">
+                        <h:outputText value="#{funcionario.admissao}">
+                            <f:convertDateTime pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column  filterBy="#{funcionario.mesAnoRecisao}" headerText="Mês/Ano rescisão" sortBy="#{funcionario.rescisao}">   
+                        <f:facet name="filter">
+                            <p:inputMask id="mesAnoRec" size="10" value="#{relatorioContratadosMB.mesAnoRecisao}" mask="99/9999" onchange="PF('wvDesligados').filter()" />
+                        </f:facet>
+                        <h:outputText value="#{funcionario.rescisao}">
+                            <f:convertDateTime pattern="MMM/yyyy"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Rescisão" sortBy="#{funcionario.rescisao}">
+                        <h:outputText value="#{funcionario.rescisao}">
+                            <f:convertDateTime pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Motivo">
+                        <h:outputText value="#{funcionario.motivoRescisao.descricao}"/>
+                    </p:column>
+                    <p:column headerText="Municipio" sortBy="#{funcionario.endereco.cidade}">
+                        <h:outputText value="#{funcionario.endereco.cidade}"/>
+                    </p:column>
+                    <p:column headerText="Matricula">
+                        <h:outputText value="#{funcionario.matricula}"/>
+                    </p:column>
+                    <p:column headerText="Sexo" sortBy="#{funcionario.sexo}">
+                        <h:outputText value="#{funcionario.sexo}"/>
+                    </p:column>
+                    <p:column headerText="Nascimento" sortBy="#{funcionario.nascimento}">
+                        <h:outputText value="#{funcionario.nascimento}">
+                            <f:convertDateTime pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="e-mail">
+                        <h:outputText value="#{funcionario.email.toLowerCase()}"/>
+                    </p:column>
+                    <p:column headerText="e-mail alternativo">
+                        <h:outputText value="#{funcionario.emailalternativo.toLowerCase()}"/>
+                    </p:column>
+                    <p:column headerText="telefone">
+                        <h:outputText value="(#{funcionario.dddTelefone}) " rendered="#{funcionario.dddTelefone ne null}"/>
+                        <h:outputText value="#{funcionario.telefone}"/>
+                    </p:column>
+                    <p:column headerText="telefone 2">
+                        <h:outputText value="(#{funcionario.dddTelefone2}) " rendered="#{funcionario.dddTelefone2 ne null and funcionario.dddTelefone2.trim() ne ''}"/>
+                        <h:outputText value="#{funcionario.telefone2}"/>
+                    </p:column>
+                    <p:column headerText="celular">
+                        <h:outputText value="(#{funcionario.dddCelular}) " rendered="#{funcionario.dddCelular ne null}"/>
+                        <h:outputText value="#{funcionario.celular}"/>
+                    </p:column>
+                    <p:column headerText="contato">
+                        <h:outputText value="(#{funcionario.dddContato}) " rendered="#{funcionario.dddContato ne null and funcionario.dddContato.trim() ne ''}"/>
+                        <h:outputText value="#{funcionario.contato}"/>
+                    </p:column>
+                    <p:column headerText="endereco">
+                        <h:outputText value="#{funcionario.endereco.descricao}"/>
+                    </p:column>
+                    <p:column headerText="numero">
+                        <h:outputText value="#{funcionario.endereco.numero}"/>
+                    </p:column>
+                    <p:column headerText="cidade">
+                        <h:outputText value="#{funcionario.endereco.cidade}"/>
+                    </p:column>
+                    <p:column headerText="uf">
+                        <h:outputText value="#{funcionario.endereco.uf}"/>
+                    </p:column>
+                    <p:column headerText="cep">
+                        <h:outputText value="#{funcionario.endereco.cep}"/>
+                    </p:column>
+                    <f:facet name="footer">
+                        <p:commandButton value="Excel" ajax="false">
+                            <p:dataExporter type="xlsx" target="desligados" fileName="Desligados.PrimeiroEmprego"/>
+                        </p:commandButton>
+                    </f:facet>
+                </p:dataTable>
+            </h:form>
+        </p:fieldset>
+    </ui:define>
+</ui:composition>

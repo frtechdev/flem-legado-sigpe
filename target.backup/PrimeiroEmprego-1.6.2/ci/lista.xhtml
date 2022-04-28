@@ -1,0 +1,52 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    template="/template/padrao.xhtml">
+
+    <ui:define name="centro">
+        <p:fieldset legend="CIs" style="margin-top: 10px;">
+            <h:form >
+                <div class="bt-action">
+                    <p:commandButton value="Novo" action="/ci/novo.xhtml" icon="ui-icon-plus" update="@form :mensagens"/>
+                    <p:commandButton value="Destravar Lock de Cadastro" actionListener="#{cIListaMB.destravarLockDeCadastro()}" icon="ui-icon-unlocked" update="@form :mensagens" rendered="#{cIListaMB.telaDeCadastroTravada and usuarioLogadoMB.temPermissao('primEmp.destravarLockDeCadastro')}"/>
+                </div>
+                <p:dataTable id="cis" emptyMessage="Nenhum registro encontrado." var="ci" value="#{cIListaMB.cis}" paginator="true" rows="10" paginatorPosition="bottom" tableStyle="width:auto">
+                    <p:column headerText="Número">
+                        <h:outputText value="#{ci.identificacao}"/>
+                    </p:column>
+                    <p:column headerText="Nome">
+                        <h:outputText value="#{ci.nome}"/>
+                    </p:column>
+                    <p:column headerText="Assunto">
+                        <h:outputText value="#{ci.assunto}"/>
+                    </p:column>
+                    <p:column headerText="Data" width="110">
+                        <h:outputText value="#{ci.dataCriacao}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column width="25" headerText="Quantidade de Beneficiário">
+                        <h:outputText value="#{ci.egressos.size()}"/>
+                    </p:column>
+                    <p:column>
+                        <p:commandButton value="Download" ajax="false">
+                            <p:fileDownload value="#{cIListaMB.download(ci)}" contentDisposition="attachment"/>
+                        </p:commandButton>
+                        <p:commandButton value="Fechar" actionListener="#{cIListaMB.fechar(ci)}" rendered="#{!ci.fechada}" update="@form :mensagens"/>
+                        <p:button value="Egressos" href="/ci/egressos.xhtml?id=#{ci.id}"/>
+                    </p:column>
+                    <f:facet name="footer">
+                        <div class="bt-action">
+                            <p:commandButton value="Novo" action="/ci/novo.xhtml" icon="ui-icon-plus" update="@form :mensagens"/>
+                            <p:commandButton value="Destravar Lock de Cadastro" actionListener="#{cIListaMB.destravarLockDeCadastro()}" icon="ui-icon-unlocked" update="@form :mensagens" rendered="#{cIListaMB.telaDeCadastroTravada and usuarioLogadoMB.temPermissao('primEmp.destravarLockDeCadastro')}"/>
+                        </div>
+                        
+                    </f:facet>
+                </p:dataTable>
+            </h:form>
+        </p:fieldset>
+    </ui:define>
+</ui:composition>

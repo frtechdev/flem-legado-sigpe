@@ -1,0 +1,52 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    xmlns:f="http://java.sun.com/jsf/core"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+        <flem:fieldset legend="Escritório Regional">
+            <h:form>
+                <flem:commandButton value="Novo" action="/escritorioregional/cadastro.xhtml" profile="add"/>
+                <flem:dataTable  id="escritorioregional" value="#{escritorioRegionalMB.lista}" actionEdit="/escritorioregional/cadastro.xhtml?id=#{item.id}">
+
+                    <p:column filterBy="#{item.nome}" headerText="Nome" filterMatchMode="contains">
+                        <h:outputText value="#{item.nome}" />
+                    </p:column>
+                    <p:column filterBy="#{item.cep}" style="width: 110px;" headerText="Cep" filterMatchMode="contains">
+                        <h:outputText value="#{item.cep}">
+                            <f:converter converterId="cepConverter" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column filterBy="#{item.logradouro}" headerText="Logradouro" filterMatchMode="contains">
+                        <h:outputText value="#{item.logradouro}" />
+                    </p:column>
+                    <p:column filterBy="#{item.bairro}" headerText="Bairro" filterMatchMode="contains">
+                        <h:outputText value="#{item.bairro}"/>
+                    </p:column>
+
+                    <p:column filterBy="#{item.cidade.nome}" headerText="Municipio" filterMatchMode="contains">
+                        <h:outputText value="#{item.cidade.nome}"/>
+                    </p:column>
+                    <p:column filterBy="#{item.telefone}" style="width: 110px;" headerText="Telefone" filterMatchMode="contains">
+                        <h:outputText value="#{item.telefone}">
+                            <f:converter converterId="telefoneConverter" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column filterBy="#{item.email}" headerText="Email" filterMatchMode="contains">
+                        <h:outputText title="#{item.email}" value="#{item.email}"/>
+                    </p:column>
+
+                    <p:column headerText="Ativo" style="width: 50px;" filterMatchMode="contains">
+                        <h:outputText value="#{item.ativo ? 'Ativo' : 'Inativo'}" />
+                    </p:column>
+                    
+                </flem:dataTable>
+                
+                <flem:commandButton value="Novo" action="/escritorioregional/cadastro.xhtml" profile="add"/>
+            </h:form>
+        </flem:fieldset>
+    </ui:define>
+</ui:composition>

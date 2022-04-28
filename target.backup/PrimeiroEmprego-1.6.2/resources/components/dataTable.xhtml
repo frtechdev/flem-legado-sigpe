@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:cc="http://java.sun.com/jsf/composite">
+
+    <h:head>
+        <title>flem:dataTable</title>
+    </h:head>
+    <h:body>
+        <cc:interface name="dataTable" displayName="Cria um dataTable Customizado">
+	        <cc:attribute name="var" default="item"/>
+	        <cc:attribute name="render"  />
+	        <cc:attribute name="value"  />
+	        <cc:attribute name="exportDataTable" default="false"  />
+	        <cc:attribute name="exportFilename"  default="flem_export" />
+                <cc:attribute name="paginator" default="true" />
+                <cc:attribute name="paginatorPosition" default="bottom" />
+                <cc:attribute name="rows" default="20" />
+                <cc:attribute name="rowClass" />
+                <cc:attribute name="rowKey" />
+                <cc:attribute name="rowIndexVar" default="index" />
+                <cc:attribute name="emptyMessage" default="Nenhum registro encontrado." />
+                <cc:attribute name="rowsPerPageTemplate" default="20,30,50,100" />
+                <cc:attribute name="draggableColumns" default="true" />
+                <cc:attribute name="widgetVar"/>
+                <cc:attribute name="lazy" default="false"/>
+                <cc:attribute name="actionEdit" />
+                <cc:attribute name="renderedEdit" default="true" />
+                
+                <cc:attribute name="actionDelete" />
+                <cc:attribute name="renderedDelete" default="true" />
+                <cc:attribute name="actionNew" />
+                
+                <cc:facet name="header"/>
+                <cc:facet name="footer"/>
+
+        </cc:interface>
+
+        <cc:implementation>
+                <div id="#{cc.clientId}" style="clear:both;">
+                    <p:dataTable id="resultList" rowStyleClass="#{cc.attrs.rowClass}"
+                                  paginator="#{cc.attrs.paginator}" 
+                                  paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                  lazy="#{cc.attrs.lazy}"
+                                  value="#{cc.attrs.value}" 
+                                  rowKey="#{cc.attrs.rowKey}"
+                                  draggableColumns="true" var="item" 
+                                  tableStyle="width:auto"
+                                  filterEvent="enter" currentPageReportTemplate="Exibindo: {startRecord} - {endRecord} de {totalRecords} Registros"
+                                  paginatorPosition="#{cc.attrs.paginatorPosition}" rows="#{cc.attrs.rows}"
+                                  rowsPerPageTemplate="#{cc.attrs.rowsPerPageTemplate}" 
+                                  rowIndexVar="#{cc.attrs.rowIndexVar}" 
+                                  widgetVar="#{cc.attrs.widgetVar}"
+                                  emptyMessage="#{cc.attrs.emptyMessage}" >
+                        
+                        
+                        <c:if test="#{cc.attrs.exportDataTable}">
+                            <f:facet name="header">
+                                <p:outputPanel id="exportPanel" style="overflow:  hidden;">
+
+                                    <p:commandButton id="export#{cc.clientId}" style="float:right; width:24px; height:24px;" icon="ui-icon-extlink" title="Exportar" rendered="#{cc.attrs.exportDataTable}" />
+                                    <p:menu id="export_menu" overlay="true" trigger="export#{cc.clientId}" my="left top" at="left bottom" style="background-color:white; width:100px; color:black;" rendered="#{cc.attrs.exportDataTable}">
+                                        <p:separator />
+                                        <p:menuitem value="XLS (Tudo)" ajax="false" icon="icon-excel">
+                                            <p:dataExporter type="xls" target="resultList" encoding="iso-8859-1" fileName="#{cc.attrs.exportFilename}"  />								        
+                                        </p:menuitem>
+                                        <p:menuitem value="XLS (Página)" ajax="false" icon="icon-excel">
+                                            <p:dataExporter type="xls" target="resultList" encoding="iso-8859-1" fileName="#{cc.attrs.exportFilename}" pageOnly="true"  />								        
+                                        </p:menuitem>
+                                        <p:separator />
+                                        <p:menuitem value="PDF (Tudo)" ajax="false" icon="icon-excel">
+                                            <p:dataExporter type="pdf" target="resultList" encoding="iso-8859-1" fileName="#{cc.attrs.exportFilename}"  />								        
+                                        </p:menuitem>
+                                        <p:menuitem value="PDF (Página)" ajax="false" icon="icon-excel">
+                                            <p:dataExporter type="pdf" target="resultList" encoding="iso-8859-1" fileName="#{cc.attrs.exportFilename}" pageOnly="true"  />								        
+                                        </p:menuitem>
+                                    </p:menu>    						 	
+
+                                   <p:commandButton id="toggler#{cc.clientId}" style="float:right; width:24px; height:24px; z-index:200;" icon="ui-icon-calculator" title="Colunas" />
+                                   <p:columnToggler datasource="resultList" trigger="toggler#{cc.clientId}" />	
+
+                                </p:outputPanel>   						        							
+                            </f:facet>
+                        </c:if>
+                        
+                        
+                        <c:set target="#{component}" property="var" value="#{cc.attrs.var}"/>
+                        <cc:insertFacet name="header" />
+                        
+                        <p:column headerText="Nº" width="15">
+                            <h:outputText value="#{index+1}" />
+                        </p:column>
+                        
+                        <cc:insertChildren />
+                        
+                        <c:if test="#{not empty cc.attrs.actionEdit and !renderedEdit}">
+                            <p:column exportable="false" toggleable="false" width="100" headerText="Ação" style="text-align: center">
+                                <p:button title="Editar" href="#{cc.attrs.actionEdit}" icon="ui-icon-pencil"/>                                
+                            </p:column>
+                        </c:if>
+                        
+                        
+                        
+                        <cc:insertFacet name="footer" />
+                    </p:dataTable>
+                </div>
+                <p:blockUI block="resultList" trigger="resultList" />
+        </cc:implementation>
+        
+    </h:body>
+</html>

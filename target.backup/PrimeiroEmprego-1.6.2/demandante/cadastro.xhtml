@@ -1,0 +1,40 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    template="/template/padrao.xhtml">
+    
+
+    <ui:define name="centro">
+        <h:form id="form">
+        <h3 style="margin-top:0">Cadastro de Demandante</h3>
+        <table>
+            <tr>
+                <td>Sigla</td>
+                <td>
+                    <p:inputText value="#{demandanteCadastroMB.demandante.sigla}" id="sigla"/>
+                    <p:message for="sigla"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Nome</td>
+                <td>
+                    <p:inputText value="#{demandanteCadastroMB.demandante.nome}" id="nome" style="width: 450px;"/>
+                    <p:message for="nome"/>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+              <span style="float: left; background-color: #EEEEEE; text-align: left;">
+                  <p:commandButton rendered="#{usuarioLogadoMB.temPermissao('primEmp.demandante')}" action="#{demandanteCadastroMB.salvar()}" value="Salvar" icon="ui-icon-disk" update="@form" />
+              </span>
+          </td>
+            </tr>
+        </table>
+    </h:form>
+    </ui:define>
+</ui:composition>

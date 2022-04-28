@@ -1,0 +1,23 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+        <f:event type="preRenderView" listener="#{cICadastroMB.checkLock()}"/>
+        <h:form enctype="multipart/form-data">
+            <h2>CI #{cICadastroMB.ci.identificacao}</h2><br/>
+            Assunto: <p:inputText id="assunto" value="#{cICadastroMB.ci.assunto}" style="width: 300px" requiredMessage="Informar o assunto" required="true"/><br/>
+            <p:message for="assunto"/>
+            <br/>
+            <p:fileUpload id="documento" value="#{cICadastroMB.documento}" mode="simple" style="margin-right: 15px;" required="true" requiredMessage="Informe o arquivo"/>
+            <br/>
+            <p:message for="documento"/>
+            <br/>
+            <p:commandButton value="Salvar CI" action="#{cICadastroMB.salvar()}" ajax="false" />
+        </h:form>
+    </ui:define>
+</ui:composition>

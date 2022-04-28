@@ -1,0 +1,72 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <p:fieldset legend="Notificações" style="margin-top: 10px;">
+            <h:form>
+                
+                <p:dataTable id="notificacoes" paginator="true" value="#{notificacaoListaMB.notificacoes}" draggableColumns="true" var="notificacao" paginatorPosition="bottom" rows="20" emptyMessage="Nada foi encontrado." widgetVar="notificacoesWd"
+                             sortBy="#{notificacao.dataCriacao}" sortOrder="descending">
+                    <f:facet name="header">
+                        <div style="height: 25px;text-align: left">
+                            <p:commandButton value="Novo" action="/notificacao/nova.xhtml" icon="ui-icon-plus"/>
+                        </div>
+                    </f:facet>
+                    <p:column filterBy="#{notificacao.mensagem}" headerText="Mensagem" filterMatchMode="contains">
+                        <h:outputText value="#{notificacao.mensagem}" />
+                    </p:column>
+                    <p:column headerText="Notificado" filterBy="#{notificacao.usuarioNotificado}" sortBy="#{usuarioLogadoMB.nomeUsuarioPorId(notificacao.usuarioNotificado)}" filterMatchMode="contains">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('notificacoesWd').filter()" >
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true" />
+                                <f:selectItems value="#{usuarioLogadoMB.usuariosComAcessoAoAplicativo}" var="usuario" itemLabel="#{usuario.nome}" itemValue="#{usuario.codigoDominio}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{usuarioLogadoMB.nomeUsuarioPorId(notificacao.usuarioNotificado)}" />
+                    </p:column>
+                    <p:column headerText="Urgente" filterMatchMode="contains" width="50">
+                        <h:outputText value="#{notificacao.urgente ? 'Sim' : 'Não'}" />
+                    </p:column>
+                    <p:column headerText="Data Limite" filterMatchMode="contains" width="100">
+                        <h:outputText value="#{notificacao.dataLimite}" >
+                            <f:convertDateTime pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Dias ativa" width="100">
+                        <h:outputText value="#{notificacao.qtdDiasAtiva()}" />
+                    </p:column>
+                    <p:column headerText="Concluído" filterMatchMode="contains" width="100">
+                        <h:outputText value="#{notificacao.dataConcluido}" >
+                            <f:convertDateTime pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Data Criação" filterMatchMode="exact" width="100">
+                        <h:outputText value="#{notificacao.dataCriacao}" >
+                            <f:convertDateTime pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column filterBy="#{notificacao.usuarioCriacao}" sortBy="#{usuarioLogadoMB.nomeUsuarioPorLogin(notificacao.usuarioCriacao)}" headerText="Remetente" filterMatchMode="exact" rendered="#{usuarioLogadoMB.temPermissao('primEmp.notificacaoGeral')}">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('notificacoesWd').filter()" >
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true" />
+                                <f:selectItems value="#{usuarioLogadoMB.usuariosComAcessoAoAplicativo}" var="usuario" itemLabel="#{usuario.nome}" itemValue="#{usuario.username}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{usuarioLogadoMB.nomeUsuarioPorLogin(notificacao.usuarioCriacao)}" />
+                    </p:column>
+                </p:dataTable>
+              
+                <flem:commandButton value="Novo" action="/notificacao/nova.xhtml" profile="add"/>
+            </h:form>
+        </p:fieldset>
+
+    </ui:define>
+</ui:composition>

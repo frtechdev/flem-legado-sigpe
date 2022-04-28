@@ -1,0 +1,47 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    template="/template/padrao.xhtml">
+
+    <ui:define name="centro">
+        <p:fieldset legend="Ofícios" style="margin-top: 10px;">
+            <h:form >
+                <p:dataTable id="oficios" emptyMessage="Nenhum registro encontrado." var="oficio" value="#{oficioListaMB.oficios}" paginator="true" rows="10" paginatorPosition="bottom" tableStyle="width:auto">
+                    <p:column headerText="Número">
+                        <h:outputText value="#{oficio.numero} \ #{oficio.ano}"/>
+                    </p:column>
+                    <p:column headerText="Data" width="110">
+                        <h:outputText value="#{oficio.dataCriacao}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Destinatário">
+                        <h:outputLink value="#{request.contextPath}/egresso/cadastro.xhtml?id=#{oficio.idEgresso}" rendered="#{oficio.idEgresso ne null}">
+                            <h:outputText value="#{oficio.nomeEgresso}"/>
+                        </h:outputLink>
+                        <h:outputText value="#{oficio.destinatarioExterno}" rendered="#{oficio.idEgresso eq null}"/>
+                    </p:column>
+                    <p:column headerText="Assunto">
+                        <h:outputLink value="#{request.contextPath}/modeloDeOficio/detalhes.xhtml?id=#{oficio.idModelo}" rendered="#{oficio.idModelo ne null}">
+                            <h:outputText value="#{oficio.nomeModelo}"/>
+                        </h:outputLink>
+                    </p:column>
+                    <p:column>
+                        <p:commandButton value="Download" ajax="false">
+                            <p:fileDownload value="#{oficioListaMB.download(oficio)}"/>
+                        </p:commandButton>
+                    </p:column>
+                    <f:facet name="footer">
+                        <p:commandButton value="Criar para destinatário externo" action="/oficio/externo.xhtml" icon="ui-icon-plus" update="@form :mensagens"/>
+                        <p:commandButton value="Destravar Lock de Cadastro" actionListener="#{oficioListaMB.destravarLockDeCadastro()}" icon="ui-icon-unlocked" update="@form :mensagens" rendered="#{oficioListaMB.telaDeCadastroTravada and usuarioLogadoMB.temPermissao('primEmp.destravarLockDeCadastro')}"/>
+                    </f:facet>
+                </p:dataTable>
+            </h:form>
+        </p:fieldset>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:cc="http://java.sun.com/jsf/composite">
+    <h:head>
+        <title>flem:commandButton</title>
+    </h:head>
+    <h:body>
+        <cc:interface name="commandButton" displayName="Cria Botões padronizados">
+            <cc:attribute name="value" />
+	    <cc:attribute name="action" targets="button"/>
+            <cc:attribute name="profile"/>
+            <cc:attribute name="update" />
+            <cc:attribute name="process" />
+            <cc:attribute name="ajax" default="false" />
+            <cc:attribute name="oncomplete" />
+            <cc:attribute name="immediate" default="false" />
+            <cc:attribute name="style" />
+            <cc:attribute name="styleClass" />
+            <cc:attribute name="block" />
+            <cc:attribute name="actionListener" targets="button" />
+            <cc:attribute name="onclick" targets="button"/>
+            
+            <cc:actionSource  name="command" targets="button" />
+        </cc:interface>
+
+        <cc:implementation>
+
+                <c:choose>
+	    		<c:when test="#{cc.attrs.profile eq 'add'}">
+	    			<ui:param name="prof_icon" value="ui-icon-plus" />
+	    		</c:when>
+                        <c:when test="#{'salvar' eq cc.attrs.profile}">
+	    			<ui:param name="prof_icon" value="ui-icon-disk" />
+	    		</c:when>
+                        <c:when test="#{'remove' eq cc.attrs.profile}">
+	    			<ui:param name="prof_icon" value="ui-icon-trash" />
+	    		</c:when>
+                        <c:when test="#{'edit' eq cc.attrs.profile}">
+	    			<ui:param name="prof_icon" value="ui-icon-pencil" />
+	    		</c:when>
+                        <c:when test="#{'search' eq cc.attrs.profile}">
+	    			<ui:param name="prof_icon" value="ui-icon-search" />
+	    		</c:when>
+                        <c:when test="#{'print' eq cc.attrs.profile}">
+	    			<ui:param name="prof_icon" value="ui-icon-print" />
+	    		</c:when>
+                        <c:when test="#{'clear' eq cc.attrs.profile}">
+	    			<ui:param name="prof_icon" value="ui-icon-trash" />
+	    		</c:when>
+	    	</c:choose>
+               
+            
+	        <div id="#{cc.clientId}" style="clear:both; display: inline">
+                    <p:commandButton id="button" 
+                                     value="#{cc.attrs.value}"  
+                                     icon="#{prof_icon}" 
+                                     process = "#{cc.attrs.process}" 
+                                     update = "#{cc.attrs.update}"
+                                     ajax = "#{cc.attrs.ajax}"
+                                     styleClass = "bt-action #{prof_class} #{cc.attrs.styleClass}"
+                                     onclick = "#{cc.attrs.onclick}"
+                                     style = "#{cc.attrs.style}">
+                        <cc:insertChildren />
+                    <c:if test="#{cc.attrs.profile eq 'remove'}">
+                        <p:confirm header="Confirmar Exclusão" message="Deseja Realmente Excluir este registro?" icon="ui-icon-alert" id="confirm" />
+                    </c:if>
+                    </p:commandButton>   
+                </div>  
+        </cc:implementation>
+        
+    </h:body>
+</html>

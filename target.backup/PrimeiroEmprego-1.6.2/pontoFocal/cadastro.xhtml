@@ -1,0 +1,65 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    template="/template/padrao.xhtml">
+    
+
+    <ui:define name="centro">
+        <h:form id="form">
+        <h3 style="margin-top:0">Cadastro de Unidades de Lotação</h3>
+        <table>
+            <tr>
+                <td>Demandante</td>
+                <td>
+                    <p:selectOneMenu value="#{pontoFocalCadastroMB.demandante}" id="demandante" converter="#{genericConverter}">
+                        <p:ajax update="instituicoes" listener="#{pontoFocalCadastroMB.atualizarInstituicoes()}"/>
+                        <f:selectItem itemLabel="Selecione um Demandante" itemValue=""/>
+                        <f:selectItems value="#{pontoFocalCadastroMB.demandantes}" var="demandante" itemLabel="#{demandante.nome}"/>
+                    </p:selectOneMenu>
+                    <p:message for="demandante"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Instituição</td>
+                <td>
+                    <p:selectOneMenu value="#{pontoFocalCadastroMB.instituicao}" id="instituicoes" converter="#{genericConverter}" disabled="#{pontoFocalCadastroMB.demandante eq null}">
+                        <p:ajax update="instituicoes" listener="#{pontoFocalCadastroMB.atualizarUnidadesDeLotacao()}"/>
+                        <f:selectItem itemLabel="Selecione uma Instituição" itemValue=""/>
+                        <f:selectItems value="#{pontoFocalCadastroMB.instituicoes}" var="instituicao" itemLabel="#{instituicao.nome}"/>
+                    </p:selectOneMenu>
+                    <p:message for="demandante"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Unidade de Lotação</td>
+                <td>
+                    <p:selectOneMenu value="#{pontoFocalCadastroMB.pontoFocal.unidadeDeLotacao}" id="instituicoes" converter="#{genericConverter}" disabled="#{pontoFocalCadastroMB.instituicao eq null}">
+                        <f:selectItem itemLabel="Selecione uma Unidade de Lotação" itemValue=""/>
+                        <f:selectItems value="#{pontoFocalCadastroMB.unidadesDeLotacao}" var="unidadeDeLotacao" itemLabel="#{unidadeDeLotacao.nome}"/>
+                    </p:selectOneMenu>
+                    <p:message for="demandante"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Nome</td>
+                <td>
+                    <p:inputText value="#{pontoFocalCadastroMB.pontoFocal.nome}" id="nome" style="width: 450px;"/>
+                    <p:message for="nome"/>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+              <span style="float: left; background-color: #EEEEEE; text-align: left;">
+                  <p:commandButton  action="#{pontoFocalCadastroMB.salvar()}" value="Salvar" icon="ui-icon-disk" update="@form" />
+              </span>
+          </td>
+            </tr>
+        </table>
+    </h:form>
+    </ui:define>
+</ui:composition>

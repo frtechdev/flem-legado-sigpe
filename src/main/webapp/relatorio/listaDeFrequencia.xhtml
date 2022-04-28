@@ -1,0 +1,199 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <flem:fieldset legend="Lista de Presença">
+
+            <h:form id="formFrequencia" enctype="multipart/form-data" style="width: 100%">
+                <p:accordionPanel styleClass="ui-accordion-header ui-helper-reset ui-state-default ui-corner-all">
+                    <p:ajax event="tabChange" listener="#{relatorioFrequenciaMB.onTabChange}" update="@all" />
+                    <p:tab title="Pesquisar">
+                        <div class="content">
+
+                            <table>
+                                <tr>  
+                                    <td>
+                                        <p:outputLabel value="Escritórios Regionais" style="display: block; margin-bottom: 5px;" />
+                                        <p:selectBooleanCheckbox value="#{relatorioFrequenciaMB.selectEsc}"> Selecionar Todos
+                                            <p:ajax listener="#{relatorioFrequenciaMB.onSelectAll(1)}" process="@this" event="change" update="@all" />
+                                        </p:selectBooleanCheckbox>
+                                        <p:selectManyMenu id="cbEscritorio" value="#{relatorioFrequenciaMB.escritorioSelecionados}" style="width:400px;" converter="uidConverter"
+                                                          var="m" filter="true" filterMatchMode="contains" showCheckbox="true"  scrollHeight="200">
+                                            <f:selectItems value="#{relatorioFrequenciaMB.escritoriosRegionais}" var="item" itemLabel="#{item.nome}" itemValue="#{item}" />
+                                            <p:ajax update="@all" process="@this" event="change" listener="#{relatorioFrequenciaMB.obterTerritorios()}" />
+                                            <p:column>
+                                                <h:outputText value="#{m.nome}" rendered="#{m ne null}" /> 
+                                                <h:outputText value="Escritório Não Implementado" rendered="#{m eq null}" /> 
+                                            </p:column>
+                                        </p:selectManyMenu>
+                                    </td>
+                                    <td>
+                                        <p:outputLabel value="Territórios" style="display: block; margin-bottom: 5px;" /> 
+                                        <p:selectBooleanCheckbox value="#{relatorioFrequenciaMB.selectTer}"> Selecionar Todos
+                                            <p:ajax listener="#{relatorioFrequenciaMB.onSelectAll(2)}" process="@this" event="change" update="@all" />
+                                        </p:selectBooleanCheckbox>
+                                        <p:selectManyMenu id="cbTerritorio" value="#{relatorioFrequenciaMB.territoriosSelecionados}" style="width:400px"  converter="uidConverter"
+                                                          var="m" filter="true" filterMatchMode="contains" showCheckbox="true" scrollHeight="200">
+                                            <f:selectItems value="#{relatorioFrequenciaMB.territorios}" var="item" itemLabel="#{item.nome}" itemValue="#{item}" />
+                                            <p:ajax update="@all" process="@this" event="change" listener="#{relatorioFrequenciaMB.obterMunicipios()}" />
+                                            <p:column>
+                                                <h:outputText value="#{m.nome}" /> 
+                                            </p:column>
+                                        </p:selectManyMenu>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <p:outputLabel value="Municipios" style="display: block; margin-bottom: 5px;" />
+                                        <p:selectBooleanCheckbox value="#{relatorioFrequenciaMB.selectMun}"> Selecionar Todos
+                                            <p:ajax listener="#{relatorioFrequenciaMB.onSelectAll(3)}" process="@this" event="change" update="@all" />
+                                        </p:selectBooleanCheckbox>
+                                        <p:selectManyMenu id="cbMunicicpios" value="#{relatorioFrequenciaMB.municipiosSelecionados}" style="width:400px" converter="uidConverter"
+                                                          var="m" filter="true" filterMatchMode="contains" showCheckbox="true" scrollHeight="200">
+                                            <f:selectItems value="#{relatorioFrequenciaMB.municipios}" var="item" itemLabel="#{item.nome}" itemValue="#{item}" />
+                                            <p:ajax update="@all" process="@this" event="change" listener="#{relatorioFrequenciaMB.obterDemandantes()}" />
+                                            <p:column>
+                                                <h:outputText value="#{m.nome}" />
+                                            </p:column>
+                                        </p:selectManyMenu>
+                                    </td>
+                                    <td>
+                                        <p:outputLabel value="Demandantes" style="display: block; margin-bottom: 5px;" />   
+                                        <p:selectBooleanCheckbox value="#{relatorioFrequenciaMB.selectDem}"> Selecionar Todos
+                                            <p:ajax listener="#{relatorioFrequenciaMB.onSelectAll(4)}" process="@this" event="change" update="@all" />
+                                        </p:selectBooleanCheckbox>
+                                        <p:selectManyMenu id="cbDemandante" value="#{relatorioFrequenciaMB.demandanteSelecionados}" style="width:400px" converter="uidConverter"
+                                                          var="m" filter="true" filterMatchMode="contains" showCheckbox="true" scrollHeight="200" >
+                                            <f:selectItems value="#{relatorioFrequenciaMB.demandantes}" var="item" itemLabel="#{item.nome}" itemValue="#{item}" />
+                                            <p:column>
+                                                <h:outputText value="#{m.nome}" />
+                                            </p:column>
+                                        </p:selectManyMenu>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <p:outputLabel value="Categorias" style="display: block; margin-bottom: 5px;" />          
+                                        <p:selectBooleanCheckbox value="#{relatorioFrequenciaMB.selectCat}"> Selecionar Todos
+                                            <p:ajax listener="#{relatorioFrequenciaMB.onSelectAll(5)}" process="@this" event="change" update="@all" />
+                                        </p:selectBooleanCheckbox>
+                                        <p:selectManyMenu id="cbCategoria" value="#{relatorioFrequenciaMB.categoriaSelecionadas}" style="width:400px" converter="uidConverter"
+                                                          var="m" filter="true" filterMatchMode="contains" showCheckbox="true" scrollHeight="200">
+                                            <f:selectItems value="#{relatorioFrequenciaMB.categorias}" var="item" itemLabel="#{item.nome}" itemValue="#{item}" />
+                                            <p:column>
+                                                <h:outputText value="#{m.nome}" />
+                                            </p:column>
+                                        </p:selectManyMenu>
+                                    </td>
+                                </tr>
+                            </table>    
+                        </div>
+                        <div class="content bt-action">
+                            <flem:commandButton id="bt-search" value="Pesquisar" action="#{relatorioFrequenciaMB.pesquisar()}" profile="search" />
+                            <flem:commandButton id="bt-trash" value="Limpar" action="#{relatorioFrequenciaMB.limpar()}" profile="clear" />
+                        </div>
+                    </p:tab>
+                    <p:tab title="Importar">
+                        <div>
+                            <p:poll interval="1" widgetVar="poll" autoStart="false" async="true" update="progressBarClient msg" immediate="true"/>
+                            <p:progressBar id="progressBarClient" value="#{relatorioFrequenciaMB.progresso}" widgetVar="pbClient" style="width:100%" labelTemplate="{value}%" styleClass="animated" global="false"/>
+                            <h:outputText value="#{relatorioFrequenciaMB.mensagem}" id="msg"/>
+                            <br/>
+
+                            <p:fileUpload value="#{relatorioFrequenciaMB.arquivoXLS}" mode="simple" style="margin-right: 15px;" allowTypes="/(\.|\/)xlsx$/"/> 
+
+                            <p:commandButton id="btImportar" value="Importar" ajax="false" 
+                                             onclick="PF('poll').start();PF('pbClient').start();" 
+                                             oncomplete="PF('poll').stop();PF('pbClient').cancel();"
+                                             update="frequenciaTable"
+                                             actionListener="#{relatorioFrequenciaMB.carregarEgressosPorCpf()}" style="margin-left: 10px; margin-right: 20px;"/>  
+                            <br/>
+                        </div>
+
+                    </p:tab>
+                </p:accordionPanel>
+
+
+                <flem:fieldset rendered="#{relatorioFrequenciaMB.pesquisaAtiva}" legend="Dados Para Impressão">
+                    <flem:inputText id="idNomeEvento" label="Evento" value="#{relatorioFrequenciaMB.nomeEvento}" />
+                    <flem:inputText id="idLocalEvento" label="Local" value="#{relatorioFrequenciaMB.localEvento}" />
+                    <div style="margin-left: 5px; margin-bottom: 15px;">
+                        <p:outputLabel for="idDataEvento" value="Data do Evento" style="display: block; margin-bottom: 5px;" />
+                        <p:calendar  value="#{relatorioFrequenciaMB.dataEvento}" id="idDataEvento" pattern="dd/MM/yyyy HH:mm" mask="true"/>
+                    </div>
+                </flem:fieldset>
+                <div class="content"> 
+                    <flem:dataTable rendered="#{relatorioFrequenciaMB.pesquisaAtiva}" value="#{relatorioFrequenciaMB.listaImpressao}" id="frequenciaTable" >
+                        <f:facet name="header">
+                            <div style="text-align: left; padding: 10px;">
+
+                                <p:outputLabel for="modelos" value="Modelos" style="display: block; margin-bottom: 5px;"/>
+                                <p:selectOneMenu id="modelos" value="#{relatorioFrequenciaMB.modeloRelatorio}" style="width:125px; margin-right: 10px;">
+                                    <f:selectItem itemLabel="Selecione" itemValue="" />
+                                    <f:selectItem itemLabel="Lista por Unidade de Lotação" itemValue="1" />
+                                    <f:selectItem itemLabel="Lista Alfabética" itemValue="2" />
+                                    <f:selectItem itemLabel="Lista por Demandante" itemValue="3" />
+                                </p:selectOneMenu>
+                                <p:commandLink ajax="false" value="Imprimir">
+                                    <p:fileDownload value="#{relatorioFrequenciaMB.imprimir()}" />
+                                </p:commandLink>
+
+                            </div>
+
+                            <p:outputPanel id="exportPanel" style="overflow:  hidden;">
+
+                                <p:commandButton id="exportfrequenciaTable" style="float:right; width:24px; height:24px;" icon="ui-icon-extlink" title="Exportar" rendered="true" />
+                                <p:menu id="export_menu" overlay="true" trigger="exportfrequenciaTable" my="left top" at="left bottom" style="background-color:white; width:100px; color:black;" rendered="true">
+                                    <p:separator />
+                                    <p:menuitem value="Exportar Para Excel" ajax="false" icon="icon-excel">
+                                        <p:dataExporter type="xls" target="resultList" encoding="iso-8859-1" fileName="flem_export"  />								        
+                                    </p:menuitem>
+                                </p:menu>    						 	
+
+                                <p:commandButton id="togglerfrequenciaTable" style="float:right; width:24px; height:24px; z-index:200;" icon="ui-icon-calculator" title="Colunas" />
+                                <p:columnToggler datasource="resultList" trigger="togglerfrequenciaTable" />	
+
+                            </p:outputPanel>
+
+
+                        </f:facet>
+                        <p:column headerText="Demandante">
+                            <h:outputText value="#{item.demandante}"/>
+                        </p:column>
+
+                        <p:column headerText="Beneficiário">
+                            <h:outputText value="#{item.nomeEgresso}"/>
+                        </p:column>
+
+                        <p:column headerText="CPF">
+                            <h:outputText value="#{item.cpf}"/>
+                        </p:column>
+                        <p:column headerText="Matricula">
+                            <h:outputText value="#{item.matricula}"/>
+                        </p:column>
+                        <p:column headerText="Formação">
+                            <h:outputText value="#{item.formacao}"/>
+                        </p:column>
+
+                        <p:column headerText="E-mail">
+                            <h:outputText value="#{item.email}"/>
+                        </p:column>
+
+                        <p:column headerText="Municipio Vaga">
+                            <h:outputText value="#{item.municipioVaga}"/>
+                        </p:column>
+
+                    </flem:dataTable>
+                </div>
+
+            </h:form>
+
+        </flem:fieldset>
+    </ui:define>
+</ui:composition>

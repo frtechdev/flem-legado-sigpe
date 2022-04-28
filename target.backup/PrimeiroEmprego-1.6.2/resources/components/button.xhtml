@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:cc="http://java.sun.com/jsf/composite">
+    <h:head>
+        <title>flem:button</title>
+    </h:head>
+    <h:body>
+        <cc:interface name="button" displayName="Cria Botões padronizados">
+            <cc:attribute name="value"/>
+	    <cc:attribute name="href" />
+            <cc:attribute name="style" />
+            <cc:attribute name="profile" />
+        </cc:interface>
+
+        <cc:implementation>
+
+                <c:choose>
+                        <c:when test="#{'remove' eq cc.attrs.profile}">
+	    			<ui:param name="prof_icon" value="ui-icon-trash" />
+	    		</c:when>
+                        <c:when test="#{'edit' eq cc.attrs.profile}">
+	    			<ui:param name="prof_icon" value="ui-icon-pencil" />
+	    		</c:when>
+	    	</c:choose>
+                    <p:button id="#{cc.clientId}" value="#{cc.attrs.value}" href="#{cc.attrs.href}" icon="prof_icon" style = "#{cc.attrs.style}">
+                        <cc:insertChildren />
+                    </p:button>
+        </cc:implementation>
+        
+    </h:body>
+</html>

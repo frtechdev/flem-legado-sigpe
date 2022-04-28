@@ -1,0 +1,44 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <p:fieldset legend="Unidades de Lotação" style="margin-top: 10px;">
+            <h:form>
+                <p:dataTable  id="unidadesDeLotacao" paginator="true" value="#{unidadeDeLotacaoListaMB.unidadesDeLotacao}" draggableColumns="true" var="unidadeDeLotacao" paginatorPosition="bottom" rows="20" rowsPerPageTemplate="20,30,50,100" rowIndexVar="item" emptyMessage="Nada foi encontrado.">
+                    <f:facet name="header">
+                        <div style="height: 25px;">
+                            Unidades de Lotação
+                        </div>
+                    </f:facet>
+                    <p:column headerText="Nº" width="15">
+                        <h:outputText value="#{item+1}" />
+                    </p:column>
+                    <p:column filterBy="#{unidadeDeLotacao.instituicao.nome}" headerText="instituicao" filterMatchMode="contains" width="110">
+                        <h:outputText value="#{unidadeDeLotacao.instituicao.nome}" />
+                    </p:column>
+                    <p:column filterBy="#{unidadeDeLotacao.nome}" headerText="nome" filterMatchMode="contains" width="110">
+                        <h:outputText value="#{unidadeDeLotacao.nome}" />
+                    </p:column>
+                    <p:column width="290" exportable="false" toggleable="false">
+                        <p:button value="Editar" href="/unidadeDeLotacao/cadastro.xhtml?id=#{unidadeDeLotacao.id}"  icon="ui-icon-pencil"/>
+                    </p:column>
+                    
+                    <f:facet name="footer">
+                        <div style="height: 25px;" >
+                            <p:commandButton value="Novo" action="/unidadeDeLotacao/cadastro.xhtml" style="float: left;" icon="ui-icon-plus"/>
+                        </div>
+                    </f:facet>
+
+                </p:dataTable>
+            </h:form>
+        </p:fieldset>
+
+    </ui:define>
+</ui:composition>

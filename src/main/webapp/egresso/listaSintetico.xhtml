@@ -1,0 +1,569 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+        <h:form id="egressosForm">
+            <h:outputScript library="js" name="egresso.lista.js"/>  
+            <h:outputStylesheet>
+                .ui-columntoggler-items{
+                    width:630px;
+                }
+                .ui-columntoggler-item{
+                    width:200px;
+                    float:left;
+                    white-space: normal !important;
+                }
+                .ui-columntoggler{
+                    height:450px !important;
+                }
+            </h:outputStylesheet>
+            
+            <p:fieldset legend="Lista de Beneficiários - Sintético" style="margin-top: 10px;">
+                <div style="height: 25px;text-align: left; margin-bottom: 10px;">
+                    <p:commandButton id="alterView" action="/egresso/lista.xhtml" title="Alterar para Detalhado deixará a aplicação mais lenta" value="Detalhado" icon="ui-icon-refresh" />
+                </div>
+                <p:dataTable id="egressos" paginator="true" value="#{egressoListaSinteticaMB.dataModel}" rowKey="#{egresso.idEgresso}"
+                              paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                              var="egresso" rows="20" emptyMessage="Nenhum registro encontrado" tableStyle="width:auto" filterEvent="enter" 
+                              currentPageReportTemplate="Exibindo: {startRecord} - {endRecord} de {totalRecords} Registros" widgetVar="egressosTable" resizableColumns="true" lazy="true" rowsPerPageTemplate="20,30,50"  >
+                    
+                    <f:facet name="header">
+                        <div style="height: 25px;text-align: left">
+                            <p:commandButton id="toggler" type="button" value="Colunas" icon="ui-icon-calculator" />
+                            <p:columnToggler datasource="egressos" trigger="toggler" >
+                                <p:ajax event="toggle" listener="#{egressoListaSinteticaMB.onToggle}" />
+                            </p:columnToggler>
+                        </div>
+                    </f:facet>
+                    
+                    <p:column exportable="false" toggleable="false">
+                        <h:outputLink value="#{request.contextPath}/egresso/cadastro.xhtml?id=#{egresso.idEgresso}" styleClass="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-left">
+                            <span class="ui-button-icon-left ui-icon ui-c ui-icon-pencil"></span>
+                            <span class="ui-button-text ui-c">Cadastro</span>
+                        </h:outputLink>
+                    </p:column>
+
+                    <p:column style="width:16px; text-align:center" exportable="false" toggleable="false" visible="false">
+                        <f:facet name="header"><h:outputText style="font-size:10px" value="* pag. atual"/></f:facet>
+                    </p:column>
+
+                    <p:column id="n" headerText="Nº" width="15" visible="false" toggleable="false">
+                        <h:outputText value="#{item+1}" />
+                    </p:column>
+
+                    <p:column id="nome" filterBy="#{egresso.nome}" headerText="Nome" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.nome}" visible="#{egressoListaSinteticaMB.estadoDasColunas.nome}" sortBy="#{egresso.nome}">
+                        <h:outputText value="#{egresso.nome}" />
+                    </p:column>
+
+                    <p:column filterBy="#{egresso.cpf}" headerText="CPF" filterMatchMode="contains" visible="#{egressoListaSinteticaMB.estadoDasColunas.cpf}" styleClass="cpf" style="#{egresso eq null or egresso.cpfValido ? '' : 'color:red'}">
+                        <h:outputText value="#{egresso.cpf}"/>
+                    </p:column>
+                    
+                    <p:column headerText="CPF Válido" visible="#{egressoListaSinteticaMB.estadoDasColunas.cpfValido}">
+                        <h:outputText value="#{egresso.cpfValido ? 'Sim' : 'Não'}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.rg}" headerText="RG" visible="#{egressoListaSinteticaMB.estadoDasColunas.rg}">
+                        <h:outputText value="#{egresso.rg}" />
+                    </p:column>
+
+                    <p:column filterBy="#{egresso.racaCor}" headerText="Raça / Cor" visible="#{egressoListaSinteticaMB.estadoDasColunas.racaCor}">
+                        <h:outputText value="#{egresso.racaCor.descricao}" />
+                    </p:column> 
+
+                    <p:column headerText="Deficiência" visible="#{egressoListaSinteticaMB.estadoDasColunas.deficiencia}">
+                        <h:outputText value="#{egresso.deficiencia}" />
+                    </p:column> 
+
+                    <p:column headerText="Data de Nascimento" visible="#{egressoListaSinteticaMB.estadoDasColunas.dataNascimento}">
+                        <h:outputText value="#{egresso.dataNascimento}" >
+                             <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
+                    
+                    <p:column headerText="Idade" style="#{egresso.idade gt 0 and egresso.idade lt 18 ? 'color:red;font-size:16px' : ''}" visible="#{egressoListaSinteticaMB.estadoDasColunas.idade}">
+                        <h:outputText value="#{egresso.idade}">
+                            <f:convertNumber pattern="#,##0.00" />
+                        </h:outputText>
+                    </p:column>
+                    
+                    <p:column headerText="CEP Residência" visible="#{egressoListaSinteticaMB.estadoDasColunas.cep}">
+                        <h:outputText value="#{egresso.cep}" />
+                    </p:column>
+                    
+                    <p:column headerText="Bairro Residência" visible="#{egressoListaSinteticaMB.estadoDasColunas.bairro}">
+                        <h:outputText value="#{egresso.bairro}" />
+                    </p:column>
+                    
+                    <p:column headerText="Endereço Residência" visible="#{egressoListaSinteticaMB.estadoDasColunas.endereco}" filterMatchMode="contains">
+                        <h:outputText value="#{egresso.endereco}" />
+                    </p:column>
+                    
+                    <p:column headerText="Complemento Residência" visible="#{egressoListaSinteticaMB.estadoDasColunas.complemento}">
+                        <h:outputText value="#{egresso.complemento}" />
+                    </p:column>
+                    
+                    <p:column headerText="Número Residência" visible="#{egressoListaSinteticaMB.estadoDasColunas.numero}">
+                        <h:outputText value="#{egresso.numero}" />
+                    </p:column>
+                    
+                    <p:column headerText="Municipio Residência" visible="#{egressoListaSinteticaMB.estadoDasColunas.municipio}">
+                        <h:outputText value="#{egresso.municipio}" />
+                    </p:column>
+
+                    <p:column headerText="DDD Telefone 1" visible="#{egressoListaSinteticaMB.estadoDasColunas.dddTelefone1}">
+                        <h:outputText value="#{egresso.dddTelefone1}" />
+                    </p:column>
+                    
+                    <p:column headerText="Telefone 1" visible="#{egressoListaSinteticaMB.estadoDasColunas.telefone1}">
+                        <h:outputText value="#{egresso.telefone1}" />
+                    </p:column>
+                    
+                    <p:column headerText="DDD Telefone 2" visible="#{egressoListaSinteticaMB.estadoDasColunas.dddTelefone2}">
+                        <h:outputText value="#{egresso.dddTelefone2}" />
+                    </p:column>
+                    
+                    <p:column headerText="Telefone 2" visible="#{egressoListaSinteticaMB.estadoDasColunas.telefone2}">
+                        <h:outputText value="#{egresso.telefone2}" />
+                    </p:column>
+                    
+                    <p:column headerText="DDD Celular" visible="#{egressoListaSinteticaMB.estadoDasColunas.dddCelular}">
+                        <h:outputText value="#{egresso.dddCelular}" />
+                    </p:column>
+                    
+                    <p:column headerText="Celular" visible="#{egressoListaSinteticaMB.estadoDasColunas.celular}">
+                        <h:outputText value="#{egresso.celular}" />
+                    </p:column>
+                    
+                    <p:column headerText="DDD Contato" visible="#{egressoListaSinteticaMB.estadoDasColunas.dddContato}">
+                        <h:outputText value="#{egresso.dddContato}" />
+                    </p:column>
+                    
+                    <p:column headerText="Contato" visible="#{egressoListaSinteticaMB.estadoDasColunas.contato}">
+                        <h:outputText value="#{egresso.contato}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.emailParticular}" headerText="Email particular" visible="#{egressoListaSinteticaMB.estadoDasColunas.emailParticular}" filterMatchMode="contains">
+                        <h:outputText value="#{egresso.emailParticular}" />
+                    </p:column>
+                    
+                    <p:column headerText="Email Válido" visible="#{egressoListaSinteticaMB.estadoDasColunas.emailValido}">
+                        <h:outputText value="#{egresso.emailValido ? 'Sim' : 'Não'}" />
+                    </p:column>
+                    
+                    <p:column headerText="Email secundário" visible="#{egressoListaSinteticaMB.estadoDasColunas.emailSecundario}">
+                        <h:outputText value="#{egresso.emailSecundario}" />
+                    </p:column>
+                    
+                    <p:column headerText="Email Secundário Válido" visible="#{egressoListaSinteticaMB.estadoDasColunas.emailSecundarioValido}">
+                        <h:outputText value="#{egresso.emailSecundarioValido ? 'Sim' : 'Não'}" />
+                    </p:column>
+                    
+                    <p:column headerText="Listas" visible="false" toggleable="false">
+                        <h:outputText value=""/>
+                    </p:column>
+                    <p:column headerText="Eventos" visible="false" toggleable="false">
+                        <h:outputText value="" escape="false" />
+                    </p:column>
+
+                    <p:column headerText="Matricula FLEM" filterBy="#{egresso.matriculaFlem}" visible="#{egressoListaSinteticaMB.estadoDasColunas.matriculaFLEM}">
+                        <h:outputText value="#{egresso.matriculaFlem}" />
+                    </p:column>
+
+                    <p:column headerText="Data de Admissão" visible="#{egressoListaSinteticaMB.estadoDasColunas.admissao}">
+                        <h:outputText value="#{egresso.admissao}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column headerText="Data de Rescisão" visible="#{egressoListaSinteticaMB.estadoDasColunas.rescisao}" >
+                        <h:outputText value="#{egresso.rescisao}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column headerText="Observação" visible="#{egressoListaSinteticaMB.estadoDasColunas.observacao}">
+                        <h:outputText value="#{egresso.observacao}" escape="false"/>
+                    </p:column>
+
+                    <p:column filterBy="#{egresso.sexo}" headerText="Sexo" visible="#{egressoListaSinteticaMB.estadoDasColunas.sexo}">
+                        <c:if test="#{egresso.sexo ne null or egresso.sexo ne ''}">
+                            <h:outputText value="#{egresso.sexo eq 'M' ? 'Masculino' : 'Feminino'}"/>
+                        </c:if>
+                    </p:column>
+
+                    <p:column headerText="Matrícula SEC" visible="#{egressoListaSinteticaMB.estadoDasColunas.matriculaSAEB}">
+                        <h:outputText value="#{egresso.matriculaSAEB}"/>
+                    </p:column> 
+
+                    <p:column filterBy="#{egresso.demandante}" headerText="Demandante" visible="#{egressoListaSinteticaMB.estadoDasColunas.demandante}">
+                        <h:outputText value="#{egresso.demandante}" />
+                    </p:column>
+                    
+                    <p:column filterBy="#{egresso.demandanteSigla}" headerText="Demandante - Sigla" visible="#{egressoListaSinteticaMB.estadoDasColunas.demandanteSigla}">
+
+                        <h:outputText value="#{egresso.demandanteSigla}" />
+                    </p:column>
+
+                    <p:column headerText="Instituição" visible="#{egressoListaSinteticaMB.estadoDasColunas.instituicao}">
+                        <h:outputText value="#{egresso.instituicao}"/>
+                    </p:column>
+
+                    <p:column headerText="Unidade de Lotação" visible="#{egressoListaSinteticaMB.estadoDasColunas.unidadeDeLotacao}">
+                        <h:outputText value="#{egresso.unidadeDeLotacao}" />
+                    </p:column>
+
+                    <p:column headerText="Logradouro da Unidade de Lotação" visible="#{egressoListaSinteticaMB.estadoDasColunas.logradouroUnidadeDeLotacao}">
+                        <h:outputText value="#{egresso.logradouroUnidadeDeLotacao}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Bairro da Unidade de Lotação" visible="#{egressoListaSinteticaMB.estadoDasColunas.bairroUnidadeDeLotacao}">
+                        <h:outputText value="#{egresso.bairroUnidadeDeLotacao}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Município da Unidade de Lotação" visible="#{egressoListaSinteticaMB.estadoDasColunas.municipioUnidadeDeLotacao}">
+                        <h:outputText value="#{egresso.municipioUnidadeDeLotacao}"/>
+                    </p:column>
+                    
+                    <p:column headerText="CEP da Unidade de Lotação" visible="#{egressoListaSinteticaMB.estadoDasColunas.cepUnidadeDeLotacao}">
+                        <h:outputText value="#{egresso.cepUnidadeDeLotacao}"/>
+                    </p:column>
+
+                    <p:column headerText="Ponto Focal na Unidade" visible="#{egressoListaSinteticaMB.estadoDasColunas.pontoFocalNaUnidade}">
+                        <h:outputText value="#{egresso.pontoFocalNaUnidade}"/>
+                    </p:column> 
+
+                    <p:column headerText="Telefone 1 Ponto Focal" visible="#{egressoListaSinteticaMB.estadoDasColunas.telefone1PontoFocal}">
+                        <h:outputText value="#{egresso.telefone1PontoFocal}"/>
+                    </p:column> 
+
+                    <p:column headerText="Telefone 2 Ponto Focal" visible="#{egressoListaSinteticaMB.estadoDasColunas.telefone2PontoFocal}">
+                        <h:outputText value="#{egresso.telefone2PontoFocal}"/>
+                    </p:column> 
+
+                    <p:column headerText="Telefone 3 Ponto Focal" visible="#{egressoListaSinteticaMB.estadoDasColunas.telefone3PontoFocal}">
+                        <h:outputText value="#{egresso.telefone3PontoFocal}"/>
+                    </p:column> 
+
+                    <p:column headerText="Telefone 4 Ponto Focal" visible="#{egressoListaSinteticaMB.estadoDasColunas.telefone4PontoFocal}">
+                        <h:outputText value="#{egresso.telefone4PontoFocal}"/>
+                    </p:column> 
+
+                    <p:column headerText="Telefone 5 Ponto Focal" visible="#{egressoListaSinteticaMB.estadoDasColunas.telefone5PontoFocal}">
+                        <h:outputText value="#{egresso.telefone5PontoFocal}"/>
+                    </p:column> 
+
+                    <p:column headerText="Email Ponto Focal" visible="#{egressoListaSinteticaMB.estadoDasColunas.emailPontoFocal}">
+                        <h:outputText value="#{egresso.emailPontoFocal}"/>
+                    </p:column> 
+
+                    <p:column headerText="Território" visible="#{egressoListaSinteticaMB.estadoDasColunas.territorio}">
+                        <h:outputText value="#{egresso.territorio}"/>
+                    </p:column>
+
+                    <p:column headerText="Município Vaga" visible="#{egressoListaSinteticaMB.estadoDasColunas.municipioDaVaga}">
+                        <h:outputText value="#{egresso.municipioDaVaga}"/>
+                    </p:column>
+                    
+
+                    <p:column headerText="Divergência Município" visible="#{egressoListaSinteticaMB.estadoDasColunas.divergenciaMunicipio}">
+                        <h:outputText value="#{egresso.divergenciaMunicipio ? 'MUNICÍPIO VAGA DIVERGENTE' : ''}"/>
+                    </p:column>
+
+                    <p:column headerText="Distância entre os Municípios (km)" visible="#{egressoListaSinteticaMB.estadoDasColunas.distanciaMunicipios}" style="#{egresso ne null ? 'color:'.concat(egresso.distanciaMunicipios/1000 > parametroMB.valorEmLong('limiteDistanciaEntreMunicipios') ? 'red' : 'green') : ''}">
+                        <h:outputText value="#{egresso.distanciaMunicipios/1000}" rendered="#{egresso.distanciaMunicipios ne null}">
+                            <f:convertNumber pattern="#,##0.00"/>
+                        </h:outputText>
+                        <h:outputText value=" km" rendered="#{egresso.distanciaMunicipios ne null}"/>
+                    </p:column>
+
+                    <p:column headerText="Data Convocação SETRE/SINE" visible="#{egressoListaSinteticaMB.estadoDasColunas.dataConvocacaoSETRESINE}">
+                        <h:outputText value="#{egresso.dataConvocacaoSETRESINE}"/>
+                    </p:column> 
+
+                    <p:column headerText="Remessa SETRE/SINE" visible="#{egressoListaSinteticaMB.estadoDasColunas.remessaSETRESINE}">
+                        <h:outputText value="#{egresso.remessaSETRESINE}"/>
+                    </p:column> 
+
+                    <p:column headerText="Data Remessa SETRE/SINE" visible="#{egressoListaSinteticaMB.estadoDasColunas.dataRemessaSETRESINE}">
+                        <h:outputText value="#{egresso.dataRemessaSETRESINE}"/>
+                    </p:column> 
+
+                    <p:column headerText="Mês Remessa SETRE/SINE" visible="#{egressoListaSinteticaMB.estadoDasColunas.mesRemessaSETRESINE}">
+                        <h:outputText value="#{egresso.mesRemessaSETRESINE}"/>
+                    </p:column> 
+
+                    <p:column headerText="Categoria" filterBy="#{egresso.categoria}" visible="#{egressoListaSinteticaMB.estadoDasColunas.categoria}" style="#{egresso.corCategoria ne null ? 'color:'.concat(egresso.corCategoria).concat(';') : ''}">
+
+                        <h:outputText value="#{egresso.categoria}"/>
+                    </p:column> 
+
+                    <p:column filterBy="#{egresso.situacao}" headerText="Situação" visible="#{egressoListaSinteticaMB.estadoDasColunas.situacao}" style="#{egresso.corSituacao ne null ? 'color:'.concat(egresso.corSituacao).concat(';') : ''}">
+
+                        <h:outputText value="#{egresso.situacao}"/>
+                    </p:column>
+
+                    <p:column headerText="Anamnese?" visible="#{egressoListaSinteticaMB.estadoDasColunas.anamnese}">
+                        <h:outputText value="#{egresso.anamnese}"/>
+                    </p:column> 
+
+                    <p:column headerText="Data Início Atividades" visible="#{egressoListaSinteticaMB.estadoDasColunas.dataInicioAtividades}">
+                        <h:outputText value="#{egresso.dataInicioAtividades}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column headerText="Publicação D.O" visible="#{egressoListaSinteticaMB.estadoDasColunas.publicacaoDiarioOficial}">
+                        <h:outputText value="#{egresso.publicacaoDiarioOficial}"/>
+                    </p:column>
+
+                    <p:column headerText="Data de Envio da Situação para SETRE/SINE" visible="#{egressoListaSinteticaMB.estadoDasColunas.dataDeEnvioDaSituacaoParaSETRESINE}">
+                        <h:outputText value="#{egresso.dataDeEnvioDaSituacaoParaSETRESINE}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Formação Beneficiário" visible="#{egressoListaSinteticaMB.estadoDasColunas.formacao}">
+                        <h:outputText value="#{egresso.formacao}"/>
+                    </p:column>
+
+                    <p:column headerText="Eixo de Formação Beneficiário" visible="#{egressoListaSinteticaMB.estadoDasColunas.eixoDeFormacao}">
+                        <h:outputText value="#{egresso.eixoDeFormacao}"/>
+                    </p:column> 
+                    
+                    <p:column headerText="Município Escola" visible="#{egressoListaSinteticaMB.estadoDasColunas.municipioEscola}">
+                        <h:outputText value="#{egresso.municipioEscola}"/>
+                    </p:column>
+
+                    <p:column headerText="Vale Alimentação" visible="#{egressoListaSinteticaMB.estadoDasColunas.valeAlimentacao}">
+                        <h:outputText value="#{egresso.valeAlimentacao}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Vale Transporte" visible="#{egressoListaSinteticaMB.estadoDasColunas.valeTransporte}">
+                        <h:outputText value="#{egresso.valeTransporte}"/>
+                    </p:column>
+                    
+                    <p:column headerText="ASO" visible="#{egressoListaSinteticaMB.estadoDasColunas.aso}">
+                        <h:outputText value="#{egresso.aso eq null ? '' : (egresso.aso ? 'Sim' : 'Não')}"/>
+                    </p:column>
+
+                    <p:column headerText="Tamanho Fardamento" visible="#{egressoListaSinteticaMB.estadoDasColunas.tamanhoDeCamisa}" filterMatchMode="equals">
+                        <h:outputText value="#{egresso.tamanhoDeCamisa}"/>
+                    </p:column>
+
+                    <p:column headerText="Data Recebimento Fardamento" visible="#{egressoListaSinteticaMB.estadoDasColunas.dataRecebimentoFardamento}">
+                        <h:outputText value="#{egresso.dataRecebimentoFardamento}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Escola Conclusão" exportable="#{egressoListaSinteticaMB.estadoDasColunas.escolaconlusao}" visible="#{egressoListaSinteticaMB.estadoDasColunas.escolaconlusao}">
+                        <h:outputText value="#{egresso.escolaconclusao }"/>
+                    </p:column>   
+                    
+                    <p:column headerText="Ficha de Admissão Pendente" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.fichaAdmissao}" visible="#{egressoListaSinteticaMB.estadoDasColunas.fichaAdmissao}">
+
+                        <h:outputText value="#{egresso.fichaAdmissao  eq null ? '' : (egresso.fichaAdmissao ? 'Pendente' : '')}"/>
+                    </p:column>
+
+                    
+                    <p:column headerText="CTPS Pendente" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.ctpsPendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.ctpsPendente}">
+
+                        <h:outputText value="#{egresso.ctpsPendente  eq null ? '' : (egresso.ctpsPendente ? 'Pendente' : '')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="CPF Pendente" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.cpfPendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.cpfPendente}">
+
+                        <h:outputText value="#{egresso.cpfPendente  eq null ? '' : (egresso.cpfPendente ? 'Pendente' : '')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Comprovante de Residencia Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.comprovanteresidenciaPendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.comprovanteresidenciaPendente}">
+
+                        <h:outputText value="#{egresso.comprovanteresidenciaPendente  eq null ? '' : (egresso.comprovanteresidenciaPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="RG Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.rgPendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.rgPendente}">
+
+                        <h:outputText value="#{egresso.rgPendente  eq null ? '' : (egresso.rgPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    <p:column headerText="Carta Cidadão Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.cartaCidadaoPendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.cartaCidadaoPendente}">
+
+                        <h:outputText value="#{egresso.cartaCidadaoPendente  eq null ? '' : (egresso.cartaCidadaoPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Titulo de eleitor Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.tituloEleitorPendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.tituloEleitorPendente}">
+
+                        <h:outputText value="#{egresso.tituloEleitorPendente  eq null ? '' : (egresso.tituloEleitorPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    <p:column headerText="Comprovante de Votação Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.comprovanteVotacaoPendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.comprovanteVotacaoPendente}">
+
+                        <h:outputText value="#{egresso.comprovanteVotacaoPendente  eq null ? '' : (egresso.comprovanteVotacaoPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    <p:column headerText="Diploma Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.diplomaPendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.diplomaPendente}">
+
+                        <h:outputText value="#{egresso.diplomaPendente  eq null ? '' : (egresso.diplomaPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    <p:column headerText="Currículo Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.curriculoPendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.curriculoPendente}">
+
+                        <h:outputText value="#{egresso.curriculoPendente  eq null ? '' : (egresso.curriculoPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    <p:column headerText="Foto 3x4 Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.foto3x4Pendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.foto3x4Pendente}">
+
+                        <h:outputText value="#{egresso.foto3x4Pendente  eq null ? '' : (egresso.foto3x4Pendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="ASO Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.asoPendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.asoPendente}">
+
+                        <h:outputText value="#{egresso.asoPendente  eq null ? '' : (egresso.asoPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="certidão de Casamento Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.certidaoCasamentoPendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.certidaoCasamentoPendente}">
+
+                        <h:outputText value="#{egresso.certidaoCasamentoPendente  eq null ? '' : (egresso.certidaoCasamentoPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Certidão de Nascimento Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.certidaoNascimentoPendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.certidaoNascimentoPendente}">
+
+                        <h:outputText value="#{egresso.certidaoNascimentoPendente  eq null ? '' : (egresso.certidaoNascimentoPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Comprovante de Escolaridade Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.comprovanteEscolaridadePendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.comprovanteEscolaridadePendente}">
+
+                        <h:outputText value="#{egresso.certidaoNascimentoPendente  eq null ? '' : (egresso.certidaoNascimentoPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="reservista Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.reservistaPendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.reservistaPendente}">
+
+                        <h:outputText value="#{egresso.reservistaPendente  eq null ? '' : (egresso.reservistaPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Cartão de vacinação Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.cartaoVacinaPendente}" visible="#{egressoListaSinteticaMB.estadoDasColunas.cartaoVacinaPendente}">
+
+                        <h:outputText value="#{egresso.cartaoVacinaPendente  eq null ? '' : (egresso.cartaoVacinaPendente ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Contrato de Trabalho Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.contratoTrabalhoFlem}" visible="#{egressoListaSinteticaMB.estadoDasColunas.contratoTrabalhoFlem}">
+
+                        <h:outputText value="#{egresso.contratoTrabalhoFlem  eq null ? '' : (egresso.contratoTrabalhoFlem ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Vale Transporte Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.vale_Transporte}" visible="#{egressoListaSinteticaMB.estadoDasColunas.vale_Transporte}">
+
+                        <h:outputText value="#{egresso.vale_Transporte  eq null ? '' : (egresso.vale_Transporte ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Vale Alimentação Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.vale_Alimentacao}" visible="#{egressoListaSinteticaMB.estadoDasColunas.vale_Alimentacao}">
+
+                        <h:outputText value="#{egresso.vale_Alimentacao  eq null ? '' : (egresso.vale_Alimentacao ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Plano de Saúde Pendente" exportable="#{egressoListaSinteticaMB.estadoDasColunas.plano_Saude}" visible="#{egressoListaSinteticaMB.estadoDasColunas.plano_Saude}">
+
+                        <h:outputText value="#{egresso.plano_Saude  eq null ? '' : (egresso.plano_Saude ? 'Pendente' :'')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Crachá Pendente" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.cracha}" visible="#{egressoListaSinteticaMB.estadoDasColunas.cracha}">
+
+                        <h:outputText value="#{egresso.cracha  eq null ? '' : (egresso.cracha ? 'Pendente' :'')}"/>
+                    </p:column>
+                    <p:column headerText="Carteira Assinada" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.carteiraAssinada}" visible="#{egressoListaSinteticaMB.estadoDasColunas.carteiraAssinada}">
+
+                        <h:outputText value="#{egresso.carteiraAssinada eq null ? '' : (egresso.carteiraAssinada ? 'Sim' : 'Não')}"/>
+                    </p:column>
+                    <p:column headerText="Estágio Concluído" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.estagioConcluido}" visible="#{egressoListaSinteticaMB.estadoDasColunas.estagioConcluido}">
+
+                        <h:outputText value="#{egresso.estagioConcluido eq null ? '' : (egresso.estagioConcluido ? 'S' :'')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Tempo de Contratação (Em meses)" filterMatchMode="exact" 
+                              exportable="#{egressoListaSinteticaMB.estadoDasColunas.tempoContratacao}" visible="#{egressoListaSinteticaMB.estadoDasColunas.tempoContratacao}">
+                        <h:outputText value="#{egresso.tempoContratacao}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Mês/Ano Admissão" 
+                              exportable="#{egressoListaSinteticaMB.estadoDasColunas.mesAnoAdmissao}" visible="#{egressoListaSinteticaMB.estadoDasColunas.mesAnoAdmissao}">
+                        <h:outputText value="#{egresso.mesAnoAdmissao}"/>
+                    </p:column>
+                    
+                    <p:column  headerText="Mês/Ano Desligamento" 
+                              exportable="#{egressoListaSinteticaMB.estadoDasColunas.mesAnoDesligamento}" visible="#{egressoListaSinteticaMB.estadoDasColunas.mesAnoDesligamento}">
+                        <h:outputText value="#{egresso.mesAnoDesligamento}"/>
+                    </p:column>
+
+                    <p:column headerText="CTPS" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.ctps}" visible="#{egressoListaSinteticaMB.estadoDasColunas.ctps}">
+                        <h:outputText value="#{egresso.ctps}"/>
+                    </p:column>
+                    
+                    <p:column headerText="PIS" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.pis}" visible="#{egressoListaSinteticaMB.estadoDasColunas.pis}">
+                        <h:outputText value="#{egresso.pis}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Escritório Regional" filterBy="#{egresso.escRegional}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.escRegional}" visible="#{egressoListaSinteticaMB.estadoDasColunas.escRegional}">
+                        <h:outputText value="#{egresso.escRegional}"/>
+                    </p:column>
+                    <p:column headerText="Curso Superior Concluído" filterBy="#{egresso.cursoSuperiorConcluido}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.cursoSuperiorConcluido}" visible="#{egressoListaSinteticaMB.estadoDasColunas.cursoSuperiorConcluido}">
+                        <h:outputText value="#{egresso.cursoSuperiorConcluido}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Curso Superior Andamento" filterBy="#{egresso.cursoSuperiorAndamento}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.cursoSuperior}" visible="#{egressoListaSinteticaMB.estadoDasColunas.cursoSuperior}">
+                        <h:outputText value="#{egresso.cursoSuperiorAndamento}"/>
+                    </p:column>
+                    <p:column headerText="Tipo de Instituição" filterBy="#{egresso.tipoInstituicaoSuperior.descricao}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.tipoInstituicaoSuperior}" visible="#{egressoListaSinteticaMB.estadoDasColunas.tipoInstituicaoSuperior}">
+                        <h:outputText value="#{egresso.tipoInstituicaoSuperior.descricao}"/>
+                    </p:column>
+                    <p:column headerText="Instituição de ensino superior" filterBy="#{egresso.nomeInstituicaoSuperior}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.nomeInstituicaoSuperior}" visible="#{egressoListaSinteticaMB.estadoDasColunas.nomeInstituicaoSuperior}">
+                        <h:outputText value="#{egresso.nomeInstituicaoSuperior}"/>
+                    </p:column>
+                    <p:column headerText="Curso da Graduação" filterBy="#{egresso.nomeCursoGraduacao}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.nomeCursoGraduacao}" visible="#{egressoListaSinteticaMB.estadoDasColunas.nomeCursoGraduacao}">
+                        <h:outputText value="#{egresso.nomeCursoGraduacao}"/>
+                    </p:column>
+                    <p:column headerText="Modalidade da Graduação" filterBy="#{egresso.modalidadeGraduacao}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.modalidadeGraduacao}" visible="#{egressoListaSinteticaMB.estadoDasColunas.modalidadeGraduacao}">
+                        <h:outputText value="#{egresso.modalidadeGraduacao}"/>
+                    </p:column>
+                    <p:column headerText="Ano da Matricula" filterBy="#{egresso.anoMatricula}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.anoMatricula}" visible="#{egressoListaSinteticaMB.estadoDasColunas.anoMatricula}">
+                        <h:outputText value="#{egresso.anoMatricula}"/>
+                    </p:column>
+                    <p:column headerText="Semestre" filterBy="#{egresso.semestre}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.semestre}" visible="#{egressoListaSinteticaMB.estadoDasColunas.semestre}">
+                        <h:outputText value="#{egresso.semestre}"/>
+                    </p:column>
+                    <p:column headerText="Renda do PPE Ajuda" filterBy="#{egresso.rendaPPEAjuda}" filterMatchMode="contains" exportable="#{egressoListaSinteticaMB.estadoDasColunas.rendaPPEAjuda}" visible="#{egressoListaSinteticaMB.estadoDasColunas.rendaPPEAjuda}">
+                        <h:outputText value="#{egresso.rendaPPEAjuda eq null ? '' : (egresso.rendaPPEAjuda ? 'SIM' : 'NAO')}"/>
+                    </p:column>
+                    <p:column headerText="Data Informação do Semestre" exportable="#{egressoListaSinteticaMB.estadoDasColunas.dataRespostaSemestre}" visible="#{egressoListaSinteticaMB.estadoDasColunas.dataRespostaSemestre}">
+                        <h:outputText value="#{egresso.dataRespostaSemestre}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Pretende Fazer Curso Superior" filterBy="#{egresso.pretendeFazerCursoSuperior}" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.pretendeFazerCursoSuperior}" visible="#{egressoListaMB.estadoDasColunas.pretendeFazerCursoSuperior}">
+                        <h:outputText value="#{egresso.pretendeFazerCursoSuperior}"/>
+                    </p:column>
+                    <p:column headerText="Curso Técnico" filterBy="#{egresso.cursoTecnicoProfissionalizante}" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.cursoTecnicoProfissionalizante}" visible="#{egressoListaMB.estadoDasColunas.cursoTecnicoProfissionalizante}">
+                        <h:outputText value="#{egresso.cursoTecnicoProfissionalizante}"/>
+                    </p:column>
+                    <p:column headerText="Tipo Instituição do Curso Técnico" filterBy="#{egresso.tipoInstituicaoTecnica}" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.tipoInstituicaoTecnica}" visible="#{egressoListaMB.estadoDasColunas.tipoInstituicaoTecnica}">
+                        <h:outputText value="#{egresso.tipoInstituicaoTecnica}"/>
+                    </p:column>
+                    <p:column headerText="Nome Instituição do Curso Técnico" filterBy="#{egresso.nomeInstituicaoTecnico}" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.nomeInstituicaoTecnico}" visible="#{egressoListaMB.estadoDasColunas.nomeInstituicaoTecnico}">
+                        <h:outputText value="#{egresso.nomeInstituicaoTecnico}"/>
+                    </p:column>
+                    <p:column headerText="Nome do Curso Técnico" filterBy="#{egresso.nomeCursoTecnico}" filterMatchMode="contains" exportable="#{egressoListaMB.estadoDasColunas.nomeCursoTecniconomeCursoTecnico}" visible="#{egressoListaMB.estadoDasColunas.nomeCursoTecnico}">
+                        <h:outputText value="#{egresso.nomeCursoTecnico}"/>
+                    </p:column>
+<!--                    <p:selectOneMenu required="true" requiredMessage="Modalidade da Graduação é obrigatório" id="modalidadeGraduacao" value="#{egressoCadastroMB.egresso.modalidadeGraduacao}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemValue="" itemLabel="Selecione" />
+                                        <f:selectItems value="#{egressoCadastroMB.getModalidades()}" var="item" itemValue="#{item}" itemLabel="#{item.descricao}" />
+                                    </p:selectOneMenu>-->
+                </p:dataTable>
+                <script type="text/javascript">
+                    $(document).ready(function() {
+                        $('.cpf .ui-column-filter').mask('999.999.999-99');
+                    });
+                </script>
+            </p:fieldset>
+        </h:form>
+    </ui:define>
+</ui:composition>

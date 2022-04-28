@@ -1,0 +1,38 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <p:fieldset legend="Relatorio Quantitativo" style="margin-top: 10px;">
+            <h:form>
+                <p:selectOneMenu value="#{relatorioQuantitativoMB.opcaoLinha}">
+                    <f:selectItem itemLabel="Selecione uma opcao" itemValue=""/>
+                    <f:selectItems value="#{relatorioQuantitativoMB.camposPossiveis()}" var="campo" itemLabel="#{campo}" />
+                </p:selectOneMenu>
+                <p:selectOneMenu value="#{relatorioQuantitativoMB.opcaoColuna}">
+                    <f:selectItem itemLabel="Selecione uma opcao" itemValue=""/>
+                    <f:selectItems value="#{relatorioQuantitativoMB.camposPossiveis()}" var="campo" itemLabel="#{campo}" />
+                </p:selectOneMenu>
+                <p:commandButton value="Calcular" update="quantitativoTable" actionListener="#{relatorioQuantitativoMB.calcular()}"/>
+                <p:dataTable value="${relatorioQuantitativoMB.itensLinha}" var="itemLinha" id="quantitativoTable" emptyMessage="">
+                    <p:column headerText="#{relatorioQuantitativoMB.opcaoLinha}/#{relatorioQuantitativoMB.opcaoColuna}">
+                        <h:outputText value="#{itemLinha}" rendered="#{itemLinha ne null}"/>
+                        <h:outputText value="Null" rendered="#{itemLinha eq null}"/>
+                    </p:column>
+                    <p:columns value="${relatorioQuantitativoMB.itensColuna}" var="itemColuna" headerText="#{itemColuna eq null ? 'Nulo' : itemColuna}">
+                        <h:outputText value="#{relatorioQuantitativoMB.quantitativo.get(itemLinha).get(itemColuna)}"/>
+                    </p:columns>
+                    <f:facet name="footer">
+                        <p:commandButton value="Excel" ajax="false">
+                            <p:dataExporter type="xlsx" target="quantitativoTable" fileName="RelatorioQuanitativo.PrimeiroEmprego.#{relatorioQuantitativoMB.opcaoLinha.replaceAll(' ', '')}.#{relatorioQuantitativoMB.opcaoColuna.replaceAll(' ', '')}"/>
+                        </p:commandButton>
+                    </f:facet>
+                </p:dataTable>
+            </h:form>
+        </p:fieldset>
+    </ui:define>
+</ui:composition>

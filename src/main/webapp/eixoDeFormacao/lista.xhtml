@@ -1,0 +1,29 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <p:fieldset legend="Eixo de Formação" style="margin-top: 10px;">
+            <h:form>
+  
+                <flem:commandButton value="Novo" action="/eixoDeFormacao/cadastro.xhtml" profile="add"/>
+                
+                <flem:dataTable id="eixosDeFormacao" value="#{eixoDeFormacaoListaMB.eixos}" actionEdit="/eixoDeFormacao/cadastro.xhtml?id=#{item.id}">
+ 
+                    <p:column filterBy="#{item.nome}" headerText="Nome da Categoria" filterMatchMode="contains">
+                        <h:outputText value="#{item.nome}" />
+                    </p:column>
+
+                </flem:dataTable>
+                <flem:commandButton value="Novo" action="/eixoDeFormacao/cadastro.xhtml" profile="add"/>
+                
+            </h:form>
+        </p:fieldset>
+
+    </ui:define>
+</ui:composition>
+

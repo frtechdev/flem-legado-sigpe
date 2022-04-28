@@ -1,0 +1,87 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    template="/template/padrao.xhtml">
+    
+
+    <ui:define name="centro">
+        <h:form id="form">
+        <h3 style="margin-top:0">Cadastro de Evento</h3>
+        <table>
+            <tr>
+                <td>Nome</td>
+                <td>
+                    <p:inputText value="#{eventoCadastroMB.evento.nome}" id="nome" style="width: 450px;"/>
+                    <p:message for="nome"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Data</td>
+                <td>
+                    <p:calendar value="#{eventoCadastroMB.evento.data}" id="data" style="width: 450px;" pattern="dd/MM/yyyy HH:mm"/>
+                    <p:message for="data"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Local</td>
+                <td>
+                    <p:selectOneMenu id="local" value="#{eventoCadastroMB.evento.local}" style="width: 450px;" converter="#{genericConverter}">
+                        <f:selectItem itemLabel="Selecione o Local" itemValue="" noSelectionOption="true"/>
+                        <f:selectItems value="#{eventoCadastroMB.locais}" var="local" itemLabel="#{local.nome}"/>
+                    </p:selectOneMenu>
+                </td>
+            </tr>
+            <tr>
+                <td>Tipo</td>
+                <td>
+                    <p:selectOneMenu id="tipo" value="#{eventoCadastroMB.evento.tipo}" effect="fold" editable="true" style="width: 450px;">
+                        <f:selectItems value="#{eventoCadastroMB.obterRespostas('tipo')}"/>
+                    </p:selectOneMenu>
+                </td>
+            </tr>
+            <tr>
+                <td>Modalidade</td>
+                <td>
+                    <p:selectOneMenu id="modalidade" value="#{eventoCadastroMB.evento.modalidade}" effect="fold" editable="true" style="width: 450px;">
+                        <f:selectItems value="#{eventoCadastroMB.obterRespostas('modalidade')}"/>
+                    </p:selectOneMenu>
+                </td>
+            </tr>
+            <tr>
+                <td>Municípios Envolvidos</td>
+                <td>
+                    <p:selectManyMenu id="municipiosEnvolvidos" value="#{eventoCadastroMB.evento.municipiosEnvolvidos}" filter="true" converter="#{genericConverter}" showCheckbox="true" style="width: 450px;">
+                        <f:attribute name="collectionType" value="java.util.ArrayList" />
+                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                        <f:selectItems value="#{eventoCadastroMB.municipios}" var="municipio" itemLabel="#{municipio.nome} - #{municipio.uf}"/>
+                    </p:selectManyMenu>
+                    <p:message for="municipiosEnvolvidos"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Demandantes Envolvidos</td>
+                <td>
+                    <p:selectManyMenu id="demandantesEnvolvidos" value="#{eventoCadastroMB.evento.demandantesEnvolvidos}" filter="true" converter="#{genericConverter}" showCheckbox="true" style="width: 450px;">
+                        <f:attribute name="collectionType" value="java.util.ArrayList" />
+                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                        <f:selectItems value="#{eventoCadastroMB.demandantes}" var="demandante" itemLabel="#{demandante.nome}}"/>
+                    </p:selectManyMenu>
+                    <p:message for="demandantesEnvolvidos"/>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+              <span style="float: left; background-color: #EEEEEE; text-align: left;">
+                  <p:commandButton  action="#{eventoCadastroMB.salvar()}" value="Salvar" icon="ui-icon-disk" update="@form" />
+              </span>
+          </td>
+            </tr>
+        </table>
+    </h:form>
+    </ui:define>
+</ui:composition>

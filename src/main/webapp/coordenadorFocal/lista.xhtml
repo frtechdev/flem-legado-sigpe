@@ -1,0 +1,53 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <p:fieldset legend="Coodenador Focal" style="margin-top: 10px;">
+            <h:form>
+                <div id="coordenadorFocalList">
+                    <p:dataTable  id="coordenadorFocal" paginator="true" value="#{coordenadorFocalListaMB.coodenadoresFocais}" draggableColumns="true" var="coordenadorFocal" paginatorPosition="bottom" rows="20" 
+                                  rowsPerPageTemplate="20,30,50,100" rowIndexVar="item" emptyMessage="Nenhum registro encontrado" tableStyle="width:auto"
+                                  filterEvent="enter">
+                        <f:facet name="header">
+                        <div style="height: 25px;text-align: left">
+                            <p:commandButton value="Novo" action="/coordenadorFocal/cadastro.xhtml" icon="ui-icon-plus" rendered="#{usuarioLogadoMB.temPermissao('primEmp.editarCoordenadorFocal')}"/>
+                        </div>
+                        </f:facet>
+                        <p:column headerText="Nº" width="15">
+                            <h:outputText value="#{item+1}" />
+                        </p:column>
+                        <p:column filterBy="#{coordenadorFocal.demandante.nome}" headerText="Demandante" filterMatchMode="contains">
+                            <h:outputText value="#{coordenadorFocal.demandante.nome}" />
+                        </p:column>
+                        <p:column filterBy="#{coordenadorFocal.nome}" headerText="Nome" filterMatchMode="contains">
+                            <h:outputText value="#{coordenadorFocal.nome}" />
+                        </p:column>
+                        <p:column filterBy="#{coordenadorFocal.telefone}" headerText="Telefone" filterMatchMode="contains">
+                            <h:outputText value="#{coordenadorFocal.telefone}" />
+                        </p:column>
+                        <p:column filterBy="#{coordenadorFocal.email}" headerText="Email" filterMatchMode="contains">
+                            <h:outputText value="#{coordenadorFocal.email}" />
+                        </p:column>
+                        <p:column exportable="false" toggleable="false">
+                            <p:button value="Editar" href="/coordenadorFocal/cadastro.xhtml?id=#{coordenadorFocal.id}"  icon="ui-icon-pencil" rendered="#{usuarioLogadoMB.temPermissao('primEmp.editarCoordenadorFocal')}"/>
+                        </p:column>
+                        <f:facet name="footer">
+                            <div class="bt-action" >
+                                <p:commandButton value="Novo" action="/coordenadorFocal/cadastro.xhtml" style="float:left;" icon="ui-icon-plus" rendered="#{usuarioLogadoMB.temPermissao('primEmp.editarCoordenadorFocal')}"/>
+                            </div>
+                        </f:facet>
+                    </p:dataTable>
+                    
+                </div>
+            </h:form>
+        </p:fieldset>
+
+    </ui:define>
+</ui:composition>

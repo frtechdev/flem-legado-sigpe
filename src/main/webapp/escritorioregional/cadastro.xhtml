@@ -1,0 +1,118 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    
+    <ui:define name="centro">
+        <style>
+            .without-selectall .ui-selectcheckboxmenu-header .ui-chkbox{
+                display: none;
+            }
+            
+        </style>
+        <h:form id="form">
+        <h3 style="margin-top:0">Cadastro de Escritórios Regionais</h3>
+        <table>
+            <tr>
+                <td>Nome</td>
+                <td>
+                    <flem:inputText value="#{escritorioRegionalCadastroMB.obj.nome}" id="nome" style="width: 450px;"/>
+                </td>
+            </tr>
+            
+            <tr>
+                <td>Cep</td>
+                <td>
+                    <flem:inputMask converter="cepConverter" id="cep" value="#{escritorioRegionalCadastroMB.obj.cep}" mask="99999-999" style="width: 450px;"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Logradouro</td>
+                <td>
+                    <flem:inputText value="#{escritorioRegionalCadastroMB.obj.logradouro}" id="logradouro" style="width: 450px;"/>
+                </td>
+            </tr>
+            
+            <tr>
+                <td>Bairro</td>
+                <td>
+                    <flem:inputText value="#{escritorioRegionalCadastroMB.obj.bairro}" id="bairro" style="width: 450px;"/>
+                </td>
+            </tr>
+            
+            <tr>
+                <td>Cidade</td>
+                <td>
+                    <p:selectOneMenu id="cidade" converter="uidConverter" value="#{escritorioRegionalCadastroMB.obj.cidade}" style="width:433px;">
+                        <f:selectItem itemLabel="Selecione" itemValue="" />
+                        <f:selectItems value="#{escritorioRegionalCadastroMB.municipios}" var="item" itemLabel="#{item.nome}" />
+                    </p:selectOneMenu>
+                    <p:message for="cidade"/>
+                </td>
+            </tr>
+                        
+            <tr>
+                <td>Celular</td>
+                <td>
+                    <flem:inputText id="celular" value="#{escritorioRegionalCadastroMB.obj.celular}"   style="width: 450px;"/>
+                    <!--<p:inputMask id="celular" value="#{escritorioRegionalCadastroMB.obj.celular}" mask="(99)99999-9999" style="width: 450px!important" required="true"/>-->
+                </td>
+            </tr>
+            
+            <tr>
+                <td>Telefone</td>
+                <td>
+                     <flem:inputText id="telefone" value="#{escritorioRegionalCadastroMB.obj.telefone}"   style="width: 450px;"/>
+                     <!--<flem:inputMask id="telefone" value="#{escritorioRegionalCadastroMB.obj.telefone}" style="width: 450px;"/>-->
+                </td>
+            </tr>
+            
+            <tr>
+                <td>E-mail</td>
+                <td>
+                    <flem:inputText id="email" value="#{escritorioRegionalCadastroMB.obj.email}" style="width: 450px;" type="email" />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Ativo</td>
+                <td>
+                    <p:selectBooleanCheckbox id="ativo" value="#{escritorioRegionalCadastroMB.obj.ativo}" />
+                    <p:message for="ativo"/>
+                </td>
+            </tr>
+            
+            <tr>
+                <td>Municipios</td>
+                <td>
+                    <p:selectCheckboxMenu panelStyleClass="without-selectall" id="municipios" converter="uidConverter" value="#{escritorioRegionalCadastroMB.municipiosSelecionados}" label="Municipios" multiple="true"
+                                  filter="true" filterMatchMode="startsWith" panelStyle="width:450px;" style="width:460px;">
+                        <f:selectItems value="#{escritorioRegionalCadastroMB.municipios}" var="item" itemDisabled="#{item.escritorioRegional ne null and item.escritorioRegional.id ne escritorioRegionalCadastroMB.obj.id}" itemLabel="#{item.nome}" />
+                    </p:selectCheckboxMenu>
+                    <p:message for="municipios"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Colaboradores</td>
+                <td>
+                    <p:selectCheckboxMenu id="colaboradores" panelStyleClass="without-selectall" converter="uidConverter" value="#{escritorioRegionalCadastroMB.colaboradoresSelecionados}" label="Colaboradores" multiple="true"
+                                  filter="true" filterMatchMode="startsWith" panelStyle="width:450px;" style="width:460px;">
+                        <f:selectItems value="#{escritorioRegionalCadastroMB.colaboradores}" var="item" itemDisabled="#{item.escritorioRegional ne null and item.escritorioRegional.id ne escritorioRegionalCadastroMB.obj.id}" itemLabel="#{item.nome} / #{item.cargo}" />
+                    </p:selectCheckboxMenu>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <flem:commandButton  action="#{escritorioRegionalCadastroMB.inserir()}" value="Salvar" profile="salvar" />
+                </td>
+            </tr>
+        </table>
+    </h:form>
+    </ui:define>
+</ui:composition>

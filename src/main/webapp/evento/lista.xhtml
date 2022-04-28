@@ -1,0 +1,40 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+        <p:fieldset legend="Evento" style="margin-top: 10px;">
+            <h:form>
+                <flem:commandButton value="Novo" action="/evento/cadastro.xhtml"  profile="add"/>
+                <flem:dataTable id="eixosDeFormacao" value="#{eventoListaMB.eventos}" var="evento">
+                    <p:column filterBy="#{evento.nome}" headerText="Evento" filterMatchMode="contains">
+                        <h:outputText value="#{evento.nome}" />
+                    </p:column>
+                    <p:column filterBy="#{evento.data}" headerText="Data" filterMatchMode="contains" width="150">
+                        <h:outputText value="#{evento.data}">
+                            <f:convertDateTime pattern="dd/MM/yyy HH:mm"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column exportable="false" toggleable="false" width="80" headerText="Ação" style="text-align: center;" >
+                        <flem:commandButton  
+                             action="#{eventoListaMB.editarEvento(evento.id)}" 
+                             profile="edit"
+                             process="@this"
+                             />   
+                        <flem:commandButton
+                           profile="remove"
+                           actionListener="#{eventoListaMB.removerEvento(evento)}" 
+                           process="@this" 
+                           update="@all"
+                           ajax="true"/>
+                    </p:column>
+                </flem:dataTable>
+            </h:form>
+        </p:fieldset>
+    </ui:define>
+</ui:composition>
+

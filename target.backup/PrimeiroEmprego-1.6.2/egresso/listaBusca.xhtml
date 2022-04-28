@@ -1,0 +1,212 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+        <h:outputScript library="js" name="egresso.lista.js"/>  
+        <h:outputStylesheet>
+            .ui-columntoggler-items{
+            width:630px;
+            }
+            .ui-columntoggler-item{
+            width:200px;
+            float:left;
+            white-space: normal !important;
+            }
+            .ui-columntoggler{
+            height:450px !important;
+            }
+        </h:outputStylesheet>
+        <h:form id="egressosForm">
+            <p:fieldset legend="Filtrar" style="margin-top: 10px;">
+                    <div class="content">
+                        <table>
+                            <tr>  
+                                <td><p:outputLabel for="nome" value="Nome:" /></td>
+                                <td>
+                                    <flem:inputText value="#{egressoBuscaMB.filtro.nome}" id="nome" style="width: 450px;"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><p:outputLabel for="cpf" value="CPF:" /></td>
+                                <td>
+                                    <flem:inputText value="#{egressoBuscaMB.filtro.cpf}" id="cpf" style="width: 450px;"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><p:outputLabel for="matricula" value="Matricula" /></td>
+                                <td>
+                                    <flem:inputText value="#{egressoBuscaMB.filtro.matriculaFlem}" id="matricula" style="width: 450px;"/>
+                                </td>
+                            </tr>
+                        </table>
+                        <p:accordionPanel id="acc" styleClass="ui-accordion-header ui-helper-reset ui-state-default ui-corner-all" activeIndex="null">
+                            <p:tab title="Outros Filtros">
+
+                                <table>
+                                    <tr>  
+                                        <td>
+                                            <p:outputLabel value="Escritórios Regionais" style="display: block; margin-bottom: 5px;" />
+                                            <p:selectBooleanCheckbox value="#{egressoBuscaMB.selectEsc}"> Selecionar Todos
+                                                <p:ajax listener="#{egressoBuscaMB.onSelectAll(1)}" process="@this" event="change" update="egressosForm:acc:cbEscritorio egressosForm:acc:cbMunicicpios egressosForm:acc:cbDemandante" />
+                                            </p:selectBooleanCheckbox>
+                                            <p:selectManyMenu id="cbEscritorio" value="#{egressoBuscaMB.escritoriosSelecionados}" style="width:400px;" converter="uidConverter"
+                                                              var="m" filter="true" filterMatchMode="contains" showCheckbox="true" scrollHeight="200">
+                                                <f:selectItems value="#{egressoBuscaMB.escritoriosRegionais}" var="item" itemLabel="#{item.nome}" itemValue="#{item}" />
+                                                <p:ajax update="egressosForm:acc:cbMunicicpios egressosForm:acc:cbDemandante" process="@this" event="change" listener="#{egressoBuscaMB.obterMunicipios()}" />
+                                                <p:column>
+                                                    <h:outputText value="#{m.nome}" /> 
+                                                </p:column>
+                                            </p:selectManyMenu>
+                                        </td>
+                                        <td>
+                                            <p:outputLabel value="Municipios" style="display: block; margin-bottom: 5px;" />
+                                            <p:selectBooleanCheckbox value="#{egressoBuscaMB.selectMun}"> Selecionar Todos
+                                                <p:ajax listener="#{egressoBuscaMB.onSelectAll(2)}" process="@this" event="change" update="egressosForm:acc:cbMunicicpios egressosForm:acc:cbDemandante" />
+                                            </p:selectBooleanCheckbox>
+                                            <p:selectManyMenu id="cbMunicicpios" value="#{egressoBuscaMB.municipiosSelecionado}" style="width:400px" converter="uidConverter"
+                                                              var="m" filter="true" filterMatchMode="contains" showCheckbox="true" scrollHeight="200">
+                                                <f:selectItems value="#{egressoBuscaMB.municipios}" var="item" itemLabel="#{item.nome}" itemValue="#{item}" />
+                                                <p:ajax update="egressosForm:acc:cbDemandante" process="@this" event="change" listener="#{egressoBuscaMB.obterDemandantes()}" />
+                                                <p:column>
+                                                    <h:outputText value="#{m.nome}" />
+                                                </p:column>
+                                            </p:selectManyMenu>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p:outputLabel value="Demandantes" style="display: block; margin-bottom: 5px;" />   
+                                            <p:selectBooleanCheckbox value="#{egressoBuscaMB.selectDem}"> Selecionar Todos
+                                                <p:ajax listener="#{egressoBuscaMB.onSelectAll(3)}" process="@this" event="change" update="egressosForm:acc:cbDemandante" />
+                                            </p:selectBooleanCheckbox>
+                                            <p:selectManyMenu id="cbDemandante" value="#{egressoBuscaMB.demandantesSelecionados}" style="width:400px" converter="uidConverter"
+                                                              var="m" filter="true" filterMatchMode="contains" showCheckbox="true" scrollHeight="200">
+                                                <f:selectItems value="#{egressoBuscaMB.demandantes}" var="item" itemLabel="#{item.nome}" itemValue="#{item}" />
+                                                <p:column>
+                                                    <h:outputText value="#{m.nome}" />
+                                                </p:column>
+                                            </p:selectManyMenu>
+                                        </td>
+                                        <td>
+                                            <p:outputLabel value="Categorias" style="display: block; margin-bottom: 5px;" />          
+                                            <p:selectBooleanCheckbox value="#{egressoBuscaMB.selectCat}"> Selecionar Todos
+                                                <p:ajax listener="#{egressoBuscaMB.onSelectAll(4)}" process="@this" event="change" update="egressosForm:acc:cbCategoria" />
+                                            </p:selectBooleanCheckbox>
+                                            <p:selectManyMenu id="cbCategoria" value="#{egressoBuscaMB.categoriasSelecionadas}" style="width:400px" converter="uidConverter"
+                                                              var="m" filter="true" filterMatchMode="contains" showCheckbox="true" scrollHeight="200">
+                                                <f:selectItems value="#{egressoBuscaMB.categorias}" var="item" itemLabel="#{item.nome}" itemValue="#{item}" />
+                                                <p:column>
+                                                    <h:outputText value="#{m.nome}" />
+                                                </p:column>
+                                            </p:selectManyMenu>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p:outputLabel value="Formações" style="display: block; margin-bottom: 5px;" />
+                                            <p:selectBooleanCheckbox value="#{egressoBuscaMB.selectFor}"> Selecionar Todos
+                                                <p:ajax listener="#{egressoBuscaMB.onSelectAll(5)}" process="@this" event="change" update="egressosForm:acc:cbFormacao" />
+                                            </p:selectBooleanCheckbox>
+                                            <p:selectManyMenu id="cbFormacao" value="#{egressoBuscaMB.formacoesSelecionado}" style="width:400px" converter="uidConverter"
+                                                              var="m" filter="true" filterMatchMode="contains" showCheckbox="true" scrollHeight="200">
+                                                <f:selectItems value="#{egressoBuscaMB.formacoes}" var="item" itemLabel="#{item.nome}" itemValue="#{item}" />
+                                                <p:column>
+                                                    <h:outputText value="#{m.nome}" />
+                                                </p:column>
+                                            </p:selectManyMenu>
+                                        </td>
+                                    </tr>
+                                </table>  
+                            </p:tab>
+                        </p:accordionPanel>
+
+                    </div>
+
+                    <div class="content bt-action">
+                        <flem:commandButton id="bt-search" update="egressosForm:egressos" value="Pesquisar" action="#{egressoBuscaMB.buscarEgressos()}" profile="search" />
+                        <flem:commandButton id="bt-trash" value="Limpar" action="#{egressoBuscaMB.limpar()}" profile="clear" />
+                    </div>
+
+            </p:fieldset>
+
+            <p:fieldset id="idfieldlista" legend="Lista de Beneficiários" style="margin-top: 10px;">
+                <div style="height: 25px;text-align: left; margin-bottom: 10px; padding: 5px;">
+                    <p:commandButton id="alterViewDetails" rendered="#{egressoBuscaMB.egressos ne null}" action="/egresso/lista.xhtml" title="Alterar para Detalhado deixará a aplicação mais lenta" value="Detalhado" icon="ui-icon-refresh" />
+                    <p:commandButton id="alterView" rendered="#{egressoBuscaMB.egressos ne null}" action="/egresso/listaSintetico.xhtml" title="Alterar para Sintético deixará a aplicação mais lenta" value="Sintético" icon="ui-icon-refresh" />
+                </div>
+                <p:dataTable id="egressos" paginator="true" value="#{egressoBuscaMB.egressos}" rowKey="#{egresso.idEgresso}"
+                             paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             var="egresso" rows="20" emptyMessage="Nenhum registro encontrado" tableStyle="width:auto" filterEvent="enter" 
+                             currentPageReportTemplate="Exibindo: {startRecord} - {endRecord} de {totalRecords} Registros" widgetVar="egressosTable" resizableColumns="true" lazy="true" rowsPerPageTemplate="20,30,50"  >
+
+                    <f:facet name="header">
+                        <div style="height: 25px;text-align: left">
+                            <p:commandButton id="toggler" type="button" value="Colunas" icon="ui-icon-calculator" />
+                            <p:columnToggler datasource="egressos" trigger="toggler" >
+                                <p:ajax event="toggle" listener="#{egressoBuscaMB.onToggle}" />
+                            </p:columnToggler>
+                        </div>
+                    </f:facet>
+
+                    <p:column exportable="false" toggleable="false">
+                        <h:outputLink value="#{request.contextPath}/egresso/cadastro.xhtml?id=#{egresso.idEgresso}" styleClass="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-left">
+                            <span class="ui-button-icon-left ui-icon ui-c ui-icon-pencil"></span>
+                            <span class="ui-button-text ui-c">Cadastro</span>
+                        </h:outputLink>
+                    </p:column>
+
+                    <p:column headerText="Nome" filterMatchMode="contains" exportable="#{egressoBuscaMB.estadoDasColunas.nome}" visible="#{egressoBuscaMB.estadoDasColunas.nome}">
+                        <h:outputText value="#{egresso.nome}" />
+                    </p:column>
+
+                    <p:column headerText="CPF" filterMatchMode="contains" visible="#{egressoBuscaMB.estadoDasColunas.cpf}" styleClass="cpf" style="#{egresso eq null or egresso.cpfValido ? '' : 'color:red'}">
+                        <h:outputText value="#{egresso.cpf}"/>
+                    </p:column>
+
+                    <p:column headerText="Matricula FLEM" visible="#{egressoBuscaMB.estadoDasColunas.matriculaFLEM}">
+                        <h:outputText value="#{egresso.matriculaFlem}" />
+                    </p:column>
+
+                    <p:column headerText="Demandante" visible="#{egressoBuscaMB.estadoDasColunas.demandante}">
+                        <h:outputText value="#{egresso.demandante}" />
+                    </p:column>
+
+                    <p:column headerText="Município Vaga" visible="#{egressoBuscaMB.estadoDasColunas.municipioDaVaga}">
+                        <h:outputText value="#{egresso.municipioDaVaga}"/>
+                    </p:column>
+
+                    <p:column headerText="Categoria" visible="#{egressoBuscaMB.estadoDasColunas.categoria}" style="#{egresso.corCategoria ne null ? 'color:'.concat(egresso.corCategoria).concat(';') : ''}">
+
+                        <h:outputText value="#{egresso.categoria}"/>
+                    </p:column> 
+
+                    <p:column headerText="Situação" visible="#{egressoBuscaMB.estadoDasColunas.situacao}" style="#{egresso.corSituacao ne null ? 'color:'.concat(egresso.corSituacao).concat(';') : ''}">
+
+                        <h:outputText value="#{egresso.situacao}"/>
+                    </p:column>
+
+                    <p:column headerText="Formação Beneficiário" visible="#{egressoBuscaMB.estadoDasColunas.formacao}">
+                        <h:outputText value="#{egresso.formacao}"/>
+                    </p:column>  
+
+                    <p:column headerText="Escritório Regional" filterMatchMode="contains" exportable="#{egressoBuscaMB.estadoDasColunas.escRegional}" visible="#{egressoBuscaMB.estadoDasColunas.escRegional}">
+                        <h:outputText value="#{egresso.escRegional}"/>
+                    </p:column>
+
+                </p:dataTable>
+                <script type="text/javascript">
+                    $(document).ready(function () {
+                        $('.cpf .ui-column-filter').mask('999.999.999-99');
+                    });
+                </script>
+            </p:fieldset>
+        </h:form>
+    </ui:define>
+</ui:composition>

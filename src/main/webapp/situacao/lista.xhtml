@@ -1,0 +1,29 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <p:fieldset legend="Situação" style="margin-top: 10px;">
+            <h:form id="form">
+                <flem:commandButton value="Novo" action="/situacao/cadastro.xhtml" profile="add" />
+                <flem:dataTable id="situacoes" value="#{situacaoListaMB.situacoes}" actionEdit="/situacao/cadastro.xhtml?id=#{item.id}">
+                    <p:column filterBy="#{item.nome}" headerText="Situação" filterMatchMode="contains" style="#{item.cor ne null ? 'color:'.concat(item.cor) : ''}">
+                        <h:outputText value="#{item.nome}" />
+                    </p:column>
+                    <p:column sortBy="#{item.categoria.nome}" headerText="Categoria" width="180" style="#{item.categoria.cor ne null ? 'color:'.concat(item.categoria.cor) : ''}">
+                        <h:outputText value="#{item.categoria.nome}" />
+                    </p:column>
+                </flem:dataTable>
+                <flem:commandButton value="Novo" action="/situacao/cadastro.xhtml" profile="add"/>
+            </h:form>
+        </p:fieldset>
+
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,84 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    template="/template/padrao.xhtml">
+    
+    <ui:define name="centro">
+        <h:form>
+            <h:outputStylesheet>
+                .ui-column-filter.ui-inputtext{
+                    display:inline;
+                    margin-left: 5px;
+                }
+                #mensagens{
+                    position: fixed;
+                }
+            </h:outputStylesheet>
+            <p:fieldset legend="Listas de Beneficiários" style="margin-top: 10px;">
+                <p:dataTable id="idTableListas" paginator="true" value="#{egressosNaListaMB.listas}" var="lista" emptyMessage="Nenhum lista associada ao seu usuário" 
+                             selectionMode="single" widgetVar="listasTable" selection="#{egressosNaListaMB.lista}" rowKey="#{lista.id}" paginatorPosition="top" rows="5">
+                    <p:ajax event="rowSelect" listener="#{egressosNaListaMB.atualizarListaDeEgressos()}" update=":mensagens @form:idTableEgressos" oncomplete="mascaraCPF()"/>
+                    <p:column filterBy="#{lista.nome}" filterMatchMode="contains" headerText="Lista" width="110">
+                        <h:outputText value="#{lista.nome}" style="#{lista.concluida ? 'color: green' : (!lista.ativo ? 'color: red' : '') }"/>
+                    </p:column>
+                </p:dataTable>
+                <br/>
+                <p:dataTable id="idTableEgressos" paginator="true" value="#{egressosNaListaMB.egressosLista}" var="egressoLista" widgetVar="egressosListaTable"
+                             emptyMessage="Nenhum Beneficiário associado a esta Lista" rows="20" paginatorPosition="bottom" filterEvent="enter">
+                    <f:facet name="header">
+                        <h:outputText value="Contatos efetuados: #{egressosNaListaMB.qtdContatosEfetuados}, de um total: #{egressosNaListaMB.egressosLista.size()}; " rendered="#{egressosNaListaMB.egressosLista ne null}"/>
+                        <h:outputText value="#{egressosNaListaMB.qtdContatosEfetuados/egressosNaListaMB.egressosLista.size()}" rendered="#{egressosNaListaMB.egressosLista ne null}">
+                            <f:convertNumber type="percent" maxFractionDigits="2"/>
+                        </h:outputText>
+                    </f:facet>
+                    <p:column width="15" sortBy="#{egressoLista.feito}">
+                        <p:selectBooleanCheckbox value="#{egressoLista.feito}" disabled="#{egressoLista.feito}">
+                            <p:ajax process="@this" global="false"/>
+                        </p:selectBooleanCheckbox>
+                    </p:column>
+                    <p:column filterBy="#{egressoLista.nomeEgresso}" headerText="Técnico" filterMatchMode="contains"  sortBy="#{egressoLista.nomeEgresso}">
+                        <p:link target="_blank" outcome="/egresso/cadastro.xhtml" value="#{egressoLista.nomeEgresso}">
+                            <f:param name="id" value="#{egressoLista.idEgresso}" />
+                        </p:link>
+                    </p:column>
+                    <p:column filterBy="#{egressoLista.cpfEgresso}" headerText="CPF" filterMatchMode="contains" styleClass="cpf">
+                        <h:outputText value="#{egressoLista.cpfEgresso}"/>
+                    </p:column>
+                    <p:column headerText="De Acordo com Transferência para SESAB?">
+                        <h:outputText style="float: left;" value="#{egressoLista.textoDeAcordo}"/>
+                        <p:commandButton value="Sim" style="float: right;" rendered="#{egressoLista.deAcordo eq null or !egressoLista.deAcordo}" action="#{egressosNaListaMB.informarDeAcordo(egressoLista, true)}" update="idTableEgressos :mensagens">
+                        </p:commandButton>
+                        <p:commandButton value="Não" style="float: right;" rendered="#{egressoLista.deAcordo eq null or egressoLista.deAcordo}" action="#{egressosNaListaMB.informarDeAcordo(egressoLista, false)}" update="idTableEgressos :mensagens">
+                        </p:commandButton>
+                    </p:column>
+                    <p:column rendered="#{usuarioLogadoMB.temPermissao('primEmp.associarEgressoEmLista')}">
+                        <p:commandButton value="Retirar"  action="#{egressosNaListaMB.retirar(egressoLista.id)}" update="idTableEgressos :mensagens" rendered="#{!egressoLista.feito}">
+                            <p:confirm header="Confirmação" message="Deseja mesmo remover o beneficiário #{egressoLista.nomeEgresso} da lista?" icon="ui-icon-alert"/>
+                        </p:commandButton>
+                    </p:column>
+                    <p:column rendered="#{usuarioLogadoMB.temPermissao('desfazerFeitoEmLista')}">
+                        <p:commandButton value="Desfazer Feito"  action="#{egressosNaListaMB.desfazerFeito(egressoLista.id)}" update="idTableEgressos :mensagens" rendered="#{egressoLista.feito}">
+                            <p:confirm header="Confirmação" message="Deseja mesmo desfazer a informação do beneficiário #{egressoLista.nomeEgresso} feito na lista?" icon="ui-icon-alert"/>
+                        </p:commandButton>
+                    </p:column>
+                    <f:facet name="footer">
+                        <div>
+                            <p:commandButton value="Salvar" actionListener="#{egressosNaListaMB.salvarListagem()}" update="idTableEgressos :mensagens" oncomplete="mascaraCPF()"/>
+                        </div>
+                    </f:facet>
+                </p:dataTable>
+            </p:fieldset>
+            <script type="text/javascript">
+                function mascaraCPF(){
+                    $('.cpf .ui-column-filter').mask('999.999.999-99');
+                }
+                $(document).ready(mascaraCPF);
+            </script>
+        </h:form>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,39 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    
+    <ui:define name="centro">
+        <h:form id="form">
+        <h3 style="margin-top:0">Cadastro de Material</h3>
+        <table>
+            <tr>
+                <td>Descrição</td>
+                <td>
+                    <flem:inputText value="#{materialCadastroMB.material.descricao}" id="desc"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Observação</td>
+                <td>
+                    <p:inputTextarea id="ob" rows="5" cols="50"  value="#{materialCadastroMB.material.observacao}" queryDelay="750" minQueryLength="4" />
+                    <p:message for="ob"/>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <span style="float: left; background-color: #EEEEEE; text-align: left;">
+                        <p:commandButton  action="#{materialCadastroMB.salvar()}" value="Salvar" icon="ui-icon-disk" update="@form" />
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </h:form>
+    </ui:define>
+</ui:composition>

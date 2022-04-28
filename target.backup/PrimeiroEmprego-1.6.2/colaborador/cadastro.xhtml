@@ -1,0 +1,86 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    
+    <ui:define name="centro">
+        <h:form id="form">
+        <h3 style="margin-top:0">Cadastro de Colaboradores</h3>
+        <table>
+            <tr>
+                <td><p:outputLabel for="nome" value="Nome" /></td>
+                <td>
+                    <flem:inputText value="#{colaboradorMB.obj.nome}" id="nome" style="width: 450px;"/>
+                </td>
+            </tr>
+            
+            <tr>
+                    <td>
+                        <p:outputLabel for="cargo" value="Cargo" />
+                    </td>
+                    <td>
+                        <div style="margin-left: 5px; margin-bottom: 15px; width: 98%; ">
+                            <p:selectOneMenu id="cargo" value="#{colaboradorMB.obj.cargo}">
+                                <f:selectItem itemLabel="Selecione" itemValue="" />
+                                <f:selectItems value="#{colaboradorMB.cargos}" />
+                            </p:selectOneMenu>
+                            <p:message for="cargo"/>
+                        </div>
+                    </td>
+                </tr>
+            
+            <tr>
+                <td>Celular</td>
+                <td>
+                    <flem:inputMask id="celular" value="#{colaboradorMB.obj.celular}" mask="(99)99999-9999" style="width: 450px;"/>
+                </td>
+            </tr>
+            
+            <tr>
+                <td>Telefone</td>
+                <td>
+                    <flem:inputMask id="telefone" value="#{colaboradorMB.obj.telefone}" style="width: 450px;"/>
+                </td>
+            </tr>
+            
+            <tr>
+                <td>E-mail</td>
+                <td>
+                    <flem:inputText id="email" value="#{colaboradorMB.obj.email}" style="width: 450px;" type="email" />
+                </td>
+            </tr>
+            
+            <tr>
+                <td>Escritório Regional</td>
+                <td>
+                    <p:selectOneMenu id="escritorio" converter="uidConverter" value="#{colaboradorMB.obj.escritorioRegional}" style="width: 430px">
+                        <f:selectItem itemLabel="Selecione" itemValue="" />
+                        <f:selectItems value="#{colaboradorMB.escritorios}" var="esc" itemLabel="#{esc.nome}" itemValue="#{esc}" />
+                    </p:selectOneMenu>
+                    <p:message for="escritorio"/>
+                </td>
+            </tr>
+            
+            <tr>
+                <td>Ativo</td>
+                <td>
+                    <p:selectBooleanCheckbox id="ativo" value="#{colaboradorMB.obj.ativo}" />
+                    <p:message for="ativo"/>
+                </td>
+            </tr>
+            
+            <tr>
+                <td colspan="2">
+                    <flem:commandButton action="#{colaboradorMB.inserir()}" value="Salvar" profile="salvar" />
+                </td>
+            </tr>
+        </table>
+    </h:form>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,21 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+        <h:form>
+            <p:fieldset legend="Relatorio de Contratados / Desligados" style="margin-top: 10px;">
+                <h2 style="text-align: left"><h:outputText value="Ativos"/></h2>
+                <p:dataTable value="#{relatorioResumosMB.relatorioResumos.registrosPorLote}" var="registroDoLote">
+                    <p:column>
+                        #{registroDoLote}
+                    </p:column>
+                </p:dataTable>
+            </p:fieldset>
+        </h:form>
+    </ui:define>
+</ui:composition>

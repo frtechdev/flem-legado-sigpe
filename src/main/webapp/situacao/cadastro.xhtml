@@ -1,0 +1,52 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    template="/template/padrao.xhtml">
+    
+
+    <ui:define name="centro">
+        <h:form id="form">
+        <h3 style="margin-top:0">Cadastro da Situação</h3>
+        <table>
+            <tr>
+                <td>Categoria</td>
+                <td>
+                    <p:selectOneMenu value="#{situacaoCadastroMB.situacao.categoria}" id="categoria" converter="#{genericConverter}">
+                        <f:selectItem itemLabel="Selecione uma Categoria" itemValue=""/>
+                        <f:selectItems value="#{situacaoCadastroMB.categorias}" var="categoria" itemLabel="#{categoria.nome}"/>
+                    </p:selectOneMenu>
+                    <p:message for="categoria"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Nome</td>
+                <td>
+                    <p:inputText value="#{situacaoCadastroMB.situacao.nome}" id="nome" style="width: 450px;"/>
+                    <p:message for="nome"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Cor</td>
+                <td>
+                    <p:inputText value="#{situacaoCadastroMB.situacao.cor}" id="cor" style="width: 450px;" onchange="jQuery('#form\\:exemplo').css('color',this.value)"/>
+                    <h:outputText id="exemplo" value="Exemplo" style="color:#{situacaoCadastroMB.situacao.cor}"/>
+                    <p:message for="cor"/>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+              <span style="float: left; background-color: #EEEEEE; text-align: left;">
+                  <p:commandButton  action="#{situacaoCadastroMB.salvar()}" value="Salvar" icon="ui-icon-disk" update="@form" />
+              </span>
+          </td>
+            </tr>
+        </table>
+    </h:form>
+    </ui:define>
+</ui:composition>

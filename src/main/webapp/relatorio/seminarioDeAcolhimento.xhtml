@@ -1,0 +1,222 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <flem:fieldset id="field" legend="Seminário de Acolhimento">
+
+            <h:form id="formFrequencia" enctype="multipart/form-data" style="width: 100%">
+                <p:accordionPanel styleClass="ui-accordion-header ui-helper-reset ui-state-default ui-corner-all" id="accp">
+                    <p:ajax event="tabChange" listener="#{relatorioSeminarioDeAcolhimentoMB.onTabChange}" process="@this" update="field:formFrequencia" />
+                    <p:tab title="Pesquisar">
+                        <div class="content">
+
+                            <table>
+                                <tr>  
+                                    <td>
+                                        <p:outputLabel value="Escritórios Regionais" style="display: block; margin-bottom: 5px;" />
+                                        <p:selectBooleanCheckbox value="#{relatorioSeminarioDeAcolhimentoMB.selectEsc}"> Selecionar Todos (#{relatorioSeminarioDeAcolhimentoMB.escritoriosRegionais.size()})
+                                            <p:ajax listener="#{relatorioSeminarioDeAcolhimentoMB.onSelectAll(1)}" process="@this" event="change" update="field:formFrequencia" />
+                                        </p:selectBooleanCheckbox>
+                                        <p:selectManyMenu id="cbEscritorio" value="#{relatorioSeminarioDeAcolhimentoMB.escritorioSelecionados}" style="width:400px;" converter="uidConverter"
+                                                          var="m" filter="true" filterMatchMode="contains" showCheckbox="true"  scrollHeight="200">
+                                            <f:selectItems value="#{relatorioSeminarioDeAcolhimentoMB.escritoriosRegionais}" var="item" itemLabel="#{item.nome}" itemValue="#{item}" />
+                                            <p:ajax update="field:formFrequencia" process="@this" event="change" listener="#{relatorioSeminarioDeAcolhimentoMB.obterMunicipios()}" />
+                                            <p:column>
+                                                <h:outputText value="#{m.nome}" rendered="#{m ne null}" /> 
+                                                <h:outputText value="Escritório Não Implementado" rendered="#{m eq null}" /> 
+                                            </p:column>
+                                        </p:selectManyMenu>
+                                    </td>
+                                    <td>
+                                        <p:outputLabel value="Municipios" style="display: block; margin-bottom: 5px;" />
+                                        <p:selectBooleanCheckbox value="#{relatorioSeminarioDeAcolhimentoMB.selectMun}"> Selecionar Todos (#{relatorioSeminarioDeAcolhimentoMB.municipios.size()})
+                                            <p:ajax listener="#{relatorioSeminarioDeAcolhimentoMB.onSelectAll(2)}" process="@this" event="change" update="field:formFrequencia" />
+                                        </p:selectBooleanCheckbox>
+                                        <p:selectManyMenu id="cbMunicicpios" value="#{relatorioSeminarioDeAcolhimentoMB.municipiosSelecionados}" style="width:400px" converter="uidConverter"
+                                                          var="m" filter="true" filterMatchMode="contains" showCheckbox="true" scrollHeight="200">
+                                            <f:selectItems value="#{relatorioSeminarioDeAcolhimentoMB.municipios}" var="item" itemLabel="#{item.nome}" itemValue="#{item}" />
+                                            <p:ajax update="field:formFrequencia" process="@this" event="change" listener="#{relatorioSeminarioDeAcolhimentoMB.obterDemandantes()}" />
+                                            <p:column>
+                                                <h:outputText value="#{m.nome}" />
+                                            </p:column>
+                                        </p:selectManyMenu>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <p:outputLabel value="Demandantes" style="display: block; margin-bottom: 5px;" />   
+                                        <p:selectBooleanCheckbox value="#{relatorioSeminarioDeAcolhimentoMB.selectDem}"> Selecionar Todos (#{relatorioSeminarioDeAcolhimentoMB.demandantes.size()})
+                                            <p:ajax listener="#{relatorioSeminarioDeAcolhimentoMB.onSelectAll(3)}" process="@this" event="change" update="field:formFrequencia:accp:cbCategoria field:formFrequencia:accp:cbDemandante" />
+                                        </p:selectBooleanCheckbox>
+                                        <p:selectManyMenu id="cbDemandante" value="#{relatorioSeminarioDeAcolhimentoMB.demandanteSelecionados}" style="width:400px" converter="uidConverter"
+                                                          var="m" filter="true" filterMatchMode="contains" showCheckbox="true" scrollHeight="200" >
+                                            <f:selectItems value="#{relatorioSeminarioDeAcolhimentoMB.demandantes}" var="item" itemLabel="#{item.nome}" itemValue="#{item}" />
+                                            <p:ajax update="field:formFrequencia:accp:cbCategoria" process="@this" event="change" listener="#{relatorioSeminarioDeAcolhimentoMB.obterCategoria()}" />
+                                            <p:column>
+                                                <h:outputText value="#{m.nome}" />
+                                            </p:column>
+                                        </p:selectManyMenu>
+                                    </td>
+
+                                    <td>
+                                        <p:outputLabel value="Categorias" style="display: block; margin-bottom: 5px;" />          
+                                        <p:selectBooleanCheckbox value="#{relatorioSeminarioDeAcolhimentoMB.selectCat}"> Selecionar Todos (#{relatorioSeminarioDeAcolhimentoMB.categorias.size()})
+                                            <p:ajax listener="#{relatorioSeminarioDeAcolhimentoMB.onSelectAll(4)}" process="@this" event="change" update="field:formFrequencia" />
+                                        </p:selectBooleanCheckbox>
+                                        <p:selectManyMenu id="cbCategoria" value="#{relatorioSeminarioDeAcolhimentoMB.categoriaSelecionadas}" style="width:400px" converter="uidConverter"
+                                                          var="m" filter="true" filterMatchMode="contains" showCheckbox="true" scrollHeight="200">
+                                            <f:selectItems value="#{relatorioSeminarioDeAcolhimentoMB.categorias}" var="item" itemLabel="#{item.nome}" itemValue="#{item}" />
+                                            <p:column>
+                                                <h:outputText value="#{m.nome}" />
+                                            </p:column>
+                                        </p:selectManyMenu>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <p:outputLabel value="Acolhido" style="display: block; margin-bottom: 5px;" />   
+
+                                        <p:selectOneMenu id="idAcolhido" value="#{relatorioSeminarioDeAcolhimentoMB.acolhido}" style="width:125px; margin-right: 10px;">
+                                            <f:selectItem itemLabel="Todos" itemValue="" />
+                                            <f:selectItem itemLabel="Sim" itemValue="SIM" />
+                                            <f:selectItem itemLabel="Não" itemValue="NÃO" />
+                                        </p:selectOneMenu>
+                                    </td>
+                                </tr>
+                            </table>    
+                        </div>
+                        <div class="content bt-action">
+                            <flem:commandButton id="bt-search" value="Pesquisar" update="frequenciaTable" action="#{relatorioSeminarioDeAcolhimentoMB.pesquisar()}" profile="search" />
+                            <flem:commandButton id="bt-trash" value="Limpar" action="#{relatorioSeminarioDeAcolhimentoMB.limpar()}" profile="clear" />
+                        </div>
+                    </p:tab>
+                    <p:tab title="Importar">
+                        <div>
+                            <p:poll interval="1" widgetVar="poll" autoStart="false" async="true" update="progressBarClient msg" immediate="true"/>
+                            <p:progressBar id="progressBarClient" value="#{relatorioSeminarioDeAcolhimentoMB.progresso}" widgetVar="pbClient" style="width:100%" labelTemplate="{value}%" styleClass="animated" global="false"/>
+                            <h:outputText value="#{relatorioSeminarioDeAcolhimentoMB.mensagem}" id="msg"/>
+                            <br/>
+
+                            <p:fileUpload value="#{relatorioSeminarioDeAcolhimentoMB.arquivoXLS}" mode="simple" style="margin-right: 15px;" allowTypes="/(\.|\/)xlsx$/"/> 
+
+                            <p:commandButton value="Importar" ajax="false" 
+                                             onclick="PF('poll').start();PF('pbClient').start();" 
+                                             oncomplete="PF('poll').stop();PF('pbClient').cancel();"
+                                             update="frequenciaTable"
+                                             actionListener="#{relatorioSeminarioDeAcolhimentoMB.carregarEgressosPorCpf()}" style="margin-left: 10px; margin-right: 20px;"/>  
+                            <br/>
+                        </div>
+
+                    </p:tab>
+                </p:accordionPanel>
+
+                <div class="content" style="overflow-x: scroll;"> 
+                    <flem:dataTable draggableColumns="true"  rendered="#{relatorioSeminarioDeAcolhimentoMB.pesquisaAtiva}" value="#{relatorioSeminarioDeAcolhimentoMB.listaImpressao}" id="frequenciaTable" >
+                        <f:facet name="header">
+
+                            <p:outputPanel id="exportPanel" style="overflow:  hidden;">
+
+                                <p:commandButton id="exportAcolhimentoTable" style="float:right; width:24px; height:24px;" icon="ui-icon-extlink" title="Exportar" rendered="true" />
+                                <p:menu id="export_menu" overlay="true" trigger="exportAcolhimentoTable" my="left top" at="left bottom" style="background-color:white; width:100px; color:black;" rendered="true">
+                                    <p:separator />
+                                    <p:menuitem value="Exportar Para Excel" ajax="false" icon="icon-excel">
+                                        <p:dataExporter type="xls" target="resultList" encoding="iso-8859-1" fileName="flem_export"  />								        
+                                    </p:menuitem>
+                                </p:menu>    						 	
+
+                                <p:commandButton id="togglerAcolhimentoTable" style="float:right; width:24px; height:24px; z-index:200;" icon="ui-icon-calculator" title="Colunas" />
+                                <p:columnToggler datasource="resultList" trigger="togglerAcolhimentoTable" />	
+
+                            </p:outputPanel>
+
+
+                        </f:facet>
+                        <p:column width="120" headerText="Escritório Regional" filterBy="#{item.escritorioRegional}" filterMatchMode="contains">
+                            <h:outputText value="#{item.escritorioRegional}"/>
+                        </p:column>
+
+                        <p:column width="120" headerText="Município vaga" filterBy="#{item.municipioVaga}" filterMatchMode="contains">
+                            <h:outputText value="#{item.municipioVaga}"/>
+                        </p:column>
+
+                        <p:column width="120" headerText="CPF" filterBy="#{item.cpf}">
+                            <h:outputText value="#{item.cpf}"/>
+                        </p:column>
+                        <p:column headerText="Nome" width="150" filterBy="#{item.nome}" filterMatchMode="contains">
+                            <h:outputText value="#{item.nome}"/>
+                        </p:column>
+
+                        <p:column width="120" headerText="Telefones" filterBy="#{item.telefones}" filterMatchMode="contains">
+                            <h:outputText value="#{item.telefones}"/>
+                        </p:column>
+
+                        <p:column headerText="E-mail" filterBy="#{item.email}" filterMatchMode="contains">
+                            <h:outputText value="#{item.email}" title="#{item.email}"/>
+                        </p:column>
+                        <p:column headerText="Categoria" width="120" filterBy="#{item.categoriaSituacao}" filterMatchMode="contains">
+                            <h:outputText value="#{item.categoriaSituacao}"/>
+                        </p:column>
+                        
+                        <p:column headerText="Mês/Ano Admissão" width="120" filterBy="#{item.mesAnoAdmissao}">
+                            <h:outputText value="#{item.mesAnoAdmissao}"/>
+                        </p:column>
+
+                        <p:column headerText="Mês/Ano Demissão" width="120" filterBy="#{item.mesAnoDesligamento}">
+                            <h:outputText value="#{item.mesAnoDesligamento}"/>
+                        </p:column>
+
+                        <p:column headerText="Matricula" width="120" filterBy="#{item.matriculaFlem}">
+                            <h:outputText value="#{item.matriculaFlem}"/>
+                        </p:column>
+                        <p:column headerText="Participou (S/N)" width="120" filterBy="#{item.acolhido}" filterMatchMode="contains">
+                            <h:outputText value="#{item.acolhido}"/>
+                        </p:column>
+
+                        <p:column headerText="Data(s)" width="120" filterBy="#{item.datas}" filterMatchMode="contains">
+                            <h:outputText value="#{item.datas}"/>
+                        </p:column>
+
+                        <p:column headerText="Demandante" width="120" filterBy="#{item.demandante}" filterMatchMode="contains">
+                            <h:outputText value="#{item.demandante}"/>
+                        </p:column>
+                        
+                        <p:column headerText="Unidade de Lotação" width="120" filterBy="#{item.unidadeDeLotacao}" filterMatchMode="contains">
+                            <h:outputText value="#{item.unidadeDeLotacao}"/>
+                        </p:column>
+                        <p:column headerText="Logradouro Unidade de Lotação" width="120" filterBy="#{item.logradouroUnidadeDeLotacao}" filterMatchMode="contains">
+                            <h:outputText value="#{item.logradouroUnidadeDeLotacao}"/>
+                        </p:column>
+
+                        <p:column headerText="Bairro da Unidade de Lotação" width="120" filterBy="#{item.bairroUnidadeDeLotacao}" filterMatchMode="contains">
+                            <h:outputText value="#{item.bairroUnidadeDeLotacao}"/>
+                        </p:column>
+
+                        <p:column headerText="Município da Unidade de Lotação" width="120" filterBy="#{item.municipioUnidadedeLotacao}" filterMatchMode="contains">
+                            <h:outputText value="#{item.municipioUnidadedeLotacao}"/>
+                        </p:column>
+                        <p:column headerText="Ponto Focal" width="120" filterBy="#{item.pontoFocalNaUnidade}" filterMatchMode="contains">
+                            <h:outputText value="#{item.pontoFocalNaUnidade}"/>
+                        </p:column>
+
+                        <p:column headerText="Telefones PF" width="120" filterBy="#{item.telefonesPF}" filterMatchMode="contains">
+                            <h:outputText value="#{item.telefonesPF}"/>
+                        </p:column>
+
+                        <p:column headerText="E-mail PF" width="120" filterBy="#{item.emailPontoFocal}" filterMatchMode="contains">
+                            <h:outputText value="#{item.emailPontoFocal}" title="#{item.emailPontoFocal}"/>
+                        </p:column>
+
+                    </flem:dataTable>
+                </div>
+
+            </h:form>
+
+        </flem:fieldset>
+    </ui:define>
+</ui:composition>

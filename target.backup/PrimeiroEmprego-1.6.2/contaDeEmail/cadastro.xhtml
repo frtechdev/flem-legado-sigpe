@@ -1,0 +1,99 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    template="/template/padrao.xhtml">
+    
+
+    <ui:define name="centro">
+        <h:form>
+            <p:fieldset legend="Conta De Email" style="margin-top: 10px;">
+                <table width="800">
+                    <tr>
+                        <td>Nome Remetente</td>
+                        <td>
+                            <p:inputText value="#{contaDeEmailCadastroMB.contaDeEmail.nomeRemetente}" id="nomeRemetente" size="75">
+                                    <p:ajax event="change" update="remetente"/>
+                            </p:inputText>
+                            <h:message for="nomeRemetente" class="erro-table-row"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Email Remetente</td>
+                        <td>
+                            <p:inputText value="#{contaDeEmailCadastroMB.contaDeEmail.emailRemetente}" id="emailRemetente" size="75">
+                                <p:ajax event="change" update="remetente"/>
+                            </p:inputText>
+                            <h:message for="emailRemetente" class="erro-table-row"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Remetente
+                        </td>
+                        <td>
+                            <p:outputPanel id="remetente" layout="block">
+                                <h:outputText value="#{contaDeEmailCadastroMB.contaDeEmail.nomeRemetente}"/>&lt;<h:outputText value="#{contaDeEmailCadastroMB.contaDeEmail.emailRemetente}" />&gt;
+                            </p:outputPanel>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Login</td>
+                        <td>
+                            <p:inputText value="#{contaDeEmailCadastroMB.contaDeEmail.login}" id="login" size="75"/>
+                            <h:message for="login" class="erro-table-row"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Senha</td>
+                        <td>
+                            <p:password value="#{contaDeEmailCadastroMB.senha}" id="senha" size="75"/>
+                            <h:message for="senha" class="erro-table-row"/>
+                            <h:outputText rendered="#{contaDeEmailCadastroMB.contaDeEmail.id  != null}" value="* Deixar em branco, caso não deseje alterar a senha" style="font-size:9px"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: center">
+                            <p:outputPanel id="botoes">
+                                <p:commandButton value="Mostrar Configurações de Conexão" actionListener="#{contaDeEmailCadastroMB.setMostrarPanelConexao(true)}" update="panelConexao botoes" rendered="#{!contaDeEmailCadastroMB.mostrarPanelConexao}"/>
+                                <p:commandButton value="Ocultar Configurações de Conexão" actionListener="#{contaDeEmailCadastroMB.setMostrarPanelConexao(false)}" update="panelConexao botoes" rendered="#{contaDeEmailCadastroMB.mostrarPanelConexao}"/>
+                             </p:outputPanel>
+                        </td>
+                    </tr>
+                </table>
+                <p:outputPanel id="panelConexao">
+                    <p:panel visible="#{contaDeEmailCadastroMB.mostrarPanelConexao}">
+                        <table width="800">
+                            <tr>
+                                <td>Servidor</td>
+                                <td>
+                                    <p:inputText value="#{contaDeEmailCadastroMB.contaDeEmail.servidor}" id="servidor" size="75"/>
+                                    <h:message for="servidor" class="erro-table-row"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Porta</td>
+                                <td>
+                                    <p:inputText value="#{contaDeEmailCadastroMB.contaDeEmail.porta}" id="porta" size="75"/>
+                                    <h:message for="porta" class="erro-table-row"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </p:panel>
+                </p:outputPanel>
+            </p:fieldset>
+            <p:toolbar>
+                <p:toolbarGroup align="left">
+                    <p:commandButton value="Voltar" action="#{contaDeEmailCadastroMB.getNextView}" immediate="true"/>
+                </p:toolbarGroup>
+                <p:toolbarGroup align="left">
+                    <p:commandButton value="Salvar" action="#{contaDeEmailCadastroMB.salvar()}" ajax="false"/>
+                </p:toolbarGroup>
+            </p:toolbar>
+        </h:form>
+    </ui:define>
+</ui:composition>

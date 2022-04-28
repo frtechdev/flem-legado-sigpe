@@ -1,0 +1,25 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <flem:fieldset legend="Categoria Da Situação">
+            <h:form>
+                <flem:commandButton value="Novo" action="/categoriaDaSituacao/cadastro.xhtml"  profile="add"/>
+                <flem:dataTable id="categorias" value="#{categoriaDaSituacaoListaMB.categorias}" actionEdit="/categoriaDaSituacao/cadastro.xhtml?id=#{item.id}">
+
+                    <p:column filterBy="#{item.nome}" headerText="Nome da Categoria" filterMatchMode="contains" style="#{item.cor ne null ? 'color:'.concat(item.cor) : ''}">
+                        <h:outputText value="#{item.nome}" />
+                    </p:column>
+
+                </flem:dataTable>
+                <flem:commandButton value="Novo" action="/categoriaDaSituacao/cadastro.xhtml" profile="add"/>
+            </h:form>
+        </flem:fieldset>
+
+    </ui:define>
+</ui:composition>

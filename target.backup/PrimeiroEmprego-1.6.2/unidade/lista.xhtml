@@ -1,0 +1,49 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <p:fieldset legend="Unidade de Medida" style="margin-top: 10px;">
+            <h:form>
+                <p:dataTable  id="item" paginator="true" value="#{unidadeDeMedidaListaMB.unidades}" draggableColumns="true" var="unidade" paginatorPosition="bottom" rows="20" rowsPerPageTemplate="20,30,50,100" rowIndexVar="item" emptyMessage="Nada foi encontrado."  >
+                    <p:column headerText="Nº" width="15">
+                        <h:outputText value="#{item+1}" />
+                    </p:column>  
+                    <p:column filterBy="#{unidade.nome}" headerText="Nome" filterMatchMode="contains" width="110">
+                        <h:outputText value="#{unidade.nome}" />
+                    </p:column>
+                    <p:column sortBy="#{unidade.sigla}" headerText="Sigla" width="110">
+                        <h:outputText value="#{unidade.sigla}" />
+                    </p:column>
+                    <p:column width="290" exportable="false" toggleable="false">
+                        <p:button value="Editar" href="/unidade/cadastro.xhtml?id=#{unidade.id}"  icon="ui-icon-pencil"/>
+                        <p:commandButton value="Excluir" actionListener="#{unidadeDeMedidaListaMB.excluir(unidade)}" ajax="true" process="@this" update="@form :mensagens"  icon="ui-icon-trash"/>
+                    </p:column>
+                    
+                    <f:facet name="footer">
+                        <div style="height: 25px;" >
+                            <p:commandButton value="Novo" action="/unidade/cadastro.xhtml" style="float: left;" icon="ui-icon-plus"/>
+                        </div>
+                    </f:facet>
+
+                </p:dataTable>
+                
+                <p:dialog header="Tem certeza que deseja excluir este registro?" resizable="false" widgetVar="deleteWG" height="60">
+                    <br />
+                    <p:commandButton value="Sim" action="#{unidadeDeMedidaListaMB.excluirItem()}" icon="ui-icon-check" update="@form :mensagens" style="float: left;margin-left: 10px;">
+                        <f:setPropertyActionListener value="#{unidadeDeMedidaListaMB.itemExcluir}" target="#{unidadeDeMedidaListaMB.itemExcluir}" />
+                    </p:commandButton>
+                    <p:commandButton value="Não" onclick="PF('deleteWG').hide();" ajax="true" process="@this" icon="ui-icon-close" style="float: right; margin-right: 10px;"/>
+                </p:dialog>
+            </h:form>
+        </p:fieldset>
+
+    </ui:define>
+</ui:composition>
+

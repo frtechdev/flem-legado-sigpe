@@ -1,0 +1,92 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+
+
+    <ui:define name="centro">
+        <h:form id="form">
+            <h3 style="margin-top:0">Associar Monitores</h3>
+            <table>
+                <tr>
+                    <td>Escritórios Regionais</td>
+                    <td>
+                        <p:selectOneMenu value="#{monitoramentoMB.escritorioSelecionado}" id="escritorio" converter="uidConverter">
+                            <f:selectItem itemLabel="Selecione um Escritório" itemValue=""/>
+                            <f:selectItems value="#{monitoramentoMB.escritoriosRegionais}" var="item" itemLabel="#{item.nome}"/>
+                            <p:ajax update=":form" process="@this" event="change" listener="#{monitoramentoMB.obterMunicipios()}" />
+                        </p:selectOneMenu>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Monitores</td>
+                    <td>
+                        <p:selectOneMenu value="#{monitoramentoMB.monitorSelecionado}" id="monitor" converter="uidConverter">
+                            <f:selectItem itemLabel="Selecione um Monitor" itemValue=""/>
+                            <f:selectItems value="#{monitoramentoMB.monitores}" var="item" itemLabel="#{item.nome}"/>
+                            <p:ajax update=":form:cbMunicicpios :form:cbDemandantes" process="@this" event="change" listener="#{monitoramentoMB.obterDemandantes()}" />
+                        </p:selectOneMenu>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Municipios</td>
+                    <td>
+                        <p:selectBooleanCheckbox value="#{monitoramentoMB.selectMunicipios}"> Selecionar Todos
+                            <p:ajax listener="#{monitoramentoMB.onSelectAllMunicipios()}" process="@this" event="change" update=":form:cbMunicicpios :form:cbDemandantes" />
+                        </p:selectBooleanCheckbox>
+                        <p:selectManyMenu id="cbMunicicpios" value="#{monitoramentoMB.municipiosSelecionados}" style="width:400px" converter="municipioDTOConverter"
+                                          var="m" filter="true" filterMatchMode="contains" showCheckbox="true" scrollHeight="200">
+                            <f:selectItems value="#{monitoramentoMB.municipios}" var="item" itemLabel="#{item.nome}" itemValue="#{item}" />
+                            <p:ajax update=":form:cbDemandantes" process="@this" event="change" listener="#{monitoramentoMB.obterDemandantes()}" />
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputText value="Nome" />
+                                </f:facet>
+                                <h:outputText value="#{m.nome}" />
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                    <h:outputText value="Egressos" />
+                                </f:facet>
+                                <h:outputText value="#{m.totalEgressos}" />
+                            </p:column>
+                        </p:selectManyMenu>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Demandantes</td>
+                    <td>
+                        <p:selectBooleanCheckbox value="#{monitoramentoMB.selectDemandantes}"> Selecionar Todos
+                            <p:ajax listener="#{monitoramentoMB.onSelectAllDemandantes()}" process="@this" event="change" update=":form:cbDemandantes" />
+                        </p:selectBooleanCheckbox>
+                        <p:selectManyMenu id="cbDemandantes" value="#{monitoramentoMB.demandanteSelecionados}" style="width:400px" converter="associacaoConverter"
+                                          var="m" filter="true" filterMatchMode="contains" showCheckbox="true" scrollHeight="200">
+                            <f:selectItems value="#{monitoramentoMB.demandantes}" var="item" itemLabel="#{item.nomeDemandante} - #{item.nomeMunicipio}" itemValue="#{item}" />
+                            <p:ajax update=":form:cbDemandantes" process="@this" event="change" />
+                            <p:column>
+                                <h:outputText value="#{m.nomeDemandante}" />
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{m.nomeMunicipio}" />
+                            </p:column>
+                        </p:selectManyMenu>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <span style="float: left; background-color: #EEEEEE; text-align: left;">
+                            <flem:commandButton action="#{monitoramentoMB.associar()}" value="Associar" profile="salvar" />
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </h:form>
+    </ui:define>
+</ui:composition>

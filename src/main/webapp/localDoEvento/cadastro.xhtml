@@ -1,0 +1,71 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    template="/template/padrao.xhtml">
+    
+
+    <ui:define name="centro">
+        <h:form id="form">
+        <h3 style="margin-top:0">Cadastro de Local Do Evento</h3>
+        <table>
+            <tr>
+                <td>Nome</td>
+                <td>
+                    <p:inputText value="#{localDoEventoCadastroMB.localDoEvento.nome}" id="nome" style="width: 450px;"/>
+                    <p:message for="nome"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Logradouro</td>
+                <td>
+                    <p:inputText value="#{localDoEventoCadastroMB.localDoEvento.logradouro}" id="logradouro" style="width: 450px;"/>
+                    <p:message for="logradouro"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Número</td>
+                <td>
+                    <p:inputText value="#{localDoEventoCadastroMB.localDoEvento.numero}" id="numero" style="width: 450px;"/>
+                    <p:message for="numero"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Bairro</td>
+                <td>
+                    <p:inputText value="#{localDoEventoCadastroMB.localDoEvento.bairro}" id="bairro" style="width: 450px;"/>
+                    <p:message for="bairro"/>
+                </td>
+            </tr>
+            <tr>
+                <td>CEP</td>
+                <td>
+                    <p:inputText value="#{localDoEventoCadastroMB.localDoEvento.cep}" id="cep" style="width: 450px;"/>
+                    <p:message for="cep"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Município</td>
+                <td>
+                    <p:selectOneMenu id="municipio" value="#{localDoEventoCadastroMB.localDoEvento.municipio}" effect="fold" filter="true" converter="#{genericConverter}">
+                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                        <f:selectItems value="#{localDoEventoCadastroMB.municipios}" var="municipio" itemLabel="#{municipio.nome} - #{municipio.uf}"/>
+                    </p:selectOneMenu>
+                    <p:message for="municipio"/>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+              <span style="float: left; background-color: #EEEEEE; text-align: left;">
+                  <p:commandButton  action="#{localDoEventoCadastroMB.salvar()}" value="Salvar" icon="ui-icon-disk" update="@form" />
+              </span>
+          </td>
+            </tr>
+        </table>
+    </h:form>
+    </ui:define>
+</ui:composition>

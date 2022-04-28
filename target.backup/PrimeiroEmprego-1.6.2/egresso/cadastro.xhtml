@@ -1,0 +1,1610 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+    xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+
+    <ui:define name="centro">
+
+        <h:form id="form" enctype="multipart/form-data" prependId="true">
+            <p:fieldset legend="Cadastro de Beneficiários" style="margin-top: 10px;">
+                <h:outputText value="Nome: #{egressoCadastroMB.egresso.nome}" id="inpnome"  style="width: 450px;" /><br/>
+                <h:outputText value="CPF: #{egressoCadastroMB.egresso.cpf}" id="inpcpf" /><br/>
+                <p:outputPanel rendered="#{egressoCadastroMB.egresso.vaga.situacao != null}">
+                    <p:outputPanel style="#{egressoCadastroMB.egresso.vaga.situacao.categoria.cor ne null ? 'color:'.concat(egressoCadastroMB.egresso.vaga.situacao.categoria.cor).concat(';') : ''}" layout="inline">
+                        <h:outputText value="#{egressoCadastroMB.egresso.vaga.situacao.categoria.nome}"/>
+                        <h:outputText value=" em " rendered="#{egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaContratado')}"/>
+                        <h:outputText value="#{egressoCadastroMB.egresso.funcionario.admissao}" rendered="#{egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaContratado')}">
+                            <f:convertDateTime pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+                    </p:outputPanel>
+                    <p:outputPanel style="#{egressoCadastroMB.egresso.vaga.situacao.cor ne null ? 'color:'.concat(egressoCadastroMB.egresso.vaga.situacao.cor).concat(';') : ''}" layout="inline">
+                        <h:outputText value=" - #{egressoCadastroMB.egresso.vaga.situacao.nome} "/>
+                        <h:outputText value=" em " rendered="#{egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaDesligado')}"/>
+                        <h:outputText value="#{egressoCadastroMB.egresso.funcionario.rescisao}" rendered="#{egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaDesligado')}">
+                            <f:convertDateTime pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+                    </p:outputPanel>
+                </p:outputPanel>
+                <p:outputPanel rendered="#{egressoCadastroMB.egresso.funcionario != null and egressoCadastroMB.egresso.funcionario.rescisao eq null}">
+                    <h:outputText value="Status RH: #{egressoCadastroMB.situacaoDominio.descricao}"/>
+                </p:outputPanel>
+
+                <p:outputPanel rendered="#{egressoCadastroMB.egresso.funcionario != null}">
+                    <h:outputText value="Matricula FLEM: #{egressoCadastroMB.egresso.funcionario.matricula}"/><br/>
+                    <h:outputText value="Trabalhando desde: "/>
+                    <h:outputText value="#{egressoCadastroMB.egresso.vaga.dataInicioAtividades}">
+                        <f:convertDateTime pattern="dd/MM/yyyy"/>
+                    </h:outputText>
+                    <h:outputText value=" Observação: #{egressoCadastroMB.egresso.vaga.observacaoInicioAtividades}"/>
+                    <br/><h:outputText value="#{egressoCadastroMB.tempoDeContrato}" id="tempoContrato" />
+                </p:outputPanel>
+
+                <p:outputPanel id="panelNotificacoes">
+                    <p:fieldset id="fieldsetNotificacoes" legend="Exceções de Contratação" toggleable="true" widgetVar="notificacoesVar" rendered="#{egressoCadastroMB.regras.size() > 0}">
+                        <p:ajax event="toggle"  global="false"/>                                 
+                        <p:outputLabel style="color: red; alignment-adjust: central; font-size: 15" value=" Este Demandante nao deseja contratar beneficiários com esta formação, nesse municipio." />
+                        <p:dataTable id="dataTableNotificacoes" value="#{egressoCadastroMB.regras}" var="regra" emptyMessage="" rowStyleClass="notificacao_urgente" >
+                            <p:column headerText="Demandante" width="100">
+                                <h:outputText value="#{regra.demandante.nome}" />
+                            </p:column>
+                            <p:column headerText="Formação" width="100">
+                                <h:outputText value="#{regra.formacao.nome == null ? 'Todas as formações':regra.formacao.nome}"/>
+                            </p:column>
+                            <p:column headerText="Município" width="65">
+                                <h:outputText value="#{regra.municipio.nome==null ? 'Todos os municipios':regra.municipio.nome}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </p:fieldset>
+                </p:outputPanel>
+
+                <br/>
+                <div style="margin-bottom: 5px;">
+                    <p:commandButton value="#{egressoCadastroMB.botao}" immediate="true" action="#{egressoCadastroMB.destravarEdicao()}" update="@form" rendered="#{(usuarioLogadoMB.temPermissao('primEmp.editarEgresso') and (egressoCadastroMB.egresso.vaga.situacao.id ne 29)) or (usuarioLogadoMB.temPermissao('primEmp.destravarLockDeCadastro')) }"/>
+                    <div style="float: left; background-color: #EEEEEE; text-align: left; margin-right: 5px;">
+                        <p:commandButton id="botaoSalvar2" action="#{egressoCadastroMB.salvar()}" value="Salvar" icon="ui-icon-disk" update="@all growl" disabled="#{egressoCadastroMB.desabilitarBtSalvar}">
+                            <p:confirm message="Deseja realmente alterar o Município Vaga? Essa alteração é crítica, portanto só a realize se tiver certeza! Caso a faça, justifique-a em Ações!!!" disabled="#{!egressoCadastroMB.municipioVagaAlterado}"/>
+                            <p:confirm message="Deseja realmente alterar o Município Residencia? Essa alteração é crítica, portanto só a realize se tiver certeza! Caso a faça, justifique-a em Ações!!!" disabled="#{!egressoCadastroMB.municipioResidenciaAlterado}"/>
+                        </p:commandButton>
+
+                        <!--escondido por estar incompleto-->
+                        <p:commandButton value="Novo Ofício" process="@this" actionListener="#{oficioCadastroMB.novoOficio()}"  oncomplete="PF('oficioDialog').show()" update="idOficioDialog" disabled="#{egressoCadastroMB.block}" rendered="#{false and usuarioLogadoMB.temPermissao('primEmp.oficio')}" />
+                    </div>
+                </div>
+                <p:tabView id="tabView">
+                    <p:tab title="Dados do Beneficiário">
+                        <table>
+                            <tr>
+                                <td>CPF</td>
+                                <td>
+                                    <p:inputMask value="#{egressoCadastroMB.egresso.cpf}" mask="999.999.999-99" id="cpf" style="width: 450px;" disabled="#{egressoCadastroMB.block}">
+                                        <p:ajax event="change" process="@this" update="@form :mensagens" listener="#{egressoCadastroMB.checarCPF()}"/>
+                                    </p:inputMask>
+                                    <h:outputText value=" Inválido" rendered="#{!egressoCadastroMB.egresso.cpfValido}" style="color:red"/>
+                                    <p:message for="cpf"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Nome</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.nome}" id="nome" style="width: 450px;" disabled="#{egressoCadastroMB.block}">
+                                        <p:ajax event="blur" update="@form:inpnome" global="false"/>
+                                    </p:inputText>
+                                    <p:message for="nome"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Data de Nascimento</td>
+                                <td>
+                                    <p:calendar value="#{egressoCadastroMB.egresso.dataNascimento}" id="dtnascimento" style="width: 450px;" pattern="dd/MM/yyyy" locale="pt_BR" disabled="#{egressoCadastroMB.block}"/>
+                                    <p:message for="dtnascimento"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Idade</td>
+                                <td>
+                                    <h:outputText value="#{egressoCadastroMB.egresso.idade}" style="#{egressoCadastroMB.egresso.idade gt 0 and egressoCadastroMB.egresso.idade lt 18 ? 'color:red;font-size:16px' : ''}">
+                                        <f:convertNumber pattern="#,##0.00" />
+                                    </h:outputText>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>RG</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.rg}" id="rg" style="width: 150px;" disabled="#{egressoCadastroMB.block}"/>
+                                    <p:message for="rg"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CTPS</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.ctps}" id="ctps" style="width: 150px;" disabled="#{egressoCadastroMB.blockDocPendente}"/>
+                                    <p:message for="ctps"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>PIS</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.pis}" id="pis" style="width: 150px;" disabled="#{egressoCadastroMB.blockDocPendente}"/>
+                                    <p:message for="pis"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Raça / Cor</td>
+                                <td>
+                                    <p:selectOneMenu id="racaCor" value="#{egressoCadastroMB.egresso.racaCor}" disabled="#{egressoCadastroMB.block}">
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{egressoCadastroMB.racasCor()}" var="racaCor" itemLabel="#{racaCor.descricao}"/>
+                                    </p:selectOneMenu>
+                                    <p:message for="racaCor"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Deficiência</td>
+                                <td>
+                                    <p:selectOneMenu id="deficiencia" value="#{egressoCadastroMB.egresso.deficiencia}" disabled="#{egressoCadastroMB.block}" converter="#{genericConverter}">
+                                        <f:selectItem itemLabel="Nenhuma" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{egressoCadastroMB.deficiencias}" var="deficiencia" itemLabel="#{deficiencia.nome}"/>
+                                    </p:selectOneMenu>
+                                    <p:message for="deficiencia"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Sexo</td> 
+                                <td>
+                                    <p:selectOneMenu id="sexo" value="#{egressoCadastroMB.egresso.sexo}" effect="fold" editable="true" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItems value="#{egressoCadastroMB.obterRespostas('sexo')}" />
+                                    </p:selectOneMenu>
+                                </td> 
+                            </tr>
+                            <tr>
+                                <td>Tamanho Fardamento</td> 
+                                <td>
+                                    <p:selectOneMenu value="#{egressoCadastroMB.egresso.tamanhoDeCamisa}" disabled="#{egressoCadastroMB.block}">
+                                        <f:selectItem itemLabel="Selecione" noSelectionOption=""/>
+                                        <f:selectItem itemLabel="P" itemValue="P"/>
+                                        <f:selectItem itemLabel="M" itemValue="M"/>
+                                        <f:selectItem itemLabel="G" itemValue="G"/>
+                                        <f:selectItem itemLabel="GG" itemValue="GG"/>
+                                        <f:selectItem itemLabel="XG" itemValue="XG"/>
+                                    </p:selectOneMenu>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <p:separator />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <h:outputText  value="Carteira Assinada há mais de 1 ano: " style="#{egressoCadastroMB.egresso.carteiraAssinada ? 'font-weight:bold;':'font-weight:normal;'}"/>
+                                </td>
+                                <td>
+                                    <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.carteiraAssinada}" disabled="#{egressoCadastroMB.block}"  />                                                        
+                                </td>      
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <h:outputText  value="Ausência de Estágio: " style="#{egressoCadastroMB.egresso.estagioConcluido ? 'font-weight:bold;':'font-weight:normal;'}"/>
+                                </td>
+                                <td>
+                                    <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.estagioConcluido}" disabled="#{egressoCadastroMB.block}" />
+                                </td>
+                            </tr>
+                        </table>
+                    </p:tab>
+
+                    <p:tab title="Endereço">
+                        <table>
+                            <tr>
+                                <td>Endereço Residência</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.endereco}" id="endereco" style="width: 450px;" disabled="#{egressoCadastroMB.block}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Complemento Residência</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.complemento}" id="complemento" style="width: 450px;" disabled="#{egressoCadastroMB.block}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Nº Residência</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.numero}" id="numero" disabled="#{egressoCadastroMB.block}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Bairro Residência</td>
+                                <td>
+                                    <p:selectOneMenu id="bairro" value="#{egressoCadastroMB.egresso.bairro}" effect="fold" editable="true" disabled="#{egressoCadastroMB.block}">
+                                        <f:selectItems value="#{egressoCadastroMB.obterRespostas('bairro')}"/>
+                                    </p:selectOneMenu>
+                                </td>
+                            </tr>
+                            <tr> 
+                                <td>Município Residência</td>
+                                <td>
+                                    <p:selectOneMenu id="municipio" value="#{egressoCadastroMB.egresso.municipio}" effect="fold" disabled="#{egressoCadastroMB.block}" filter="true" converter="#{genericConverter}">
+                                        <p:ajax event="change" update="divergenciaMunicipio form:botaoSalvar form:botaoSalvar2" listener="#{egressoCadastroMB.setMunicipioResidenciaAlterado(true)}"/>
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="false" />
+                                        <f:selectItems value="#{egressoCadastroMB.municipios}" var="municipio" itemLabel="#{municipio.nome} - #{municipio.uf}"/>
+                                    </p:selectOneMenu>
+                                    <p:message for="municipio"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CEP Residência</td>
+                                <td>
+                                    <p:inputMask value="#{egressoCadastroMB.egresso.cep}" id="cep" mask="99.999-999" style="width: 450px;" disabled="#{egressoCadastroMB.block}"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </p:tab>
+                    <p:tab title="Contato">
+                        <div style="margin-left: 5px; margin-bottom: 15px; width: 98%; display: none; ">
+                            <p:outputLabel for="tiposTelefone" value="Tipos de Telefone" style="display: block; margin-bottom: 5px;" />
+                            <p:selectOneMenu id="tiposTelefone" value="#{egressoCadastroMB.telefone.tipo}">
+                                <f:selectItem itemLabel="Selecione" itemValue="" />
+                                <f:selectItems value="#{egressoCadastroMB.tiposTelefone}" />
+                            </p:selectOneMenu>
+                            <p:message for="tiposTelefone"/>
+                        </div>
+                        <div style="margin-left: 5px; margin-bottom: 15px; width: 98%; display: none;">
+                            <p:outputLabel for="numTelefone" value="Número" style="display: block; margin-bottom: 5px;" />
+                            <p:inputMask id="numTelefone" style="width: 150px !important;" value="#{egressoCadastroMB.telefone.numero}" mask="(99)99999-9999" autoClear="false" disabled="#{!egressoCadastroMB.block}"/>
+                        </div>
+                        <flem:inputText style="width: 300px !important; display: none;" value="#{egressoCadastroMB.telefone.descricao}" id="descTelefone" readonly="#{!egressoCadastroMB.block}"/>
+                        <flem:commandButton action="#{egressoCadastroMB.adicionarTelefone()}" style="display: none;" value="Adicionar" profile="add" update="@(#telefones)" />
+
+                        <div style="display: block; float:left">
+                            <p:dataTable paginator="false" style="display: none;" var="item" emptyMessage="Não existem registros" id="telefones"  value="#{egressoCadastroMB.telefones}">
+                                <f:facet name="header">Telefones</f:facet>
+                                <p:column>
+                                    <h:outputLabel value="#{item.tipo}"/>
+                                </p:column>
+                                <p:column>
+                                    <h:outputLabel value="#{item.numero}">
+                                        <f:converter converterId="telefoneConverter"/>
+                                    </h:outputLabel>
+                                </p:column>
+                                <p:column>
+                                    <h:outputLabel value="#{item.descricao}" >
+                                    </h:outputLabel>
+                                </p:column>
+                                <p:column>
+                                    <p:commandButton icon="ui-icon-trash" actionListener="#{egressoCadastroMB.removerTelefone(item)}" update="telefones" process="@this"/>
+                                </p:column>
+
+                            </p:dataTable>
+                        </div>
+                        <table>
+                            <tr>
+                                <td>Telefone 1</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.dddTelefone1}"  id="dddTelefone1" style="width: 40px;" disabled="#{egressoCadastroMB.block}"/>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.telefone1}" id="telefone1" style="width: 410px;" disabled="#{egressoCadastroMB.block}"/>
+                                    <p:message for="telefone1"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Telefone 2</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.dddTelefone2}"  id="dddTelefone2" style="width: 40px;" disabled="#{egressoCadastroMB.block}"/>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.telefone2}" id="telefone2" style="width: 410px;" disabled="#{egressoCadastroMB.block}"/>
+                                    <p:message for="telefone2"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Celular</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.dddCelular}"  id="dddCelular" style="width: 40px;" disabled="#{egressoCadastroMB.block}"/>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.celular}" id="celular" style="width: 410px;" disabled="#{egressoCadastroMB.block}"/>
+                                    <p:message for="celular"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Contato</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.dddContato}"  id="dddContato" style="width: 40px;" disabled="#{egressoCadastroMB.block}"/>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.contato}" id="contato" style="width: 410px;" disabled="#{egressoCadastroMB.block}"/>
+                                    <p:message for="contato"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Email Primário</td>
+                                <td>
+                                    <flem:inputText id="emailParticular" value="#{egressoCadastroMB.egresso.emailParticular}" style="width: 450px;" type="email" readonly="#{egressoCadastroMB.block}" />
+                                    <h:outputText id="emailParticularMsg" value=" Inválido" rendered="#{!egressoCadastroMB.egresso.emailValido}" style="color:red"/>
+                                    <p:message for="emailParticular"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Email Secundário</td>
+                                <td>
+                                    <flem:inputText id="email_secundario" value="#{egressoCadastroMB.egresso.emailSecundario}" style="width: 450px;" type="email" readonly="#{egressoCadastroMB.block}" />
+                                    <h:outputText id="email_secundarioMsg" value=" Inválido" rendered="#{!egressoCadastroMB.egresso.emailValido}" style="color:red"/>
+                                    <p:message for="email_secundario"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </p:tab>
+                    <p:tab title="Curso Superior">
+
+                        <p:panel id="panelCursoSuperior" style="border: none !important;">
+                            <p:row id="rowOne" style="padding: 0px !important; margin: 0px !important;" rendered="#{egressoCadastroMB.egresso.cursoSuperior eq null or egressoCadastroMB.egresso.cursoSuperior eq false}">
+                                <p:panelGrid columns="1" layout="grid" style="padding: 0px !important; margin: 0px !important; border: 0px !important;">
+                                    <h:outputText value="Você concluiu curso superior (faculdade/universidade)? " />
+                                    <p:selectOneMenu id="concluiuGraduacao" value="#{egressoCadastroMB.egresso.cursoSuperiorConcluido}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" noSelectionOption="" />
+                                        <f:selectItem itemValue="SIM" itemLabel="Sim" />
+                                        <f:selectItem itemValue="NAO" itemLabel="Não" />
+                                        <p:ajax event="change" process="@this" update="panelCursoSuperior" listener="#{egressoCadastroMB.limparCamposCursos(1)}"/>
+                                    </p:selectOneMenu>
+                                </p:panelGrid>
+                            </p:row>
+                            <p:row id="isCursoSuperior" style="padding: 0px !important; margin: 0px !important;" rendered="#{egressoCadastroMB.egresso.cursoSuperiorConcluido eq 'SIM'}">
+                                <p:panelGrid columns="1" layout="grid" style="padding: 0px !important; margin: 0px !important; border: 0px !important;">
+
+                                    <h:outputText value="Em qual tipo de Instituição você concluiu o ensino superior( faculdade/universidade )?" />
+                                    <p:selectOneMenu id="concluiuTipoInstituicao" required="true" requiredMessage="Tipo de Instituição é obrigatório" value="#{egressoCadastroMB.egresso.tipoInstituicaoSuperior}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{egressoCadastroMB.getTiposInstituicao()}" var="item" itemValue="#{item}" itemLabel="#{item.descricao}" />
+                                    </p:selectOneMenu>
+
+                                    <h:outputText value="Em qual Instituição de ensino você concluiu o seu curso superior(gentileza informar o nome completo da Instituição de ensino superior, sem abreviações, da forma como está descrito em sua ficha de matrícula)?" />
+                                    <p:inputText size="100" required="true" requiredMessage="Nome da Instituição é obrigatório" value="#{egressoCadastroMB.egresso.nomeInstituicaoSuperior}" disabled="#{egressoCadastroMB.block}"/>
+
+                                    <h:outputText value="Qual curso superior que você concluiu? (gentileza informar o nome completo do curso, sem abreviações, da forma como está descrito em sua ficha de matrícula)? " />
+                                    <p:inputText required="true" requiredMessage="Curso da Graduação é obrigatório" size="100" value="#{egressoCadastroMB.egresso.nomeCursoGraduacao}" disabled="#{egressoCadastroMB.block}"/>
+
+                                    <h:outputText value="Qual a modalidade de ensino do curso superior que você concluiu?" />
+                                    <p:selectOneMenu required="true" requiredMessage="Modalidade da Graduação é obrigatório" id="concluiuModalidadeGraduacao" value="#{egressoCadastroMB.egresso.modalidadeGraduacao}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{egressoCadastroMB.getModalidades()}" var="item" itemValue="#{item}" itemLabel="#{item.descricao}" />
+                                    </p:selectOneMenu>
+
+                                    <h:outputText value="Em que ano você iniciou o curso superior, já concluído?" />
+                                    <p:selectOneMenu required="true" requiredMessage="Ano Inicio da Graduação é obrigatório" id="concluiuAnoGraduacao" value="#{egressoCadastroMB.egresso.anoMatricula}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItem itemValue="Anterior a 2014" itemLabel="Anterior a 2014" />
+                                        <f:selectItem itemValue="2014" itemLabel="2014" />
+                                        <f:selectItem itemValue="2015" itemLabel="2015" />
+                                        <f:selectItem itemValue="2016" itemLabel="2016" />
+                                        <f:selectItem itemValue="2017" itemLabel="2017" />
+                                        <f:selectItem itemValue="2018" itemLabel="2018" />
+                                        <f:selectItem itemValue="2019" itemLabel="2019" />
+                                        <f:selectItem itemValue="2020" itemLabel="2020" />
+                                    </p:selectOneMenu>
+
+                                    <h:outputText value="Em que ano você concluiu o curso superior?" />
+                                    <p:selectOneMenu required="true" requiredMessage="Ano Conclusão da Graduação é obrigatório" id="anoConclusaoGraduacao" value="#{egressoCadastroMB.egresso.anoConclusaoCurso}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItem itemValue="Anterior a 2016" itemLabel="Anterior a 2016" />
+                                        <f:selectItem itemValue="2016" itemLabel="2016" />
+                                        <f:selectItem itemValue="2017" itemLabel="2017" />
+                                        <f:selectItem itemValue="2018" itemLabel="2018" />
+                                        <f:selectItem itemValue="2019" itemLabel="2019" />
+                                        <f:selectItem itemValue="2020" itemLabel="2020" />
+                                    </p:selectOneMenu>
+
+                                    <h:outputText value="Você considera que a renda do Programa Primeiro Emprego (PPE) ajudou na manutenção do curso superior que concluiu? " />
+                                    <p:selectOneMenu required="true" requiredMessage="Programa Primeiro Emprego (PPE) ajuda é obrigatório" converter="javax.faces.Boolean"  id="concluiuRendaAjuda" value="#{egressoCadastroMB.egresso.rendaPPEAjuda}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" />
+                                        <f:selectItem itemValue="#{true}" itemLabel="Sim" />
+                                        <f:selectItem itemValue="#{false}" itemLabel="Não" />
+                                    </p:selectOneMenu>
+                                </p:panelGrid>
+                            </p:row>
+
+                            <p:row id="rowTwo" style="padding: 0px !important; margin: 0px !important;" rendered="#{egressoCadastroMB.egresso.cursoSuperiorConcluido eq 'NAO'}">
+                                <p:panelGrid columns="1" layout="grid" style="padding: 0px !important; margin: 0px !important; border: 0px !important;">
+                                    <h:outputText value="Está cursando faculdade/universidade (ensino superior)?" />
+                                    <p:selectOneMenu id="cursandoGraduacao" value="#{egressoCadastroMB.egresso.cursoSuperior}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItem itemValue="SIM" itemLabel="Sim" />
+                                        <f:selectItem itemValue="NAO" itemLabel="Não" />
+                                        <p:ajax event="change" process="@this" update="panelCursoSuperior" listener="#{egressoCadastroMB.limparCamposCursos(2)}"/>
+                                    </p:selectOneMenu>
+                                </p:panelGrid>
+                            </p:row>
+
+                            <p:row id="isCursoSuperiorAndamento" style="padding: 0px !important; margin: 0px !important;" rendered="#{egressoCadastroMB.egresso.cursoSuperior eq 'SIM' and egressoCadastroMB.egresso.cursoSuperiorConcluido eq 'NAO'}">
+                                <p:panelGrid columns="1" layout="grid" style="padding: 0px !important; margin: 0px !important; border: 0px !important;">
+
+                                    <h:outputText value="Em qual tipo de Instituição você está cursando faculdade/universidade?" />
+                                    <p:selectOneMenu id="tipoInstituicao" required="true" requiredMessage="Tipo de Instituição é obrigatório" value="#{egressoCadastroMB.egresso.tipoInstituicaoSuperior}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{egressoCadastroMB.getTiposInstituicao()}" var="item" itemValue="#{item}" itemLabel="#{item.descricao}" />
+                                    </p:selectOneMenu>
+
+                                    <h:outputText value="Em qual a Instituição de ensino superior você está realizadno o seu curso (gentileza informar o nome completo da Instituição de ensino superior, sem abreviações, da forma como está descrito em sua ficha de matrícula)? " />
+                                    <p:inputText size="100" required="true" requiredMessage="Nome da Instituição é obrigatório" value="#{egressoCadastroMB.egresso.nomeInstituicaoSuperior}" disabled="#{egressoCadastroMB.block}"/>
+
+                                    <h:outputText value="Qual curso superior você está realizando? (gentileza informar o nome completo do curso, sem abreviações, da forma como está descrito em sua ficha de matrícula)? " />
+                                    <p:inputText required="true" requiredMessage="Curso da Graduação é obrigatório" size="100" value="#{egressoCadastroMB.egresso.nomeCursoGraduacao}" disabled="#{egressoCadastroMB.block}"/>
+
+                                    <h:outputText value="Qual a modalidade de ensino do curso superior que você está realizando?" />
+                                    <p:selectOneMenu required="true" requiredMessage="Modalidade da Graduação é obrigatório" id="modalidadeGraduacao" value="#{egressoCadastroMB.egresso.modalidadeGraduacao}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{egressoCadastroMB.getModalidades()}" var="item" itemValue="#{item}" itemLabel="#{item.descricao}" />
+                                    </p:selectOneMenu>
+
+                                    <h:outputText value="Em que ano você iniciou o curso superior que está realizando? " />
+                                    <p:selectOneMenu required="true" requiredMessage="Ano Inicio da Graduação é obrigatório" id="anoGraduacao" value="#{egressoCadastroMB.egresso.anoMatricula}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItem itemValue="Anterior a 2014" itemLabel="Anterior a 2014" />
+                                        <f:selectItem itemValue="2014" itemLabel="2014" />
+                                        <f:selectItem itemValue="2015" itemLabel="2015" />
+                                        <f:selectItem itemValue="2016" itemLabel="2016" />
+                                        <f:selectItem itemValue="2017" itemLabel="2017" />
+                                        <f:selectItem itemValue="2018" itemLabel="2018" />
+                                        <f:selectItem itemValue="2019" itemLabel="2019" />
+                                        <f:selectItem itemValue="2020" itemLabel="2020" />
+                                        <f:selectItem itemValue="2021" itemLabel="2021" />
+                                        <f:selectItem itemValue="2022" itemLabel="2022" />
+                                    </p:selectOneMenu>
+
+                                    <h:outputText value="Qual semestre está cursando no seu curso de graduação?" />
+                                    <p:selectOneMenu required="true" requiredMessage="Semestre da Graduação é obrigatório" id="semestreGraduacao" value="#{egressoCadastroMB.egresso.semestre}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItem itemValue="Abandonado" itemLabel="Abandonado" />
+                                        <f:selectItem itemValue="1º Semestre" itemLabel="1º Semestre" />
+                                        <f:selectItem itemValue="2º Semestre" itemLabel="2º Semestre" />
+                                        <f:selectItem itemValue="3º Semestre" itemLabel="3º Semestre" />
+                                        <f:selectItem itemValue="4º Semestre" itemLabel="4º Semestre" />
+                                        <f:selectItem itemValue="5º Semestre" itemLabel="5º Semestre" />
+                                        <f:selectItem itemValue="6º Semestre" itemLabel="6º Semestre" />
+                                        <f:selectItem itemValue="7º Semestre" itemLabel="7º Semestre" />
+                                        <f:selectItem itemValue="8º Semestre" itemLabel="8º Semestre" />
+                                        <f:selectItem itemValue="9º Semestre" itemLabel="9º Semestre" />
+                                        <f:selectItem itemValue="10º Semestre" itemLabel="10º Semestre" />
+                                        <f:selectItem itemValue="11º Semestre" itemLabel="11º Semestre" />
+                                        <f:selectItem itemValue="12º Semestre" itemLabel="12º Semestre" />
+                                    </p:selectOneMenu>
+
+                                    <h:outputText value="Data da Resposta" />
+                                    <p:calendar value="#{egressoCadastroMB.egresso.dataRespostaSemestre}" pattern="dd/MM/yyyy" locale="pt_BR" disabled="#{egressoCadastroMB.block}"/>
+
+                                    <h:outputText value="Você considera que a renda do Programa Primeiro Emprego (PPE) ajuda na manutenção do curso superior que está realizando? " />
+                                    <p:selectOneMenu required="true" requiredMessage="Programa Primeiro Emprego (PPE) ajuda é obrigatório"  id="rendaAjuda" converter="javax.faces.Boolean" value="#{egressoCadastroMB.egresso.rendaPPEAjuda}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItem itemValue="#{true}" itemLabel="Sim" />
+                                        <f:selectItem itemValue="#{false}" itemLabel="Não" />
+                                    </p:selectOneMenu>
+                                </p:panelGrid>
+                            </p:row>
+
+                            <p:row id="rowThree" style="padding: 0px !important; margin: 0px !important;" rendered="#{egressoCadastroMB.egresso.cursoSuperiorConcluido eq 'NAO' and egressoCadastroMB.egresso.cursoSuperior eq 'NAO'}">
+                                <p:panelGrid columns="1" layout="grid" style="padding: 0px !important; margin: 0px !important; border: 0px !important;">
+                                    <h:outputText value="Você pretende fazer um curso superior futuramente? " />
+                                    <p:selectOneMenu id="pretendeCursarSuperior" value="#{egressoCadastroMB.egresso.pretendeFazerCursoSuperior}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItem itemValue="SIM" itemLabel="Sim" />
+                                        <f:selectItem itemValue="NAO" itemLabel="Não" />
+                                        <p:ajax event="change" process="@this" update="panelCursoSuperior"/>
+                                    </p:selectOneMenu>
+                                </p:panelGrid>
+                            </p:row>
+
+                            <p:row id="rowFour" style="padding: 0px !important; margin: 0px !important;" rendered="#{egressoCadastroMB.egresso.cursoSuperiorConcluido eq 'NAO' and egressoCadastroMB.egresso.cursoSuperior eq 'NAO' }">
+                                <p:panelGrid columns="1" layout="grid" style="padding: 0px !important; margin: 0px !important; border: 0px !important;">
+                                    <h:outputText value="Você está matriculado em outro curso técnico ou profissionalizante? " />
+                                    <p:selectOneMenu id="cursoTecnico" value="#{egressoCadastroMB.egresso.cursoTecnicoProfissionalizante}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItem itemValue="SIM" itemLabel="Sim" />
+                                        <f:selectItem itemValue="NAO" itemLabel="Não" />
+                                        <p:ajax event="change" process="@this" update="panelCursoSuperior" listener="#{egressoCadastroMB.limparCamposCursos(3)}"/>
+                                    </p:selectOneMenu>
+                                </p:panelGrid>
+
+                                <p:panelGrid columns="1" layout="grid" style="padding: 0px !important; margin: 0px !important; border: 0px !important;" rendered="#{egressoCadastroMB.egresso.cursoTecnicoProfissionalizante eq 'SIM' and egressoCadastroMB.egresso.cursoSuperiorConcluido eq 'NAO' and egressoCadastroMB.egresso.cursoSuperior eq 'NAO'}">
+
+                                    <h:outputText value="Em qual tipo de Instituição você está cursando outro curso técnico ou profissionalizante? " />
+                                    <p:selectOneMenu id="tipoInstituicaoTecnico" required="true" requiredMessage="Tipo de Instituição é obrigatório" value="#{egressoCadastroMB.egresso.tipoInstituicaoTecnica}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{egressoCadastroMB.getTiposInstituicao()}" var="item" itemValue="#{item}" itemLabel="#{item.descricao}" />
+                                    </p:selectOneMenu>
+
+                                    <h:outputText value="Qual curso técnico ou profissionalizante você esta realizando? (gentileza informar o nome completo do curso, sem abreviações, da forma como está descrito em sua ficha de matrícula)? " />
+                                    <p:inputText required="true" requiredMessage="Curso da Técnico é obrigatório" size="100" value="#{egressoCadastroMB.egresso.nomeCursoTecnico}" disabled="#{egressoCadastroMB.block}"/>
+
+                                    <h:outputText value="Você considera que a renda do Programa Primeiro Emprego (PPE) ajuda na permanência / manutenção do curso técnico ou profissionalizante que está realizando? " />
+                                    <p:selectOneMenu required="true" requiredMessage="Programa Primeiro Emprego (PPE) ajuda é obrigatório"  id="rendaAjudaTecnico" converter="javax.faces.Boolean" value="#{egressoCadastroMB.egresso.rendaPPEAjuda}" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItem itemValue="#{true}" itemLabel="Sim" />
+                                        <f:selectItem itemValue="#{false}" itemLabel="Não" />
+                                    </p:selectOneMenu>
+                                </p:panelGrid>
+                            </p:row>
+
+                        </p:panel>
+
+                    </p:tab>
+                    <p:tab title="Dados Sistema de RH" rendered="#{egressoCadastroMB.egresso.funcionario != null}">
+                        <table>
+                            <tr>
+                                <td>Matricula</td>
+                                <td>
+                                    <h:outputText value="#{egressoCadastroMB.egresso.funcionario.matricula}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Admissão</td>
+                                <td>
+                                    <h:outputText value="#{egressoCadastroMB.egresso.funcionario.admissao}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                    </h:outputText>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Nome</td>
+                                <td>
+                                    <h:outputText value="#{egressoCadastroMB.egresso.funcionario.nome}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Data de Nascimento</td>
+                                <td>
+                                    <h:outputText value="#{egressoCadastroMB.egresso.funcionario.nascimento}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                    </h:outputText>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Situação</td>
+                                <td>
+                                    <h:outputText value="#{egressoCadastroMB.egresso.funcionario.situacao.descricao}"/>
+                                    <h:outputText value=" em " rendered="#{egressoCadastroMB.egresso.funcionario.rescisao ne null}"/>
+                                    <h:outputText value="#{egressoCadastroMB.egresso.funcionario.rescisao}" rendered="#{egressoCadastroMB.egresso.funcionario.rescisao ne null}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                    </h:outputText>
+                                    <h:outputText value=" - #{egressoCadastroMB.egresso.funcionario.motivoRescisao.descricao}" rendered="#{egressoCadastroMB.egresso.funcionario.rescisao ne null}"/>
+                                </td>
+                            </tr>
+                            <p:outputPanel rendered="#{egressoCadastroMB.egresso.funcionario != null and egressoCadastroMB.egresso.funcionario.rescisao eq null and !(egressoCadastroMB.situacaoDominio.descricao.equals(egressoCadastroMB.egresso.funcionario.situacao.descricao))}">
+                                <tr>
+                                    <td>Status RH</td>
+                                    <td>
+                                        <h:outputText value="#{egressoCadastroMB.situacaoDominio.descricao}"/>
+                                    </td>
+                                </tr>
+                            </p:outputPanel>
+
+                            <tr>
+                                <th colspan="2">Telefones</th>
+                            </tr>
+                            <tr>
+                                <td>Telefone</td>
+                                <td>
+                                    <h:outputText value="(#{egressoCadastroMB.egresso.funcionario.dddTelefone}) " rendered="#{egressoCadastroMB.egresso.funcionario.dddTelefone ne null and egressoCadastroMB.egresso.funcionario.dddTelefone.trim() ne ''}"/>
+                                    <h:outputText value="#{egressoCadastroMB.egresso.funcionario.telefone}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Telefone 2</td>
+                                <td>
+                                    <h:outputText value="(#{egressoCadastroMB.egresso.funcionario.dddTelefone2}) " rendered="#{egressoCadastroMB.egresso.funcionario.dddTelefone2 ne null and egressoCadastroMB.egresso.funcionario.dddTelefone2.trim() ne ''}"/>
+                                    <h:outputText value="#{egressoCadastroMB.egresso.funcionario.telefone2}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Celular</td>
+                                <td>
+                                    <h:outputText value="(#{egressoCadastroMB.egresso.funcionario.dddCelular}) " rendered="#{egressoCadastroMB.egresso.funcionario.dddCelular ne null and egressoCadastroMB.egresso.funcionario.dddCelular.trim() ne ''}"/>
+                                    <h:outputText value="#{egressoCadastroMB.egresso.funcionario.celular}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Contato</td>
+                                <td>
+                                    <h:outputText value="(#{egressoCadastroMB.egresso.funcionario.dddContato}) " rendered="#{egressoCadastroMB.egresso.funcionario.dddContato ne null and egressoCadastroMB.egresso.funcionario.dddContato.trim() ne ''}"/>
+                                    <h:outputText value="#{egressoCadastroMB.egresso.funcionario.contato}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Email</td>
+                                <td>
+                                    <h:outputText value="#{egressoCadastroMB.egresso.funcionario.email} " rendered="#{egressoCadastroMB.egresso.funcionario.email ne null and egressoCadastroMB.egresso.funcionario.email.trim() ne ''}"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </p:tab>
+                    <p:tab title="Listas Associadas">
+                        <p:dataTable value="#{egressoCadastroMB.egresso.estadoNasListas}" id="listas" var="egressoLista" emptyMessage="" sortBy="#{egressoLista.lista.dataCriacao}" sortOrder="descending">
+                            <p:column>
+                                <h:outputText value="#{egressoLista.lista.nome}"/>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{egressoLista.feito ? 'Concluído' : 'Pendente'}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </p:tab>
+                    <p:tab title="Observação" >
+                        <p:editor id="observacao" value="#{egressoCadastroMB.egresso.observacao}" disabled="#{egressoCadastroMB.block}" style="margin-bottom:10px" widgetVar="wdObservacao"/>
+                    </p:tab>
+
+
+                    <p:tab title="Ações" id="acaoesTab">
+                        <p:dataTable value="#{egressoCadastroMB.egresso.acoes}" var="acao" emptyMessage="" id="acaoTable" sortBy="#{acao.data}" sortOrder="descending">
+                            <f:facet name="header">
+                                <div style="height: 25px;text-align: center">
+                                    <p:commandButton value="Nova" actionListener="#{egressoCadastroMB.novaAcao()}" process="@this" oncomplete="PF('acaoDialog').show()" update="idAcaoDialog" disabled="#{egressoCadastroMB.block and !usuarioLogadoMB.temPermissao('addAcaoPrimEmp')}"/>
+                                </div>
+                            </f:facet>
+                            <p:column headerText="Id">
+                                <h:outputText value="#{acao.id}" />
+                            </p:column>
+                            <p:column headerText="Data">
+                                <h:outputText value="#{acao.data}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Tipo de Ação" filterBy="#{acao.tipoDeAcao.nome}" filterMatchMode="contains" >
+                                <h:outputText value="#{acao.tipoDeAcao.nome}"/>
+                            </p:column>
+                            <p:column headerText="Descrição" >
+                                <h:outputText value="#{acao.descricao}" escape="false"/>
+                            </p:column>
+                            <p:column headerText="Usuário" filterBy="#{usuarioLogadoMB.nomeUsuarioPorLogin(acao.usuarioCriacao)}" filterMatchMode="contains" >
+                                <h:outputText value="#{usuarioLogadoMB.nomeUsuarioPorLogin(acao.usuarioCriacao)}"/>
+                            </p:column>
+                            <p:column style="width:25px">
+                                <p:commandButton icon="ui-icon-trash" actionListener="#{egressoCadastroMB.egresso.acoes.remove(acao)}" rendered="#{acao.id == null}" update="acaoTable" process="@this" disabled="#{!usuarioLogadoMB.temPermissao('addAcaoPrimEmp') and egressoCadastroMB.block}"/>
+                                <p:commandButton icon="ui-icon-trash" actionListener="#{egressoCadastroMB.excluirAcao(acao.id)}" rendered="#{acao.id ne null and acao.usuarioCriacao eq usuarioLogadoMB.usuario.username}" update="acaoTable :mensagens" process="@this" disabled="#{!usuarioLogadoMB.temPermissao('addAcaoPrimEmp') and egressoCadastroMB.block}">
+                                    <p:confirm message="Tem certeza que deseja excluir permanentemente esta açao?"/>
+                                </p:commandButton>
+                                <p:commandButton icon="ui-icon-pencil" actionListener="#{egressoCadastroMB.setAcao(acao)}" process="@this" oncomplete="PF('acaoDialog').show()" update="idAcaoDialog" disabled="#{!usuarioLogadoMB.temPermissao('addAcaoPrimEmp') and egressoCadastroMB.block}" rendered="#{acao.usuarioCriacao eq usuarioLogadoMB.usuario.username}"/>
+                            </p:column>
+                            <f:facet name="footer">
+                                <p:commandButton value="Nova" actionListener="#{egressoCadastroMB.novaAcao()}" process="@this" oncomplete="PF('acaoDialog').show()" update="idAcaoDialog" disabled="#{egressoCadastroMB.block and !usuarioLogadoMB.temPermissao('addAcaoPrimEmp')}"/>
+                            </f:facet>
+                        </p:dataTable>
+                    </p:tab>
+
+                    <p:tab title="Materiais" id="materiaisTab" >
+                        <p:dataTable value="#{egressoCadastroMB.egresso.materiais}" var="material" emptyMessage="" id="materialTable" sortOrder="descending">
+                            <p:column headerText="Data do Recebimento">
+                                <h:outputText value="#{material.dataRecebimento}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Descrição" >
+                                <h:outputText value="#{material.material.descricao}" />
+                            </p:column>
+                            <p:column headerText="Tamanho" >
+                                <h:outputText value="#{material.tamanho.descricao}" />
+                            </p:column>
+                            <p:column headerText="Unidade" >
+                                <h:outputText value="#{material.unidade.nome}" />
+                            </p:column>
+                            <p:column headerText="Lote" >
+                                <h:outputText value="#{material.lote}" />
+                            </p:column>
+                            <p:column headerText="Quantidade" >
+                                <h:outputText value="#{material.quantidade}" />
+                            </p:column>
+                            <p:column headerText="Usuário de Criação" >
+                                <h:outputText value="#{usuarioLogadoMB.nomeUsuarioPorLogin(material.usuarioCriacao)}" />
+                            </p:column>
+                            <p:column headerText="Usuário de Atualização" >
+                                <h:outputText value="#{usuarioLogadoMB.nomeUsuarioPorLogin(material.usuarioAlteracao) ne null ? usuarioLogadoMB.nomeUsuarioPorLogin(material.usuarioAlteracao) : usuarioLogadoMB.nomeUsuarioPorLogin(material.usuarioCriacao)}" />
+                            </p:column>
+
+
+                            <p:column rendered="#{usuarioLogadoMB.temPermissao('primEmp.ExcMatEgresso') or usuarioLogadoMB.temPermissao('primEmp.EditMatEgresso')}" style="width:25px">
+                                <p:commandButton icon="ui-icon-trash" actionListener="#{egressoCadastroMB.excluirItem(material)}" process="@this" disabled="#{egressoCadastroMB.block }" rendered="#{usuarioLogadoMB.temPermissao('primEmp.ExcMatEgresso') or material.id == null}"/>
+                                <p:commandButton icon="ui-icon-pencil"  process="@this" actionListener="#{egressoCadastroMB.editarMaterial(material.id)}" update="idMaterialDialog" disabled="#{egressoCadastroMB.block }" rendered="#{usuarioLogadoMB.temPermissao('primEmp.EditMatEgresso') and material.id != null}"/>
+                            </p:column>
+                            <f:facet name="footer">
+                                <p:commandButton value="Nova" actionListener="#{egressoCadastroMB.novoMaterial()}" process="@this" oncomplete="PF('materialDialog').show()" update="idMaterialDialog" rendered="#{usuarioLogadoMB.temPermissao('primEmp.InsMatEgresso')}" disabled="#{egressoCadastroMB.block}"/>
+                            </f:facet>
+                        </p:dataTable>
+
+                        <p:dialog header="Tem certeza que deseja excluir este registro?" resizable="false" widgetVar="deleteWG" height="60">
+                            <br />
+                            <p:commandButton value="Sim" action="#{egressoCadastroMB.excluirMaterial()}" icon="ui-icon-check" update="materialTable :mensagens" style="float: left;margin-left: 10px;">
+                                <f:setPropertyActionListener value="#{egressoCadastroMB.itemExcluir}" target="#{egressoCadastroMB.itemExcluir}" />
+                            </p:commandButton>
+                            <p:commandButton value="Não" onclick="PF('deleteWG').hide();" ajax="true" process="@this" icon="ui-icon-close" style="float: right; margin-right: 10px;"/>
+                        </p:dialog>
+
+                    </p:tab>
+
+                    <p:tab title="Ações Sigilosas" id="assistenciaSocialTab" rendered="#{usuarioLogadoMB.temPermissao('primEmp.lancarAssistenciaSocial')}">
+                        <p:dataTable value="#{egressoCadastroMB.egresso.assistenciasSociais}" var="assistencia" emptyMessage="" id="assistenciaSocialTable" sortBy="#{assistencia.data}" sortOrder="descending">
+                            <p:column headerText="Data">
+                                <h:outputText value="#{assistencia.data}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Tipo de Ação Sigilosa" >
+                                <h:outputText value="#{assistencia.tipoAssistenciaSocial.nome}"/>
+                            </p:column>
+                            <p:column headerText="Descrição" >
+                                <h:outputText value="#{assistencia.descricao}" escape="false"/>
+                            </p:column>
+                            <p:column headerText="Usuário">
+                                <h:outputText value="#{usuarioLogadoMB.nomeUsuarioPorLogin(assistencia.usuarioCriacao)}"/>
+                            </p:column>
+                            <p:column style="width:25px">
+                                <p:commandButton icon="ui-icon-trash" actionListener="#{egressoCadastroMB.egresso.assistenciasSociais.remove(assistencia)}" rendered="#{assistencia.id == null}" update="assistenciaSocialTable" process="@this"/>
+                                <p:commandButton icon="ui-icon-pencil" actionListener="#{egressoCadastroMB.setAssistenciaSocial(assistencia)}" process="@this" oncomplete="PF('assistenciaDialog').show()" update="idAssistenciaDialog" rendered="#{assistencia.usuarioCriacao eq usuarioLogadoMB.usuario.username}"/>
+                            </p:column>
+                            <f:facet name="footer">
+                                <p:commandButton value="Nova" actionListener="#{egressoCadastroMB.novaAssistenciaSocial()}" process="@this" oncomplete="PF('assistenciaDialog').show()" update="idAssistenciaDialog" disabled="#{egressoCadastroMB.block}"/>
+                            </f:facet>
+                        </p:dataTable>
+                    </p:tab>
+                    <p:tab title="Documentos Sigilosos" rendered="#{usuarioLogadoMB.temPermissao('primEmp.lancarAssistenciaSocial')}">
+                        <p:dataTable id="dtDocumentosSigilo" value="#{egressoCadastroMB.egresso.documentosSigilogos}" var="documento" emptyMessage="Nenhum registro encontrado">
+                            <p:column headerText="Arquivo">
+                                <h:outputText value="#{documento.nome}"/>
+                            </p:column>
+                            <p:column headerText="Tipo">
+                                <h:outputText value="#{documento.tipo}"/>
+                            </p:column>
+
+                            <p:column headerText="Usuário">
+                                <h:outputText value="#{usuarioLogadoMB.nomeUsuarioPorLogin(documento.usuarioCriacao)}"/>
+                            </p:column>
+
+                            <p:column headerText="Data Inserção">
+                                <h:outputText value="#{documento.dataCriacao}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column>
+                                <p:commandButton value="Download" ajax="false">
+                                    <p:fileDownload value="#{egressoCadastroMB.downloadDocumento(documento)}"/>
+                                </p:commandButton>
+                                <p:commandButton value="Remover" 
+                                                 disabled="#{documento.id ne null and egressoCadastroMB.block and documento.usuarioCriacao ne usuarioLogadoMB.usuario.username}" 
+                                                 rendered="#{(documento.id eq null or (documento.usuarioCriacao eq usuarioLogadoMB.usuario.username))}" 
+                                                 actionListener="#{egressoCadastroMB.addListaExclusao(documento)}" update="dtDocumentosSigilo">
+                                    <p:confirm message="Confirmar remoção do Documento?"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>    
+                        <p:fileUpload fileUploadListener="#{egressoCadastroMB.uploadDocumentoSigiloso}" multiple="true" auto="true" uploadLabel="Upload" cancelLabel="Cancelar" label="Adicionar Documento" allowTypes="/(\.|\/)(jpe?g|pdf|docx?|xlsx?|pptx?)$/" update="dtDocumentosSigilo" invalidFileMessage="Formato de arquivo inválido" disabled="#{egressoCadastroMB.block and !usuarioLogadoMB.temPermissao('primEmp.lancarAcaoExclusivamente')}"/>
+                    </p:tab>
+                    <p:tab title="Vaga" id="abaVaga">
+                        <table>
+                            <tr>
+                                <td>Demandante</td>
+                                <td>
+                                    <h:outputText id="demandante" value="#{egressoCadastroMB.egresso.vaga.demandante.nome}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Formação Beneficiário</td>
+                                <td style="height: 29px;">
+                                    <h:outputText value="#{egressoCadastroMB.egresso.formacao.nome}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Categoria</td>
+                                <td style="height: 29px;">
+                                    <p:selectOneMenu id="categoria" value="#{egressoCadastroMB.categoria}"  effect="fold" disabled="#{egressoCadastroMB.block}" converter="#{genericConverter}" rendered="#{!(egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaContratado') or egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaDesligado') or egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaTransferido'))}" >
+                                        <p:ajax event="change" update="situacao" listener="#{egressoCadastroMB.atualizarSituacoes()}"/>
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{egressoCadastroMB.categorias}" var="categoria" itemLabel="#{categoria.nome}" itemValue="#{categoria}"/>
+                                    </p:selectOneMenu>
+                                    <h:outputText value="#{egressoCadastroMB.categoria.nome}" rendered="#{egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaContratado') or egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaDesligado') or egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaTransferido')}" style="#{egressoCadastroMB.egresso.vaga.situacao.categoria.cor ne null ? 'color:'.concat(egressoCadastroMB.egresso.vaga.situacao.categoria.cor).concat(';') : ''}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Situação</td>
+                                <td style="height: 29px;">
+                                    <p:selectOneMenu id="situacao" value="#{egressoCadastroMB.egresso.vaga.situacao}" effect="fold" disabled="#{egressoCadastroMB.block}" converter="#{genericConverter}" rendered="#{!(egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaContratado') or egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaDesligado') or egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaTransferido') )}">
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{egressoCadastroMB.situacoes}" var="situacao" itemLabel="#{situacao.nome}" itemValue="#{situacao}"/>
+                                    </p:selectOneMenu>
+                                    <p:message for="situacao"/>
+                                    <h:outputText value="#{egressoCadastroMB.egresso.vaga.situacao.nome}" rendered="#{egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaContratado') or egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaDesligado') or egressoCadastroMB.egresso.vaga.situacao.categoria.id eq propertiesMB.valor('categoriaTransferido')}" style="#{egressoCadastroMB.egresso.vaga.situacao.cor ne null ? 'color:'.concat(egressoCadastroMB.egresso.vaga.situacao.cor).concat(';') : ''}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Escritório Regional</td>
+                                <td style="height: 29px;">
+                                    <c:choose>
+                                        <c:when test="#{egressoCadastroMB.egresso.vaga.municipio.escritorioRegional ne null}">
+                                            <h:outputText value="#{egressoCadastroMB.egresso.vaga.municipio.escritorioRegional.nome} "/>
+                                            <p:commandButton oncomplete="PF('escritorioRegionalDialog').show()" update="idEscritorioRegionalDialog" icon="ui-icon-search"/>
+                                        </c:when>
+
+                                        <c:otherwise>
+                                            <h:outputText value="Escritório Inexistente"/>
+                                        </c:otherwise>
+                                    </c:choose>                                  
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Território</td>
+                                <td style="height: 29px;">
+                                    <h:outputText id="territorio" value="#{egressoCadastroMB.egresso.vaga.municipio.territorio.nome}" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Município Vaga</td>
+                                <td>
+                                    <p:selectOneMenu id="municipioDaVaga" value="#{egressoCadastroMB.egresso.vaga.municipio}"  effect="fold" filter="true" disabled="#{egressoCadastroMB.block}" converter="#{genericConverter}" rendered="#{usuarioLogadoMB.temPermissao('primEmp.alterarMunicipioVaga')}">
+                                        <p:ajax event="change" update="divergenciaMunicipio territorio form:botaoSalvar form:botaoSalvar2" listener="#{egressoCadastroMB.setMunicipioVagaAlterado(true)}"/>
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{egressoCadastroMB.municipios}" var="municipio" itemLabel="#{municipio.nome} - #{municipio.uf}" itemValue="#{municipio}"/>
+                                    </p:selectOneMenu>
+                                    <h:outputText value="#{egressoCadastroMB.egresso.vaga.municipio.nome} - #{egressoCadastroMB.egresso.vaga.municipio.uf}" rendered="#{!usuarioLogadoMB.temPermissao('primEmp.alterarMunicipioVaga')}"/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>Município Residência</td>
+                                <td style="height: 29px;">
+                                    <h:outputText value="#{egressoCadastroMB.egresso.municipio.nome} - #{egressoCadastroMB.egresso.municipio.uf}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Divergência Município</td>
+                                <td style="height: 29px;">
+                                    <h:outputText id="divergenciaMunicipio" value="#{egressoCadastroMB.egresso.divergenciaMunicipio ? 'MUNICÍPIO VAGA DIVERGENTE' : ''}" style="color:red"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Distância entre os Municípios (km)</td>
+                                <td style="height: 29px;color:#{egressoCadastroMB.egresso.distanciaEntreMunicipios/1000 > parametroMB.valorEmLong('limiteDistanciaEntreMunicipios') ? 'red' : 'green'}">
+                                    <h:outputText id="distanciaEntreMunicipios" value="#{egressoCadastroMB.egresso.distanciaEntreMunicipios/1000}" rendered="#{egressoCadastroMB.egresso.distanciaEntreMunicipios ne null}">
+                                        <f:convertNumber pattern="#,##0.00"/>
+                                    </h:outputText>
+                                    <h:outputText value=" km" rendered="#{egressoCadastroMB.egresso.distanciaEntreMunicipios ne null}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Instituição</td>
+                                <td>
+                                    <h:outputText id="instituicao" value="#{egressoCadastroMB.egresso.vaga.instituicao}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Unidade de Lotação</td>
+                                <td>
+                                    <p:selectOneMenu id="unidadeDeLotacao" value="#{egressoCadastroMB.egresso.vaga.unidadeDeLotacao}" effect="fold" editable="true" disabled="#{egressoCadastroMB.block or !usuarioLogadoMB.temPermissao('editUndLot')}" >
+                                        <f:selectItems value="#{egressoCadastroMB.obterRespostasDaVaga('unidadeDeLotacao')}" />
+                                    </p:selectOneMenu>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Logradouro da Unidade de Lotação</td>
+                                <td>
+                                    <p:selectOneMenu id="logradouroUnidadeDeLotacao" value="#{egressoCadastroMB.egresso.vaga.logradouroUnidadeDeLotacao}" effect="fold" editable="true" disabled="#{egressoCadastroMB.block or !usuarioLogadoMB.temPermissao('editUndLot')}" >
+                                        <f:selectItems value="#{egressoCadastroMB.obterRespostasDaVaga('logradouroUnidadeDeLotacao')}" />
+                                    </p:selectOneMenu>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Bairro da Unidade de Lotação</td>
+                                <td>
+                                    <p:selectOneMenu id="bairroUnidadeDeLotacao" value="#{egressoCadastroMB.egresso.vaga.bairroUnidadeDeLotacao}" effect="fold" editable="true" disabled="#{egressoCadastroMB.block or !usuarioLogadoMB.temPermissao('editUndLot')}" >
+                                        <f:selectItems value="#{egressoCadastroMB.obterRespostasDaVaga('bairroUnidadeDeLotacao')}" />
+                                    </p:selectOneMenu>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Município da Unidade de Lotação</td>
+                                <td>
+                                    <p:selectOneMenu id="municipioUnidadeDeLotacao" value="#{egressoCadastroMB.egresso.vaga.municipioUnidadeDeLotacao}" effect="fold" disabled="#{egressoCadastroMB.block or !usuarioLogadoMB.temPermissao('editUndLot')}" filter="true" converter="#{genericConverter}">
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{egressoCadastroMB.municipios}" var="municipio" itemLabel="#{municipio.nome} - #{municipio.uf}"/>
+                                    </p:selectOneMenu>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CEP da Unidade de Lotação</td>
+                                <td>
+                                    <p:selectOneMenu id="cepUnidadeDeLotacao" value="#{egressoCadastroMB.egresso.vaga.cepUnidadeDeLotacao}" effect="fold" editable="true" disabled="#{egressoCadastroMB.block or !usuarioLogadoMB.temPermissao('editUndLot')}" >
+                                        <f:selectItems value="#{egressoCadastroMB.obterRespostasDaVaga('cepUnidadeDeLotacao')}" />
+                                    </p:selectOneMenu>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Ponto Focal na Unidade</td>
+                                <td>
+                                    <p:selectOneMenu id="pontoFocalNaUnidade" value="#{egressoCadastroMB.egresso.vaga.pontoFocalNaUnidade}" effect="fold" editable="true" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItems value="#{egressoCadastroMB.obterRespostasDaVaga('pontoFocalNaUnidade')}" />
+                                    </p:selectOneMenu>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Telefone 1 Ponto Focal</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.vaga.telefone1PontoFocal}"  disabled="#{egressoCadastroMB.block}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Telefone 2 Ponto Focal</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.vaga.telefone2PontoFocal}"  disabled="#{egressoCadastroMB.block}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Telefone 3 Ponto Focal</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.vaga.telefone3PontoFocal}"  disabled="#{egressoCadastroMB.block}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Telefone 4 Ponto Focal</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.vaga.telefone4PontoFocal}"  disabled="#{egressoCadastroMB.block}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Telefone 5 Ponto Focal</td>
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.vaga.telefone5PontoFocal}"  disabled="#{egressoCadastroMB.block}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Email Ponto Focal</td>
+                                <td>
+                                    <p:inputText style="width:450px" value="#{egressoCadastroMB.egresso.vaga.emailPontoFocal}"  disabled="#{egressoCadastroMB.block}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Data Convocação SETRE/SINE</td>
+                                <td style="height: 29px;">
+                                    <h:outputText value="#{egressoCadastroMB.egresso.vaga.dataConvocacaoSETRESINE}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Remessa SETRE/SINE</td>
+                                <td style="height: 29px;">
+                                    <h:outputText value="#{egressoCadastroMB.egresso.vaga.remessaSETRESINE}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Data Remessa SETRE/SINE</td>
+                                <td style="height: 29px;">
+                                    <h:outputText value="#{egressoCadastroMB.egresso.vaga.dataRemessaSETRESINE}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Mês Remessa SETRE/SINE</td>
+                                <td style="height: 29px;">
+                                    <h:outputText value="#{egressoCadastroMB.egresso.vaga.mesRemessaSETRESINE}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Data Início Atividades</td>
+                                <td>
+                                    <p:calendar value="#{egressoCadastroMB.egresso.vaga.dataInicioAtividades}" pattern="dd/MM/yyyy" locale="pt_BR" disabled="#{egressoCadastroMB.block || !usuarioLogadoMB.temPermissao('editarDtIniAti')}"/>
+                                    Observação:
+                                    <p:inputText value="#{egressoCadastroMB.egresso.vaga.observacaoInicioAtividades}" style="width:450px" disabled="#{egressoCadastroMB.block}"/>                                   
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Publicação D.O</td>
+                                <td style="height: 29px;">
+                                    <h:outputText value="#{egressoCadastroMB.egresso.vaga.publicacaoDiarioOficial}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Data de Envio da Situação para SETRE/SINE</td>
+                                <td style="height: 29px;">
+                                    <h:outputText value="#{egressoCadastroMB.egresso.vaga.dataDeEnvioDaSituacaoParaSETRESINE}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p:commandButton value="Exportar" ajax="false" style="float: left">
+                                        <p:fileDownload value="#{egressoCadastroMB.abaVaga()}" contentDisposition="attachment"/>
+                                    </p:commandButton>
+                                </td>
+                            </tr>
+                        </table>
+                        <table>
+                            <tr>
+                                <td colspan="2">
+                                    <p:dataTable value="#{egressoCadastroMB.egresso.historicoVaga}" var="vaga" rowIndexVar="pos" tableStyle="width:auto" emptyMessage="" sortBy="#{vaga.dataAlteracao}" sortOrder="descending">
+                                        <f:facet name="header">Histórico</f:facet>
+                                        <p:column headerText="Demandante">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].demandante ne vaga.demandante}" value="#{vaga.demandante.nome}"/>
+                                        </p:column>
+                                        <p:column headerText="Instituicao">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].instituicao ne vaga.instituicao}" value="#{vaga.instituicao}"/>
+                                        </p:column>
+                                        <p:column headerText="Unidade de Lotação">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].unidadeDeLotacao ne vaga.unidadeDeLotacao}" value="#{vaga.unidadeDeLotacao}"/>
+                                        </p:column>
+                                        <p:column headerText="Logradouro da Unidade">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].logradouroUnidadeDeLotacao ne vaga.logradouroUnidadeDeLotacao}" value="#{vaga.logradouroUnidadeDeLotacao}"/>
+                                        </p:column>
+                                        <p:column headerText="Bairro da Unidade">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].bairroUnidadeDeLotacao ne vaga.bairroUnidadeDeLotacao}" value="#{vaga.bairroUnidadeDeLotacao}"/>
+                                        </p:column>
+                                        <p:column headerText="Município da Unidade">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].municipioUnidadeDeLotacao.id ne vaga.municipioUnidadeDeLotacao.id}" value="#{vaga.municipioUnidadeDeLotacao.nome}"/>
+                                        </p:column>
+                                        <p:column headerText="CEP da Unidade">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].cepUnidadeDeLotacao ne vaga.cepUnidadeDeLotacao}" value="#{vaga.cepUnidadeDeLotacao}"/>
+                                        </p:column>
+                                        <p:column headerText="Ponto Focal">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].pontoFocalNaUnidade ne vaga.pontoFocalNaUnidade}" value="#{vaga.pontoFocalNaUnidade}"/>
+                                        </p:column>
+                                        <p:column headerText="Telefone 1">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].telefone1PontoFocal ne vaga.telefone1PontoFocal}" value="#{vaga.telefone1PontoFocal}"/>
+                                        </p:column>
+                                        <p:column headerText="Telefone 2">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].telefone2PontoFocal ne vaga.telefone2PontoFocal}" value="#{vaga.telefone2PontoFocal}"/>
+                                        </p:column>
+                                        <p:column headerText="Telefone 3">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].telefone3PontoFocal ne vaga.telefone3PontoFocal}" value="#{vaga.telefone3PontoFocal}"/>
+                                        </p:column>
+                                        <p:column headerText="Telefone 4">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].telefone4PontoFocal ne vaga.telefone4PontoFocal}" value="#{vaga.telefone4PontoFocal}"/>
+                                        </p:column>
+                                        <p:column headerText="Telefone 5">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].telefone5PontoFocal ne vaga.telefone5PontoFocal}" value="#{vaga.telefone5PontoFocal}"/>
+                                        </p:column>
+                                        <p:column headerText="Email">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].emailPontoFocal ne vaga.emailPontoFocal}" value="#{vaga.emailPontoFocal}"/>
+                                        </p:column>
+                                        <p:column headerText="Município da Vaga">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].municipio.id ne vaga.municipio.id}" value="#{vaga.municipio.nome}"/>
+                                        </p:column>
+                                        <p:column headerText="Data Convocação">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].dataConvocacaoSETRESINE ne vaga.dataConvocacaoSETRESINE}" value="#{vaga.dataConvocacaoSETRESINE}"/>
+                                        </p:column>
+                                        <p:column headerText="Remessa">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].remessaSETRESINE ne vaga.remessaSETRESINE}" value="#{vaga.remessaSETRESINE}"/>
+                                        </p:column>
+                                        <p:column headerText="Data Remessa">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].dataRemessaSETRESINE ne vaga.dataRemessaSETRESINE}" value="#{vaga.dataRemessaSETRESINE}"/>
+                                        </p:column>
+                                        <p:column headerText="Mês Remessa">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].mesRemessaSETRESINE ne vaga.mesRemessaSETRESINE}" value="#{vaga.mesRemessaSETRESINE}"/>
+                                        </p:column>
+                                        <p:column headerText="Situação">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].situacao.id ne vaga.situacao.id}" value="#{vaga.situacao.nome} - #{vaga.situacao.categoria.nome}"/>
+                                        </p:column>
+                                        <p:column headerText="Inicio Atividades">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].dataInicioAtividades ne vaga.dataInicioAtividades}" value="#{vaga.dataInicioAtividades}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                                            </h:outputText>
+                                        </p:column>
+                                        <p:column headerText="Observação Inicio Atividades">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].observacaoInicioAtividades ne vaga.observacaoInicioAtividades}" value="#{vaga.observacaoInicioAtividades}"/>
+                                        </p:column>
+                                        <p:column headerText="Publicação D.O">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].publicacaoDiarioOficial ne vaga.publicacaoDiarioOficial}" value="#{vaga.publicacaoDiarioOficial}"/>
+                                        </p:column>
+                                        <p:column headerText="Data de Envio da Situação para SETRE/SINE">
+                                            <h:outputText  rendered="#{egressoCadastroMB.egresso.historicoVaga[pos+1] eq null or egressoCadastroMB.egresso.historicoVaga[pos+1].dataDeEnvioDaSituacaoParaSETRESINE ne vaga.dataDeEnvioDaSituacaoParaSETRESINE}" value="#{vaga.dataDeEnvioDaSituacaoParaSETRESINE}"/>
+                                        </p:column>
+                                        <p:column headerText="Usuário">
+                                            <h:outputText value="#{usuarioLogadoMB.nomeUsuarioPorLogin(vaga.usuarioAlteracao)}"/>
+                                        </p:column>
+                                        <p:column headerText="Data Alteração">
+                                            <h:outputText value="#{vaga.dataAlteracao}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                            </h:outputText>
+                                        </p:column>
+                                    </p:dataTable>
+                                </td>
+                            </tr>
+                        </table>
+                    </p:tab>
+                    <p:tab title="Informações Complementares">
+                        <table>
+                            <tr>
+                                <td>Matrícula SEC</td> 
+                                <td>
+                                    <p:inputText value="#{egressoCadastroMB.egresso.matriculaSAEB}" disabled="#{!usuarioLogadoMB.temPermissao('primEmp.super') || egressoCadastroMB.block}"/>
+                                </td> 
+                            </tr>
+                            <tr>
+                                <td>Município Escola</td> 
+                                <td>
+                                    <p:selectOneMenu id="municipioEscola" rendered="${usuarioLogadoMB.temPermissao('primEmp.munEscola')}"  value="#{egressoCadastroMB.egresso.municipioEscola}" effect="fold" filter="true" disabled="#{egressoCadastroMB.block}" converter="#{genericConverter}" >
+                                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{egressoCadastroMB.municipios}" var="municipio" itemLabel="#{municipio.nome} - #{municipio.uf}" itemValue="#{municipio}"/>
+                                    </p:selectOneMenu>
+                                    <h:outputText value="#{egressoCadastroMB.egresso.municipioEscola.nome}" rendered="#{!usuarioLogadoMB.temPermissao('primEmp.munEscola')}" style="#{egressoCadastroMB.egresso.vaga.situacao.categoria.cor ne null ? 'color:'.concat(egressoCadastroMB.egresso.vaga.situacao.categoria.cor).concat(';') : ''}"/>
+                                </td> 
+                            </tr>
+                            <tr>
+                                <td>Escola conclusão curso</td>
+                                <td style="height: 29px;">
+                                    <h:outputText value="#{egressoCadastroMB.egresso.escolaconclusao}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Eixo de Formação Beneficiário</td>
+                                <td style="height: 29px;">
+                                    <h:outputText value="#{egressoCadastroMB.egresso.formacao.eixoDeFormacao.nome}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Formação Beneficiário</td>
+                                <td style="height: 29px;">
+                                    <b><h:outputText value="#{egressoCadastroMB.egresso.formacao.nome}"/></b>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>Anamnese?</td> 
+                                <td>
+                                    <p:selectOneMenu id="anamnese" value="#{egressoCadastroMB.egresso.anamnese}" effect="fold" editable="true" disabled="#{egressoCadastroMB.block}" >
+                                        <f:selectItems value="#{egressoCadastroMB.obterRespostas('anamnese')}" />
+                                    </p:selectOneMenu>
+                                </td> 
+                            </tr>
+                        </table>
+                    </p:tab>
+                    <p:tab title="Eventos">
+                        <p:dataTable value="#{egressoCadastroMB.egresso.eventosParticipados}" var="evento" id="dataTableEventos"
+                                     style="width:100%" rows="10" paginator="true" emptyMessage="" sortBy="#{evento.id.evento.data}" sortOrder="descending">
+                            <p:column headerText="Nome">
+                                <h:outputText value="#{evento.id.evento.nome}" />
+                            </p:column>
+                            <p:column headerText="Data">
+                                <h:outputText value="#{evento.id.evento.data}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Local">
+                                <h:outputText value="#{evento.id.evento.local.nome}" />
+                            </p:column>
+                            <p:column headerText="Tipo">
+                                <h:outputText value="#{evento.id.evento.tipo}" />
+                            </p:column>
+                            <p:column headerText="Modalidade">
+                                <h:outputText value="#{evento.id.evento.modalidade}" />
+                            </p:column>
+                            <p:column headerText="Situação">
+                                <h:outputText value="#{evento.situacao.descricao}" />
+                            </p:column>
+                            <p:column>
+                                <p:commandButton value="Remover" action="#{egressoCadastroMB.egresso.eventosParticipados.remove(evento)}" update="dataTableEventos :mensagens" disabled="#{egressoCadastroMB.block}" rendered="#{usuarioLogadoMB.temPermissao('primEmp.removerEventoDoEgresso')}">
+                                    <p:confirm message="Confirmar retirada de partitipação de Beneficiário no Evento?"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+                    </p:tab>
+                    <p:tab title="Documentos">
+                        <p:dataTable id="dtDocumentos" value="#{egressoCadastroMB.egresso.documentosNaoSigilogos}" var="documento" emptyMessage="Nenhum registro encontrado">
+                            <p:column headerText="Arquivo">
+                                <h:outputText value=" #{documento.nome}"/>
+                            </p:column>
+                            <p:column headerText="Tipo">
+                                <h:outputText value=" #{documento.tipo}"/>
+                            </p:column>
+
+                            <p:column headerText="Usuário">
+                                <h:outputText value="#{usuarioLogadoMB.nomeUsuarioPorLogin(documento.usuarioCriacao)}"/>
+                            </p:column>
+
+                            <p:column headerText="Data Inserção">
+                                <h:outputText value="#{documento.dataCriacao}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column>
+                                <p:commandButton value="Download" ajax="false">
+                                    <p:fileDownload value="#{egressoCadastroMB.downloadDocumento(documento)}"/>
+                                </p:commandButton>
+                                <p:commandButton value="Remover" 
+                                                 disabled="#{documento.id ne null and egressoCadastroMB.block and documento.usuarioCriacao ne usuarioLogadoMB.usuario.username}" 
+                                                 rendered="#{(documento.id eq null or (documento.usuarioCriacao eq usuarioLogadoMB.usuario.username))}" 
+                                                 actionListener="#{egressoCadastroMB.addListaExclusao(documento)}" update="dtDocumentos">
+                                    <p:confirm message="Confirmar remoção do Documento?"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>    
+                        <p:fileUpload fileUploadListener="#{egressoCadastroMB.uploadDocumento}" multiple="true" auto="true" uploadLabel="Upload" cancelLabel="Cancelar" label="Adicionar Documento" allowTypes="/(\.|\/)(jpe?g|pdf|docx?|xlsx?|pptx?)$/" update="dtDocumentos" invalidFileMessage="Formato de arquivo inválido" disabled="#{egressoCadastroMB.block and !usuarioLogadoMB.temPermissao('addDocPrimEmp')}"/>
+                    </p:tab>
+
+                    <p:tab title="Documentos Pendentes">
+                        <h:panelGrid columns="6" style="margin-bottom:10px" cellpadding="5">
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.fichaAdmissao}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Formulários/Fichas de Admissão "  style="#{egressoCadastroMB.egresso.fichaAdmissao ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.rgPendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+
+                            <h:outputText value="Carteira de Identidade (cópia) "  style="#{egressoCadastroMB.egresso.rgPendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.cpfPendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="CPF (cópia) " style="#{egressoCadastroMB.egresso.cpfPendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.cartaCidadaoPendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Cartão cidadão – PIS / Declaração Caixa Econômica PIS ativo – Cópia " style="#{egressoCadastroMB.egresso.cartaCidadaoPendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.ctpsPendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="C.T.P.S. (Cópia - página de registo n° CTPS e dados pessoais) " style="#{egressoCadastroMB.egresso.ctpsPendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.comprovanteresidenciaPendente}" disabled="#{egressoCadastroMB.blockDocPendente}"/>
+                            <h:outputText value="Comprovante de residência (cópia) " style="#{egressoCadastroMB.egresso.ctpsPendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.tituloEleitorPendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Título de Eleitor (cópia) " style="#{egressoCadastroMB.egresso.comprovanteresidenciaPendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.comprovanteVotacaoPendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Último comprovante de votação (cópia) " style="#{egressoCadastroMB.egresso.comprovanteVotacaoPendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.diplomaPendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText  value="Diploma, Histórico Escolar ou Declaração da Escola (cópia) " style="#{egressoCadastroMB.egresso.diplomaPendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.curriculoPendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Currículo atualizado: " style="#{egressoCadastroMB.egresso.curriculoPendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.dadosbancariosPendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Dados bancários (banco/ agência / conta corrente)  " style="#{egressoCadastroMB.egresso.dadosbancariosPendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.foto3x4Pendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="02 Fotos 3X4 : " style="#{egressoCadastroMB.egresso.foto3x4Pendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.asoPendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="ASO (Atestado de Saúde Ocupacional) " style="#{egressoCadastroMB.egresso.asoPendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.certidaoCasamentoPendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Certidão de casamento (caso se aplique) (cópia) " style="#{egressoCadastroMB.egresso.certidaoCasamentoPendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.certidaoNascimentoPendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Certidão de nascimento dos filhos (caso se aplique) (cópia) " style="#{egressoCadastroMB.egresso.certidaoNascimentoPendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.cartaoVacinaPendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Cartão de vacina - Dependentes até 05 anos (caso se aplique) (cópia) " style="#{egressoCadastroMB.egresso.cartaoVacinaPendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.comprovanteEscolaridadePendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Comprovante de escolaridade - Dependente até 06 anos (caso se aplique) (cópia) " style="#{egressoCadastroMB.egresso.comprovanteEscolaridadePendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.reservistaPendente}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Carteira Reservista (caso sexo masculino) (cópia) " style="#{egressoCadastroMB.egresso.reservistaPendente ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.contratoTrabalhoFlem}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Contrato de Trabalho FLEM: " style="#{egressoCadastroMB.egresso.contratoTrabalhoFlem ? 'font-weight:bold;':'font-weight:normal;'}"/>
+                        </h:panelGrid>
+                    </p:tab>
+
+                    <p:tab title="Benefícios / Crachá Pendentes">
+                        <h:panelGrid columns="2" style="margin-bottom:10px" cellpadding="5" >
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.vale_Alimentacao}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Vale Alimentação "  style="#{egressoCadastroMB.egresso.vale_Alimentacao ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.vale_Transporte}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Vale Transporte " style="#{egressoCadastroMB.egresso.vale_Transporte ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.plano_Saude}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Plano de Saude " style="#{egressoCadastroMB.egresso.plano_Saude ? 'font-weight:bold;':'font-weight:normal;'}"/>
+
+                            <p:selectBooleanCheckbox value="#{egressoCadastroMB.egresso.cracha}" disabled="#{egressoCadastroMB.blockDocPendente}" />
+                            <h:outputText value="Crachá " style="#{egressoCadastroMB.egresso.cracha ? 'font-weight:bold;':'font-weight:normal;'}"/>
+                        </h:panelGrid>
+                    </p:tab>
+
+                    <p:tab title="Ofícios">
+                        <p:dataTable id="datatableOficios" value="#{egressoCadastroMB.egresso.oficios}" var="oficio" emptyMessage="Nenhum registro encontrado" sortOrder="descending" sortBy="#{oficio.dataCriacao}">
+                            <p:column headerText="Nª Oficio">
+                                <h:outputText value="#{oficio.identificacao}"/>
+                            </p:column>
+                            <p:column headerText="Nome">
+                                <h:outputText value="#{oficio.nome}"/>
+                            </p:column>
+                            <p:column headerText="Tipo">
+                                <h:outputText value="#{oficio.modelo.tipoModelo.codigo} - #{oficio.modelo.tipoModelo.descricao}"/>
+                            </p:column>
+                            <p:column headerText="Data da Geração">
+                                <h:outputText value="#{oficio.dataCriacao}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{usuarioLogadoMB.nomeUsuarioPorLogin(oficio.usuarioCriacao)}"/>
+                            </p:column>
+                            <p:column>
+                                <p:commandButton value="Download" ajax="false">
+                                    <p:fileDownload value="#{egressoCadastroMB.downloadDocumento(oficio)}"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+                    </p:tab>
+                    <p:tab title="CIs">
+                        <p:dataTable id="dataTableCIS" value="#{egressoCadastroMB.egresso.cis}" var="ci" emptyMessage="Nenhum registro encontrado" sortOrder="descending" sortBy="#{ci.dataCriacao}">
+                            <p:column>#{ci.identificacao}</p:column>
+                            <p:column>
+                                <h:outputText value="#{ci.dataCriacao}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{usuarioLogadoMB.nomeUsuarioPorLogin(ci.usuarioCriacao)}"/>
+                            </p:column>
+                            <p:column>
+                                <p:commandButton value="Download" ajax="false">
+                                    <p:fileDownload value="#{egressoCadastroMB.downloadDocumento(ci)}"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+                    </p:tab>
+                </p:tabView>
+
+                <span style="float: left; background-color: #EEEEEE; text-align: left; margin: 5px 5px 5px 0px;">
+                    <p:commandButton id="botaoSalvar" action="#{egressoCadastroMB.salvar()}" value="Salvar" icon="ui-icon-disk" update="@all growl" disabled="#{egressoCadastroMB.desabilitarBtSalvar}">
+                        <p:confirm message="Deseja realmente alterar o Município Vaga? Essa alteração é crítica, portanto só a realize se tiver certeza! Caso a faça, justifique-a em Ações!!!" disabled="#{!egressoCadastroMB.municipioVagaAlterado}"/>
+                        <p:confirm message="Deseja realmente alterar o Município Residencia? Essa alteração é crítica, portanto só a realize se tiver certeza! Caso a faça, justifique-a em Ações!!!" disabled="#{!egressoCadastroMB.municipioResidenciaAlterado}"/>
+                    </p:commandButton>
+
+                    <!--escondido por estar incompleto-->
+                    <p:commandButton value="Novo Ofício" process="@this" actionListener="#{oficioCadastroMB.novoOficio()}"  oncomplete="PF('oficioDialog').show()" update="idOficioDialog" disabled="#{egressoCadastroMB.block}" rendered="#{false and usuarioLogadoMB.temPermissao('primEmp.oficio')}" />
+                </span>
+            </p:fieldset>
+        </h:form>
+
+
+        <p:dialog widgetVar="materialDialog" modal="true" resizable="false" appendTo="@(body)" id="idMaterialDialog" >
+            <h:form id="materialDialog">
+                <p:growl id="growl" showDetail="true" sticky="true" />
+                <p:panelGrid>
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel value="Data"/>
+                        </p:column>
+                        <p:column>
+                            <p:calendar value="#{egressoCadastroMB.materialEgresso.dataRecebimento}" style="width: 450px;" pattern="dd/MM/yyyy HH:mm" locale="pt_BR" id="materialData"  showButtonPanel="true" timeInput="true" showTodayButton="true"/>
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel value="Material"/>
+                        </p:column>
+                        <p:column>
+                            <p:selectOneMenu value="#{egressoCadastroMB.materialEgresso.material}" id="mat" converter="#{genericConverter}" >
+                                <p:ajax event="change" process="@this"/>
+                                <f:selectItem itemLabel="Selecione um Tipo De Material" itemValue="" />
+                                <f:selectItems value="#{egressoCadastroMB.materiais}" var="item" itemLabel="#{item.descricao}" />
+                            </p:selectOneMenu>
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel value="Tamanho"/>
+                        </p:column>
+                        <p:column>
+                            <p:selectOneMenu value="#{egressoCadastroMB.materialEgresso.tamanho}" id="tam" converter="#{genericConverter}" >
+                                <p:ajax event="change" process="@this"/>
+                                <f:selectItem itemLabel="Selecione o Tamanho" itemValue="" />
+                                <f:selectItems value="#{egressoCadastroMB.tamanhos}" var="item" itemLabel="#{item.sigla}" />
+                            </p:selectOneMenu>
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel value="Unidade"/>
+                        </p:column>
+                        <p:column>
+                            <p:selectOneMenu value="#{egressoCadastroMB.materialEgresso.unidade}" id="uni" converter="#{genericConverter}" >
+                                <p:ajax event="change" process="@this"/>
+                                <f:selectItem itemLabel="Selecione a Unidade" itemValue="" />
+                                <f:selectItems value="#{egressoCadastroMB.unidades}" var="item" itemLabel="#{item.nome}" />
+                            </p:selectOneMenu>
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel value="Lote"/>
+                        </p:column>
+                        <p:column>
+                            <p:selectOneMenu id="lote" value="#{egressoCadastroMB.materialEgresso.lote}" style="width:125px">
+                                <f:selectItem itemLabel="Selecione um Lote" itemValue="" />
+                                <f:selectItems value="#{egressoCadastroMB.lotes}" var="item" itemLabel="#{item}" />
+                            </p:selectOneMenu>
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel value="Quantidade"/>
+                        </p:column>
+                        <p:column>
+                            <p:inputText value="#{egressoCadastroMB.materialEgresso.quantidade}" id="quant" style="width: 20px;" />
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel value="observação"/>
+                        </p:column>
+                        <p:column>
+
+                            <p:inputTextarea value="#{egressoCadastroMB.materialEgresso.observacao}" id="obs" rows="6" cols="33" />
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
+                            <p:commandButton value="Adicionar Material" update=":materialDialog :form:tabView:materialTable"  actionListener="#{egressoCadastroMB.adicionarMaterial()}" rendered="#{egressoCadastroMB.materialEgresso.id == null}"/>
+                            <p:commandButton value="Alterar" update=":materialDialog :form:tabView:materialTable" actionListener="#{egressoCadastroMB.adicionarMaterial()}" rendered="#{egressoCadastroMB.materialEgresso.id != null}"/>
+                        </p:column>
+                    </p:row>
+                </p:panelGrid>
+            </h:form>
+        </p:dialog>
+
+
+        <p:dialog widgetVar="acaoDialog" modal="true" resizable="false" appendTo="@(body)" id="idAcaoDialog" >
+            <h:form id="acaoDialog">
+                <p:panelGrid>
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel value="Data"/>
+                        </p:column>
+                        <p:column>
+                            <p:calendar value="#{egressoCadastroMB.acao.data}" style="width: 450px;" pattern="dd/MM/yyyy HH:mm" locale="pt_BR" id="acaoData"  showButtonPanel="true" timeInput="true" showTodayButton="true"/>
+                            <p:message for="acaoData"/>
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel value="Tipo De Ação"/>
+                        </p:column>
+                        <p:column>
+                            <p:selectOneMenu value="#{egressoCadastroMB.acao.tipoDeAcao}" id="tipo" converter="#{genericConverter}" >
+                                <p:ajax event="change" process="@this"/>
+                                <f:selectItem itemLabel="Selecione um Tipo De Acao" itemValue="" />
+                                <f:selectItems value="#{egressoCadastroMB.listagemTipoDeAcao()}" var="tipo" itemLabel="#{tipo.nome}" />
+                            </p:selectOneMenu>
+                            <p:message for="tipo"/>
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel value="Descrição"/>
+                        </p:column>
+                        <p:column>
+                            <p:textEditor value="#{egressoCadastroMB.acao.descricao}" id="acaoDescricao" style="width: 500px;" widgetVar="wdAcaoDescricao" height="200">
+                                <f:facet name="toolbar">
+                                    <span class="ql-formats">
+                                        <button class="ql-bold"></button>
+                                        <button class="ql-italic"></button>
+                                        <button class="ql-underline"></button>
+                                        <button class="ql-strike"></button>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <select class="ql-font"></select>
+                                        <select class="ql-size"></select>
+                                    </span>
+                                </f:facet>
+                            </p:textEditor>
+                        </p:column>
+                    </p:row><p:row>
+                        <p:column>
+                            <p:commandButton value="Adicionar Ação" update=":acaoDialog :form:tabView:acaoTable"  actionListener="#{egressoCadastroMB.adicionarAcao()}" oncomplete="if(args &amp;&amp; !args.validationFailed){PF('acaoDialog').hide()}" rendered="#{egressoCadastroMB.acao.id == null}"/>
+                            <p:commandButton value="Alterar" update=":acaoDialog :form:tabView:acaoTable" actionListener="#{egressoCadastroMB.alterarAcao()}" oncomplete="if(args &amp;&amp; !args.validationFailed){PF('acaoDialog').hide()}" rendered="#{egressoCadastroMB.acao.id != null}"/>
+                        </p:column>
+                    </p:row>
+
+                </p:panelGrid>
+            </h:form>
+        </p:dialog>
+
+        <p:dialog widgetVar="assistenciaDialog" modal="true" resizable="false" appendTo="@(body)" id="idAssistenciaDialog" >
+            <h:form id="assistenciaDialog">
+                <p:panelGrid>
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel value="Data"/>
+                        </p:column>
+                        <p:column>
+                            <p:calendar value="#{egressoCadastroMB.assistenciaSocial.data}" style="width: 450px;" pattern="dd/MM/yyyy HH:mm" locale="pt_BR" id="assistenciaData"  showButtonPanel="true" timeInput="true" showTodayButton="false"/>
+                            <p:message for="assistenciaData"/>
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel value="Tipo De Ação"/>
+                        </p:column>
+                        <p:column>
+                            <p:selectOneMenu value="#{egressoCadastroMB.assistenciaSocial.tipoAssistenciaSocial}" id="tipo" converter="#{genericConverter}" >
+                                <p:ajax event="change" process="@this"/>
+                                <f:selectItem itemLabel="Selecione um Tipo De Ação Sigilosa" itemValue="" />
+                                <f:selectItems value="#{egressoCadastroMB.listagemTiposAssistenciaSocial()}" var="tipo" itemLabel="#{tipo.nome}" />
+                            </p:selectOneMenu>
+                            <p:message for="tipo"/>
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
+                            <h:outputLabel value="Descrição"/>
+                        </p:column>
+                        <p:column>
+                            <p:editor value="#{egressoCadastroMB.assistenciaSocial.descricao}" id="assistenciaDescricao" style="width: 500px;" disabled="#{egressoCadastroMB.block}" widgetVar="wdAssistenciaDescricao" height="200"/>
+                        </p:column>
+                    </p:row>
+                    <p:row>
+                        <p:column>
+                            <p:commandButton value="Adicionar Ação Sigilosa" update=":assistenciaDialog :form:tabView:assistenciaSocialTable"  actionListener="#{egressoCadastroMB.adicionarAssistenciaSocial()}" oncomplete="if(args &amp;&amp; !args.validationFailed){PF('assistenciaDialog').hide()}" rendered="#{egressoCadastroMB.assistenciaSocial.id == null}"/>
+                            <p:commandButton value="Alterar" update=":assistenciaDialog :form:tabView:assistenciaSocialTable"  oncomplete="if(args &amp;&amp; !args.validationFailed){PF('assistenciaDialog').hide()}" rendered="#{egressoCadastroMB.assistenciaSocial.id != null}"/>
+                        </p:column>
+                    </p:row>
+                </p:panelGrid>
+            </h:form>
+        </p:dialog>
+        <p:dialog widgetVar="oficioDialog" modal="true" resizable="false" appendTo="@(body)" id="idOficioDialog" >
+            <h:form id="oficioForm" enctype="multipart/form-data">
+                <p:outputPanel rendered="#{oficioCadastroMB.foiObtidoLock}">
+                    <h2> #{oficioCadastroMB.oficio.identificacao}</h2><br/>
+                    Assunto: <p:inputText id="assunto" value="#{oficioCadastroMB.oficio.assunto}" style="width: 300px" requiredMessage="Informar o assunto" required="true"/><br/>
+                    <p:message for="assunto"/>
+                    <br/>
+                    <p:fileUpload id="arquivoOficio" value="#{oficioCadastroMB.arquivoOficio}" mode="simple" style="margin-right: 15px;" required="true" requiredMessage="Informe o arquivo"/>
+                    <br/>
+                    <p:message for="arquivoOficio"/>
+                    <br/>
+                    <p:commandButton value="Salvar Oficio" update=":oficioForm :mensagens" actionListener="#{egressoCadastroMB.salvarOficio()}" oncomplete="window.args = args; if(args &amp;&amp; !args.validationFailed){PF('oficioDialog').hide()}"/>
+                    <p:commandButton value="Salvar Ofício" action="#{oficioCadastroMB.salvar()}"  />
+                </p:outputPanel>
+            </h:form>
+        </p:dialog>        
+
+        <p:dialog widgetVar="escritorioRegionalDialog" modal="true" appendTo="@(body)" resizable="false" id="idEscritorioRegionalDialog">
+
+
+            <p:panelGrid id="panelGridModal">
+                <p:row>
+                    <p:column>
+                        <h:outputLabel value="Escritório" style="font-weight:bold"/>
+                    </p:column>
+                    <p:column>
+                        <h:outputLabel value="#{egressoCadastroMB.escritorioRegional.nome}"/>
+                    </p:column>
+                    <p:column>
+                        <h:outputLabel value="#{egressoCadastroMB.escritorioRegional.email}"/>
+                    </p:column>
+                    <p:column>
+                        <h:outputLabel value="#{egressoCadastroMB.escritorioRegional.telefone}">
+                            <f:converter converterId="telefoneConverter"/>
+                        </h:outputLabel>
+                    </p:column>
+                </p:row>
+                <p:row>
+                    <p:column>
+                        <h:outputLabel value="Endereço" style="font-weight:bold"/>
+                    </p:column>
+                    <p:column colspan="3">
+                        <h:outputLabel value="#{egressoCadastroMB.escritorioRegional.descricaoEndereco}"/>
+                    </p:column>
+                </p:row>
+
+            </p:panelGrid>
+            <div style="width: 800px !important; margin-top: 5px;">
+                <p:dataTable paginator="false" var="item" id="colaborador" rendered="#{egressoCadastroMB.escritorioRegional.getColaboradores() ne null}" value="#{egressoCadastroMB.escritorioRegional.getColaboradores()}">
+                    <f:facet name="header">Técnicos</f:facet>
+                    <p:column>
+                        <h:outputLabel value="#{item.nome}"/>
+                    </p:column>
+                    <p:column>
+                        <h:outputLabel value="#{item.cargo}"/>
+                    </p:column>
+                    <p:column>
+                        <h:outputLabel value="#{item.telefone}" >
+                            <f:converter converterId="telefoneConverter"/>
+                        </h:outputLabel>
+                        <h:outputLabel value="/" rendered="#{item.celular ne null and item.celular ne 0 and item.telefone ne null and item.telefone ne 0}"/>
+                        <h:outputLabel value="#{item.celular}">
+                            <f:converter converterId="telefoneConverter"/>
+                        </h:outputLabel>
+                    </p:column>
+
+                </p:dataTable>
+            </div>
+
+        </p:dialog>
+
+
+    </ui:define>
+</ui:composition>

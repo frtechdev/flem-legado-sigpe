@@ -1,0 +1,68 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <p:fieldset legend="Relatório de Ações" style="margin-top: 10px;">
+            <h:form>
+                <flem:dataTable value="#{relatorioAcoesMB.dataModel}" var="acao" id="dataTableAcoes" widgetVar="acoesTable" lazy="true">
+                    <p:column filterBy="#{acao.data}" sortBy="#{acao.data}" headerText="Data da Ação" width="120" filterMatchMode="contains">
+                        <h:outputText value="#{acao.data}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column filterBy="#{acao.tipo}" sortBy="#{acao.tipo}" headerText="Tipo de Ação">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('acoesTable').filter()" autoWidth="false" style="width:150px;">
+                                <f:selectItem itemLabel="Selecione" itemValue="#{null}" noSelectionOption="true"/>
+                                <f:selectItems value="#{relatorioAcoesMB.tiposDeAcao}" var="tipoDeAcao" itemLabel="#{tipoDeAcao.nome}" itemValue="#{tipoDeAcao.nome}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{acao.tipo}"/>
+                    </p:column>
+                    <p:column filterBy="#{acao.descricao}" filterMatchMode="contains" headerText="Descrição">
+                        <h:outputText value="#{acao.descricao}" />
+                    </p:column>
+                    <p:column filterBy="#{acao.usuario}" sortBy="#{acao.usuario}" headerText="Usuário">
+                        <f:facet name="filter">
+                            <p:selectOneMenu onchange="PF('acoesTable').filter()">
+                                <f:selectItem itemLabel="Selecione uma opcao" itemValue=""/>
+                                <f:selectItems value="#{usuarioLogadoMB.usuariosComAcessoAoAplicativo}" var="usuario" itemLabel="#{usuario.nome}" itemValue="#{usuario.username}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                        <h:outputText value="#{usuarioLogadoMB.nomeUsuarioPorLogin(acao.usuario)}"/>
+                    </p:column>
+                    <p:column filterBy="#{acao.cpf}" headerText="CPF" filterMatchMode="contains">
+                        <h:outputText value="#{acao.cpf}"/>
+                    </p:column>
+                    <p:column filterBy="#{acao.egresso}" sortBy="#{acao.egresso}" headerText="Beneficiário" filterMatchMode="contains">
+                        <h:outputText value="#{acao.egresso}"/>
+                    </p:column>
+                    <p:column headerText="Excluir" rendered="#{false}">
+                        <p:commandButton value="Excluir" onclick="PF('deleteWG').open();" ajax="true" process="@this" icon="ui-icon-trash"/>
+                    </p:column>
+                    <f:facet name="footer">
+                        <div style="height: 25px;">
+
+                            <p:commandLink ajax="false" title="Imprimir">
+                                <p:fileDownload value="#{relatorioAcoesMB.imprimir()}" />
+                                <p:graphicImage value="/resources/img/pdf.png"/>
+                            </p:commandLink>
+
+                        </div>
+                    </f:facet>
+                </flem:dataTable>
+            </h:form>
+            <p:dialog header="Tem certeza que deseja excluir este registro?" resizable="false" widgetVar="deleteWG" height="60">
+                <br />
+                <p:commandButton value="Sim" action="#{relatorioAcoesMB.excluir(acao)}" oncomplete="PF('deleteWG').hide();" icon="ui-icon-check" style="float: left;margin-left: 10px;"/>
+                <p:commandButton value="Não" onclick="PF('deleteWG').hide();" ajax="true" process="@this" icon="ui-icon-close" style="float: right; margin-right: 10px;"/>
+            </p:dialog>
+        </p:fieldset>
+    </ui:define>
+</ui:composition>

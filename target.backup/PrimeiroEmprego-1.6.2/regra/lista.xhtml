@@ -1,0 +1,41 @@
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:flem="http://java.sun.com/jsf/composite/components"
+    template="/template/padrao.xhtml">
+    <ui:define name="centro">
+
+        <flem:fieldset legend="Regra para Contratação">
+            <h:form>
+                <flem:commandButton value="Novo" action="/regra/cadastro.xhtml" profile="add" rendered="#{usuarioLogadoMB.temPermissao('primEmp.editarFormacao')}"/>
+                <flem:dataTable  id="regras" value="#{regraContratacaoListaMB.regras}" actionEdit="/regra/cadastro.xhtml?id=#{item.id}">
+                    <p:column filterBy="#{item.demandante.nome}" headerText="Demandante" filterMatchMode="contains" width="110">
+                        <h:outputText value="#{item.demandante.nome}" style="#{item.ativo ? 'font-weight:normal;':'font-weight:bold; color: #FF0000'}"/>
+                    </p:column>
+                    <p:column sortBy="#{item.formacao.nome}" headerText="Formação" filterMatchMode="contains" width="110">
+                        <h:outputText value="#{item.formacao.nome}" style="#{item.ativo ? 'font-weight:normal;':'font-weight:bold;color: #FF0000'}" />
+                    </p:column>
+                    <p:column sortBy="#{item.municipio.nome}" headerText="Municipio" filterMatchMode="contains" width="110">
+                        <h:outputText value="#{item.municipio.nome}" style="#{item.ativo ? 'font-weight:normal;':'font-weight:bold;color: #FF0000'}"/>
+                    </p:column>
+                    <p:column  headerText="Ativo"  width="110">
+                        <h:outputText value="#{item.ativo == true ? 'Ativo': 'Inativo'}" style="#{item.ativo ? 'font-weight:normal;':'font-weight:bold;color: #FF0000'}"/>
+                    </p:column>
+         
+                    <p:column style="width:32px; text-align: center" headerText="Excluir">
+                        <p:commandButton action="#{regraContratacaoCadastroMB.excluir()}" icon="ui-icon-trash" title="Excluir" update="@form">
+                            <f:setPropertyActionListener value="#{item}" target="#{regraContratacaoCadastroMB.regra}" />
+                            <p:confirm header="Confirmation" message="Deseja excluir a regra #{item.demandante.sigla} + #{item.formacao.nome} + #{item.municipio.nome} " icon="ui-icon-alert" />
+                        </p:commandButton>
+                    </p:column>
+
+                </flem:dataTable>
+                <flem:commandButton value="Novo" action="/regra/cadastro.xhtml" profile="add" rendered="#{usuarioLogadoMB.temPermissao('primEmp.editarFormacao')}"/>
+            </h:form>
+        </flem:fieldset>
+
+    </ui:define>
+</ui:composition>
